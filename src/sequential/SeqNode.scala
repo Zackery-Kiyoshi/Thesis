@@ -5,6 +5,10 @@ import util._
 /**
  * @author zkurimab
  */
-class SeqNode(c:Container) {
+class SeqNode(var c:Container) {
+  
+  def run(){
+    c.apply()
+  }
   
 }

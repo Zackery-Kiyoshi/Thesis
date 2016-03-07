@@ -7,4 +7,5 @@ package util
 abstract class Container {
   val inputs:Int;
   val outputs:Int;
+  def apply();
 }
