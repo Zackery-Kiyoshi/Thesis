@@ -3,6 +3,15 @@ package util
 class DataStore(var data:Vector[DataElement], var outputs:Vector[Node]) {
   var numOutputs = outputs.length
   
+  def update(){
+    for( n <- outputs){
+      n.updateInput(data)
+    }
+    for( n <- outputs){
+      n.updateOutput()
+    }
+  }
+  
   def addOutput(n:Node){
     outputs = outputs :+ n
   }

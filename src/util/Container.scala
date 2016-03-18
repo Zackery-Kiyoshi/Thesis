@@ -6,7 +6,7 @@ package util
  */
 // Wrapper so nodes can have any kind of Container
 abstract class Container {
-  val inputs:Int;
-  val outputs:Int;
+  var inputData:Vector[DataElement]
+  var outputData:Vector[DataElement]
   def apply();
 }

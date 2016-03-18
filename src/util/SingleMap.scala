@@ -3,19 +3,25 @@ package util
 /**
  * @author zkurimab
  */
-class SingleMap(val input:Vector[DataElement], val f:(Double) => (Double), var output:Vector[Container]) extends Container {
-  val inputs:Int = 1;
-  val outputs:Int = 1;
-  var outputData:Vector[DataElement] = Vector.empty
+class SingleMap(var inputData:Vector[DataElement], var f:(Double) => (Double)) extends Container {
   
+  var outputs:Vector[Node] = Vector.empty
+  var outputData:Vector[DataElement] = Vector.empty
+  var output:DataStore = new DataStore( outputData, outputs)
   
   def apply(){
     outputData = Vector.empty
-    for(i <- input){
+    for(i <- inputData){
       var tmp = i.get()
       tmp.map( x => f(x))
       outputData = outputData :+ new DataElement(tmp.to[Vector])
     }
+    output.update();
+  }
+  
+  def addOutput(n:Node){
+    outputs = outputs :+ n
+    output.addOutput(n)
   }
   
 }
