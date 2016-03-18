@@ -3,16 +3,19 @@ package util
 /**
  * @author zkurimab
  */
-class SingleMap(val input:DataElement, val f:(Double) => (Double) ) extends Container {
+class SingleMap(val input:Vector[DataElement], val f:(Double) => (Double), var output:Vector[Container]) extends Container {
   val inputs:Int = 1;
   val outputs:Int = 1;
-  var output:DataElement = new DataElement(Vector.empty)
+  var outputData:Vector[DataElement] = Vector.empty
   
   
   def apply(){
-    var tmp = input.get()
-    tmp.map( x => f(x))
-    output = new DataElement(tmp)
+    outputData = Vector.empty
+    for(i <- input){
+      var tmp = i.get()
+      tmp.map( x => f(x))
+      outputData = outputData :+ new DataElement(tmp.to[Vector])
+    }
   }
   
 }
