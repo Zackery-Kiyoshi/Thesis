@@ -3,11 +3,16 @@ package util
 /**
  * @author zkurimab
  */
-class PrintSink (val input:DataElement) extends Container{
-  val inputs:Int = 1;
-  val outputs:Int = 0;
+class PrintSink (var inputData:Vector[DataElement]) extends Container{
+  var outputData:Vector[DataElement] = Vector(new DataElement( Vector.empty))
+  //def this(){  }
+  
   def apply(){
-    val tmp = input.get()
-    for(x <- tmp) println(x)
+    for(i <- 0 until inputData.length){
+      val tmp = inputData(i).get()
+      println( "V[" + i + "]")
+      for(x <- tmp) println(" " + x)
+    }
   }
+  
 }
