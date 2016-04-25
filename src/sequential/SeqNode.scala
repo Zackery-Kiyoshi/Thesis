@@ -12,7 +12,7 @@ class SeqNode(var c:Container) extends Node{
   }
   
   def updateInput(data:Vector[DataElement]){
-    c.inputData = data
+    //c.inputData = data
   }
   
   def updateOutput(){
