@@ -31,9 +31,5 @@ class ListSource (s:Double, e:Double, d:Double) extends Function{
     //output.update();
   }
   
-  def addOutput(n:Node){
-    //outputs = outputs :+ n
-    //output.addOutput(n)
-  }
-  
+
 } 
