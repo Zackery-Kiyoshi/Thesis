@@ -1,7 +1,7 @@
 package util
 import scala.collection.mutable.ListBuffer
 
-class DataStore(var id:DKey) extends Container {
+class DataStore(var id:DKey) {
   //var numOutputs;
   
   var in:Vector[Vector[DataElement]] = Vector[Vector[DataElement]]()

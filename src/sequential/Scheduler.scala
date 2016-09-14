@@ -3,8 +3,8 @@ package sequential
 import scala.collection.immutable.Queue._
 import scala.collection.mutable.Queue
 
-class Scheduler(var nodes:Array[SeqNode], var graphIn:Array[Array[Boolean]])  {
-  
+class Scheduler(var nodes:Array[Int], var graphIn:Array[Array[Boolean]])  {
+  /*
   var runQueue = new Queue[SeqNode]
   
   def makeSchedule() {
@@ -69,6 +69,7 @@ class Scheduler(var nodes:Array[SeqNode], var graphIn:Array[Array[Boolean]])  {
     }
     
   }
+  */
 }
 
 

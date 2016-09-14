@@ -3,9 +3,9 @@ package util
 /**
  * @author zkurimab
  */
-class Map ( f:(Double)=>(Double) ) extends Function{
+class MultiMap ( f:(Double)=>(Double) ) extends Function{
   
-  def apply(inputData:Vector[Vector[DataElement]]):Vector[Vector[DataElement]]={
+  override def apply(inputData:Vector[Vector[DataElement]]):Vector[Vector[DataElement]]={
     var ret:Vector[Vector[DataElement]] = Vector.empty
     for( x <- inputData){
       var tmpRet:Vector[DataElement] = Vector.empty

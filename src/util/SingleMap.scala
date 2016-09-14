@@ -3,7 +3,7 @@ import scala.collection.mutable.ListBuffer
 /**
  * @author zkurimab
  */
-class SingleMap(var f:(Double) => (Double),var id:Key) extends Container {
+class SingleMap(var f:(Double) => (Double),var id:FKey) extends Function {
   
   var in:Vector[Vector[DataElement]] = Vector[Vector[DataElement]]()
   var out:Vector[Vector[DataElement]] = Vector[Vector[DataElement]]()

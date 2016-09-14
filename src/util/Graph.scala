@@ -1,9 +1,10 @@
 package util
 
-import scala.collection.mutable.Map._
+import scala.collection.mutable.Map
+import scala.collection.mutable.HashMap
 
 
-class FKey(val key:String){
+class FKey(var key:String){
   def equals(s:FKey):Boolean={
     return key == s.key
   }
@@ -12,7 +13,7 @@ class FKey(val key:String){
   }
 }
 
-class DKey(val key:String){
+class DKey(var key:String){
   def equals(s:DKey):Boolean={
     return key == s.key
   }
@@ -23,44 +24,39 @@ class DKey(val key:String){
 
 
 class Graph {
-  var funcKeys:Map:FKey,Function)
-  var dataKeys:Map[DKey,DataStore]
-  var funcToData:Map[FKey,Vector[DKey]]
-  var datatoFunc:Map[DKey,Vector[FKey]]
-
-  def Graph(){
-    funcKeys = new Map(new FKey("")=>new Function())
-    dataKeys = Map(new DKey(" ") => new DataStore(new DKey("1")))
-    funcToData = Map(new FKey(" ") => new Vector[new DKey(" " )])
-    datatoFunc = Map(new DKey(" ") => new Vector[new FKey(" " )])
-  }
+  var funcKeys = HashMap.empty[FKey,Function]
+  var dataKeys = HashMap.empty[DKey,DataStore]
+  var funcToData = HashMap.empty[FKey,Vector[DKey]]
+  var dataToFunc = HashMap.empty[DKey,Vector[FKey]]
+  var key = 0;
   
   //method(Graph): Graph
   def process(){
     
   }
+  
   def analyze(): Boolean={ /* (Checks for warnings/errors) */
     var ret = false
     
     return ret
   }
   
-  def connectNode(FKey, DKey) : Boolean = {
+  def connectNode(f:FKey, d:DKey) : Boolean = {
     var ret = false
     
     return ret
   }
-  def connectNode(DKey, FKey) : Boolean = {
+  def connectNode(d:DKey, f:FKey) : Boolean = {
     var ret = false
     
     return ret
   }
-  def disconnectNodes(FKey, DKey) : Boolean = {
+  def disconnectNodes(f:FKey, d:DKey) : Boolean = {
     var ret = false
     
     return ret
   }
-  def disconnectNodes(DKey, FKey) : Boolean = {
+  def disconnectNodes(d:DKey, f:FKey) : Boolean = {
     var ret = false
     
     return ret
@@ -72,8 +68,76 @@ class Graph {
     return ret
   }
 
-  def createFileInput( String, Params) : Boolean
+  
 
-+ removeNode(FKey): Boolean
-+ removeNode(DKey): Boolean
+  def removeNode(f:FKey): Boolean = {
+    var ret = false
+    
+    return ret
+  }
+  def removeNode(d:DKey): Boolean = {
+    var ret = false
+    
+    return ret
+  }
+  
+  
+  def addListSouceNode(s:Double, e:Double, di:Double):FKey={
+    var fKey = new FKey(key+"")
+    var n:Function = new ListSource(s,e,di,fKey)
+    funcKeys += (fKey -> n)
+    key+=1
+    
+    var dKey = new DKey(key+"")
+    var d:DataStore = new DataStore(dKey)
+    
+    dataKeys += (dKey -> d)
+    key+=1
+    var out:Vector[DKey] = Vector.empty
+    out :+ dKey
+    funcToData += (fKey -> out )
+    return fKey
+  }
+  
+  def addSingleMapNode(f: Double ⇒ Double):FKey={
+    var fKey = new FKey(key+"")
+    var n:Function = new SingleMap(f,fKey)
+    //n.c = new SingleMap(, new FKey(""))
+    funcKeys += (fKey -> n)
+    key+=1
+    
+    var dKey = new DKey(key+"")
+    var d:DataStore = new DataStore(dKey)
+    dataKeys += (dKey -> d)
+    key+=1
+    var out:Vector[DKey] = Vector.empty
+    out :+ dKey
+    funcToData += (fKey -> out)
+    return fKey
+  }
+  
+  def addPrintSkink():FKey={
+    var fKey = new FKey(key+"")
+    var n:Function = new PrintSink(fKey)
+    
+    //n.c = new Fnode(, fKey)
+    funcKeys += (fKey -> n)
+    key+=1
+    
+    return fKey
+  }
+  
+  def connectNodes(input:DKey, output:FKey){
+    var tmp = dataToFunc.get(input)
+    var t = tmp.getOrElse(null)
+    if(t != null){
+      t :+ output
+      dataToFunc += (input -> t)
+    }else{
+      t = Vector.empty
+      t :+ output
+      dataToFunc += (input -> t)
+    }
+  }
+  
 }

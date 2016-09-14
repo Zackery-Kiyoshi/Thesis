@@ -4,7 +4,7 @@ import scala.collection.mutable.ListBuffer
 /**
  * @author zkurimab
  */
-class PrintSink (var id:Key) extends Container{
+class PrintSink (var id:FKey) extends Function {
   
   var in:Vector[Vector[DataElement]] = Vector[Vector[DataElement]]()
   var out:Vector[Vector[DataElement]] = Vector[Vector[DataElement]]()

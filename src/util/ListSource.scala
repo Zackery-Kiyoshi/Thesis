@@ -6,7 +6,7 @@ import Array._
 /**
  * @author zkurimab
  */
-class ListSource (s:Double, e:Double, d:Double) extends Function{
+class ListSource (s:Double, e:Double, d:Double, var id:FKey) extends Function{
   var start:Double = s
   var end:Double = e
   var dx:Double = d
@@ -16,7 +16,7 @@ class ListSource (s:Double, e:Double, d:Double) extends Function{
   //var outputs:Vector[Node] = Vector.empty
   //var output:DataStore = new DataStore( outputData, outputs)
   
-  def apply(inputData:Vector[Vector[DataElement]]):Vector[Vector[DataElement]]={
+  override def apply(inputData:Vector[Vector[DataElement]]):Vector[Vector[DataElement]]={
     var tmp = new DataElement(arr.to[Vector])
     var retp = Vector.empty[DataElement]
     retp :+ tmp
