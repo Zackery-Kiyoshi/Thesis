@@ -5,7 +5,11 @@ package util
   
  */
 // Wrapper so nodes can have any kind of Container
-abstract class Function {
+class Function {
   
-  def apply(inputData:Vector[Vector[DataElement]]):Vector[Vector[DataElement]];
+  def apply(inputData:Vector[Vector[DataElement]]):Vector[Vector[DataElement]]={
+    var ret = Vector[Vector[DataElement]]()
+    
+    return ret;
+  }
 }

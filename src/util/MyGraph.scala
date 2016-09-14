@@ -2,18 +2,7 @@ package util
 
 import sequential.SeqNode
 
-class Key(val key:String){
-  def equals(s:String):Boolean={
-    return key == s
-  }
-}
 
-class FKey(val k:String) extends Key(k){
-  
-}
-class DKey(val k:String) extends Key(k){
-  
-}
 
 class MyGraph() {
   // need to figure out how to abstract for different node types

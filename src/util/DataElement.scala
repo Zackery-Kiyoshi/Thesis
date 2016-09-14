@@ -11,13 +11,15 @@ class DataElement(in:Vector[Double]) {
   }
   
   def get():Array[Double] ={
-    val tmp = element.to[Array]
+    val tmp = element;
     tmp
   }
+  
+  /*
   // possibly unnecessary
   def set(t:Vector[Double]){
     element = t.to[Array]
   }
-  
+  */
   
 }
