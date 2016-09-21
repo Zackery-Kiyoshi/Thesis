@@ -3,17 +3,11 @@ package util
 
 class DataElement(in:Vector[Double]) {
   
-  private var element:Array[Double] = in.to[Array] 
+  private var element:Array[Double] = in.toArray 
   // scala.collection.immutable.IndexedSeq[Double]
   
-  def apply(){
-    
-  }
-  
-  def get():Array[Double] ={
-    val tmp = element;
-    tmp
-  }
+  def apply(i: Int) = element(i)
+  def length = element.length
   
   /*
   // possibly unnecessary

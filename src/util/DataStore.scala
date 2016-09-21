@@ -1,13 +1,11 @@
 package util
 import scala.collection.mutable.ListBuffer
 
-class DataStore(var id:DKey) {
+class DataStore(val id:DKey) {
   //var numOutputs;
   
-  var in:Vector[Vector[DataElement]] = Vector[Vector[DataElement]]()
-  var out:Vector[Vector[DataElement]] = Vector[Vector[DataElement]]()
+  private var out:Vector[DataElement] = Vector[DataElement]()
   
-  def apply(){
-    out = in
-  }
+  def apply(i: Int): DataElement = out(i)
+  def length = out.length
 }
