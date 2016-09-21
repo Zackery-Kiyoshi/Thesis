@@ -1,11 +1,26 @@
 package util
 
 class SortFilter {
-  
+  var input = 0;
   
   def apply(){
-    
-    
+    if(input!=null) {
+		  sizeDataVectToInputStreams();
+          map=new Integer[getSource(0).getNumStreams()][];
+		  for(s <- 0 until getSource(0).getNumStreams()) {
+		    val ss=s
+	        map[s]=new Integer[input.getNumElements(s)];
+    	  for(i <- 0 until i<map[s].length) map[s][i]=i;
+    			Arrays.sort(map[s],new Comparator<Integer>() {
+    				@Override
+                    public int compare(Integer o1,Integer o2) {
+    					double v1=sortValue.valueOf(OldSortFilter.this,ss,o1);
+    					double v2=sortValue.valueOf(OldSortFilter.this,ss,o2);
+    				return Double.compare(v1,v2);
+    		  }
+    	  });
+		  }
+    }
   }
   
 }
