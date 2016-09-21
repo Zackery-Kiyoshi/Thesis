@@ -2,7 +2,7 @@ package util
 
 // optional
 
-class GroupNumberingFilter {
+class GroupNumberingFilter extends Function {
   
   
   def apply(){

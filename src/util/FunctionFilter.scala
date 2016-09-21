@@ -1,6 +1,6 @@
 package util
 
-class FunctionFilter {
+class FunctionFilter extends Function {
   
   
   def apply(){

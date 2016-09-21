@@ -1,6 +1,6 @@
 package util
 
-class SortFilter {
+class SortFilter extends Function {
   var input = 0;
   
   def apply(){

@@ -1,6 +1,6 @@
 package util
 
-class InputCollectionFilter {
+class InputCollectionFilter extends Function {
   
   
   def apply(){

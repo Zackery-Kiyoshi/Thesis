@@ -1,6 +1,6 @@
 package util
 
-class LinearFitFilter {
+class LinearFitFilter extends Function {
   
   
   def apply(){

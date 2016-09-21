@@ -1,6 +1,6 @@
 package util
 
-class ThinningFilter {
+class ThinningFilter extends Function {
   
   
   def apply(){
