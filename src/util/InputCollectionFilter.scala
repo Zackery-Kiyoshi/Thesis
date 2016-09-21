@@ -2,7 +2,52 @@ package util
 
 class InputCollectionFilter {
   
+  
+  def apply(){
+    var lastToRemove:Integer = 0
+  
+    for(s <- 0 until getSource(0).getNumStreams()) {
+      for(lastToRemove=0; lastToRemove<dataVect.get(s).size() && dataVect.get(s).get(lastToRemove).getParam(input.getNumParameters(s))<inputCount-numToKeep.getValue()+1; ++lastToRemove);
+      if(lastToRemove>0) {
+        ArrayList<DataElement> toRemove=new ArrayList<DataElement>();
+        toRemove.ensureCapacity(lastToRemove);
+        for(i <- 0 until lastToRemove) {
+          toRemove.add(dataVect.get(s).get(i));
+        }
+        dataVect.get(s).removeAll(toRemove)
+      }
+      for(i <- 0 until input.getNumElements(s)) {
+        dataVect.get(s).add(new DataElement(input.getElement(i,s),inputCount));
+      }
+    }
+    inputCount++
+  }
+ 
 }
+
+/*
+
+protected void redoAllElements() {
+        int lastToRemove;
+        sizeDataVectToInputStreams();
+        for(int s=0; s<getSource(0).getNumStreams(); ++s) {
+            for(lastToRemove=0; lastToRemove<dataVect.get(s).size() && dataVect.get(s).get(lastToRemove).getParam(input.getNumParameters(s))<inputCount-numToKeep.getValue()+1; ++lastToRemove);
+            if(lastToRemove>0) {
+                ArrayList<DataElement> toRemove=new ArrayList<DataElement>();
+                toRemove.ensureCapacity(lastToRemove);
+                for(int i=0; i<lastToRemove; ++i) {
+                    toRemove.add(dataVect.get(s).get(i));
+                }
+                dataVect.get(s).removeAll(toRemove);
+            }
+            for(int i=0; i<input.getNumElements(s); ++i) {
+                dataVect.get(s).add(new DataElement(input.getElement(i,s),inputCount));
+            }
+        }
+        inputCount++;
+    }
+
+*/
 
 /*
 

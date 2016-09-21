@@ -2,7 +2,89 @@ package util
 
 class ThinningFilter {
   
+  
+  def apply(){
+    
+    
+  }
+  
 }
+
+/*
+
+protected void redoAllElements() {
+		if(input==null) return;
+		sizeDataVectToInputStreams();
+		for(int s=0; s<getSource(0).getNumStreams(); ++s) {
+		    final int ss=0;
+    		if(useGroups.getValue()) {
+    			ThreadHandler.instance().loadWaitTask(this,new Runnable() {
+    				@Override
+                    public void run() {
+    					int groupCount=0;
+    					int[] range=groupFormula.getSafeElementRange(OldThinningFilter.this,ss);
+    		            DataFormula.checkRangeSafety(range,OldThinningFilter.this);
+    					int i=range[0];
+    					while(i<range[1]) {
+    						int groupEnd=doGroupSelection(i,range[1],groupFormula,ss);
+    						if(groupCount%thinFactor.getValue()==0) {
+    							while(i<groupEnd) {
+    								dataVect.get(ss).add(input.getElement(i,ss));
+    								++i;
+    							}
+    						}
+    						i=groupEnd;
+    						++groupCount;
+    					}
+    				}
+    			});
+    		} else {
+    			//  parallel
+    			final ArrayList<ArrayList<DataElement>> vects=new ArrayList<ArrayList<DataElement>>();
+                for (int i=0; i<ThreadHandler.instance().getNumThreads(); i++) {
+                	vects.add(new ArrayList<DataElement>());
+                }
+    //          create ReduceLoopBody array
+                ReduceLoopBody[] loops=new ReduceLoopBody[vects.size()];
+                for (int i=0; i<loops.length; i++) {
+                	final int index=i;
+                	loops[i]=new ReduceLoopBody() {
+                		@Override
+                        public void execute(int start, int end) {
+                			ArrayList<DataElement> data=vects.get(index);
+                			for (int j=start; j<end; j++) {
+                				if(j%thinFactor.getValue()==0) data.add(input.getElement(j,ss));
+                			}
+                		}
+                	};
+                }
+                ThreadHandler.instance().chunkedForLoop(this,0,input.getNumElements(ss),loops);
+                // merge lists
+                int size=0;
+                for (int i=0; i<vects.size(); i++) {
+                	size+=vects.get(i).size();
+                }
+                dataVect.get(s).ensureCapacity(size);
+                for (int i=0; i<vects.size(); i++) {
+                	dataVect.get(s).addAll(vects.get(i));
+                }
+    		}
+		}
+	}
+    
+	/**
+	 * Returns the elements after the group that begins at startIndex.
+	 * @param startIndex The index to start the group at.
+	 * @return The index of the first element not in the group.
+	 */
+	private int doGroupSelection(int startIndex,int maxIndex,DataFormula sortFormula,int stream) {
+		double val=sortFormula.valueOf(this,stream,startIndex);
+		int i;
+		for(i=startIndex+1; i<maxIndex && sortFormula.valueOf(this,stream,i)==val; ++i);
+		return i;
+	}
+
+*/
 
 /*
 

@@ -2,7 +2,60 @@ package util
 
 class FunctionFilter {
   
+  
+  def apply(){
+    
+    
+  }
+  
 }
+
+
+/*
+
+protected void redoAllElements() {
+        sizeDataVectToInputStreams();
+        for(int s=0; s<inputVector.get(0).getNumStreams(); ++s) {
+            final int ss=s;
+            final int[] indexBounds=new int[]{0,inputVector.get(0).getNumElements(s)};
+            for(FunctionEntry fe:paramEntry) {
+                DataFormula.mergeSafeElementRanges(indexBounds,fe.formula.getSafeElementRange(this,s));
+            }
+            for(FunctionEntry fe:valueEntry) {
+                DataFormula.mergeSafeElementRanges(indexBounds,fe.formula.getSafeElementRange(this,s));
+            }
+            if(indexBounds==null) return;
+            DataFormula.checkRangeSafety(indexBounds,this);
+            dataVect.get(s).ensureCapacity(indexBounds[1]-indexBounds[0]);
+            for (int i=0; i<indexBounds[1]-indexBounds[0]; i++) {
+                dataVect.get(s).add(null);
+            }
+            ReduceLoopBody[] threadBody=new ReduceLoopBody[ThreadHandler.instance().getNumThreads()];
+            for(int i=0; i<ThreadHandler.instance().getNumThreads(); ++i) {
+                threadBody[i]=new ReduceLoopBody() {
+                    @Override
+                    public void execute(int start, int end) {
+                        for(int i=start; i<end; ++i) {
+                            for(int j=0; j<paramArray.length; j++) {
+                                paramArray[j]=(int)(pForms[j].valueOf(OldFunctionFilter.this,ss,i));
+                            }
+                            for(int j=0; j<valueArray.length; j++) {
+                                valueArray[j]=(float)(vForms[j].valueOf(OldFunctionFilter.this,ss,i));
+                            }
+                            dataVect.get(ss).set(i - indexBounds[0],new DataElement(paramArray,valueArray));
+                        }
+                    }
+                    final DataFormula[] pForms=buildParamFormulas();
+                    final DataFormula[] vForms=buildValueFormulas();
+                    final int[] paramArray=new int[paramEntry.size()];
+                    final float[] valueArray=new float[valueEntry.size()];
+                };
+            }
+            ThreadHandler.instance().chunkedForLoop(this,indexBounds[0], indexBounds[1], threadBody);
+        }
+    }
+
+*/
 
 /*
 
