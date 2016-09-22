@@ -6,7 +6,7 @@ import scala.util.parsing.combinator._
 class DoubleFormula(val str:String) {
   import DoubleFormula.IOList
     private val tree=DoubleFormula.parseAll(DoubleFormula.Expression,str).get
-    def apply(i:Int,s:Int,x:IOList,vars:Map[String,Double]):Double = tree.eval(i,s,x,vars)
+    def apply(i:Int,x:IOList,vars:Map[String,Double]):Double = tree.eval(i,x,vars)
 }
 
 object DoubleFormula extends JavaTokenParsers {
@@ -15,22 +15,28 @@ object DoubleFormula extends JavaTokenParsers {
     
     def apply(str:String) = new DoubleFormula(str)
     def main(args:Array[String]) {
-        println(new DoubleFormula("4+5")(0,0,null,null))
-        println(new DoubleFormula("4+5*3")(0,0,null,null))
-        println(new DoubleFormula("(4+5)*3")(0,0,null,null))
-        println(new DoubleFormula("4+5-3")(0,0,null,null))
-        println(new DoubleFormula("4*5/3")(0,0,null,null))
-        println(new DoubleFormula("4+5*i")(0,0,null,Map(("i"->3.0))))
-        //println(new DoubleFormula("y[1]+5*x[0]")(0,0,IndexedSeq(IndexedSeq(IndexedSeq(Vector(3.0,4.0)))),IndexedSeq(IndexedSeq(IndexedSeq(Vector(3.0,4.0)))),null))
-        //println(new DoubleFormula("y[0][1]+5*x[0][0]")(0,0,IndexedSeq(IndexedSeq(IndexedSeq(Vector(3.0,4.0)))),IndexedSeq(IndexedSeq(IndexedSeq(Vector(3.0,4.0)))),null))
-        //println(new DoubleFormula("y[0][0][1]+5*x[0][0][0]")(0,0,IndexedSeq(IndexedSeq(IndexedSeq(Vector(3.0,4.0)))),IndexedSeq(IndexedSeq(IndexedSeq(Vector(3.0,4.0)))),null))
-        println(new DoubleFormula("if(5>3) 4+5*3 else 4+5")(0,0,null,null))
+        println(new DoubleFormula("4+5")(0,null,null))
+        println(new DoubleFormula("4+5*3")(0,null,null))
+        println(new DoubleFormula("(4+5)*3")(0,null,null))
+        println(new DoubleFormula("4+5-3")(0,null,null))
+        println(new DoubleFormula("4*5/3")(0,null,null))
+        println(new DoubleFormula("4+5*i")(0,null,Map(("i"->3.0))))
+        var tmp1 = new DataStore(new DKey("1"))
+        tmp1.set( Vector.empty :+ new DataElement(Vector(3.0,4.0)) )
+        println( new DoubleFormula("y[1]+5*x[0]")(0,IndexedSeq(tmp1),null) )
+        tmp1 = new DataStore(new DKey("1"))
+        tmp1.set( Vector.empty :+ new DataElement(Vector(3.0,4.0)) )
+        println(new DoubleFormula("y[0][1]+5*x[0][0]")(0,IndexedSeq( tmp1 ),null))
+        tmp1 = new DataStore(new DKey("1"))
+        tmp1.set( Vector.empty :+ new DataElement(Vector(3.0,4.0)) )
+        println(new DoubleFormula("y[0][0][1]+5*x[0][0][0]")(0,IndexedSeq(tmp1),null))
+        println(new DoubleFormula("if(5>3) 4+5*3 else 4+5")(0,null,null))
     }
     
     def safeRange(x:IOList,df:DoubleFormula*):Range = {
 //        println("allRange = "+allRange)
         val ret=df.foldLeft(allRange)((r,dblf) => {
-            val nr=dblf.tree.safeRange(s,x)
+            val nr=dblf.tree.safeRange(x)
 //            println(r+" :: "+nr)
             (r.head max nr.head) to (r.last min nr.last)
         } )
@@ -96,71 +102,71 @@ object DoubleFormula extends JavaTokenParsers {
         "||" ^^ (_ => (a:Boolean,b:Boolean) => a || b) 
 
     private trait DoubleNode { 
-        def eval(i:Int,s:Int,x:IOList,vars:Map[String,Double]):Double
-        def safeRange(s:Int,x:IOList):Range
+        def eval(i:Int,x:IOList,vars:Map[String,Double]):Double
+        def safeRange(x:IOList):Range
     }
     private class LiteralNode(v:Double) extends DoubleNode {
-        override def eval(i:Int,s:Int,x:IOList,vars:Map[String,Double]):Double = v
-        def safeRange(s:Int,x:IOList):Range = allRange
+        override def eval(i:Int,x:IOList,vars:Map[String,Double]):Double = v
+        def safeRange(x:IOList):Range = allRange
         override def toString:String = "Lit="+v
     }
     private class VarNode(val name:String) extends DoubleNode {
-        override def eval(i:Int,s:Int,x:IOList,vars:Map[String,Double]):Double = vars(name)
-        def safeRange(s:Int,x:IOList):Range = allRange
+        override def eval(i:Int,x:IOList,vars:Map[String,Double]):Double = vars(name)
+        def safeRange(x:IOList):Range = allRange
     }
     private class XNode(input:Int,offset:Int,index:Int) extends DoubleNode {
-        override def eval(i:Int,s:Int,x:IOList,vars:Map[String,Double]):Double = x(input)(i+offset)(index)
-        def safeRange(s:Int,x:IOList):Range = -offset until x(input).length-offset
+        override def eval(i:Int,x:IOList,vars:Map[String,Double]):Double = x(input)(i+offset)(index)
+        def safeRange(x:IOList):Range = -offset until x(input).length-offset
     }
     private class UnaryNode(op:(Double)=>Double,node:DoubleNode) extends DoubleNode {
-        override def eval(i:Int,s:Int,x:IOList,vars:Map[String,Double]):Double = op(node.eval(i,s,x,vars))
-        def safeRange(s:Int,x:IOList):Range = node.safeRange(s,x)
+        override def eval(i:Int,x:IOList,vars:Map[String,Double]):Double = op(node.eval(i,x,vars))
+        def safeRange(x:IOList):Range = node.safeRange(x)
     }
     private class TreeNode(start: DoubleNode, ops: List[~[(Double,Double) => Double,DoubleNode]]) extends DoubleNode {
-        override def eval(i:Int,s:Int,x:IOList,vars: Map[String, Double]): Double = (ops foldLeft start.eval(i,s,x,vars)){(res, e) => e._1(res, e._2.eval(i,s,x,vars))}
-        def safeRange(s:Int,x:IOList):Range = ops.foldLeft(start.safeRange(s,x))((r,t) => {
-            val nr=t._2.safeRange(s,x)
+        override def eval(i:Int,x:IOList,vars: Map[String, Double]): Double = (ops foldLeft start.eval(i,x,vars)){(res, e) => e._1(res, e._2.eval(i,x,vars))}
+        def safeRange(x:IOList):Range = ops.foldLeft(start.safeRange(x))((r,t) => {
+            val nr=t._2.safeRange(x)
             (r.head max nr.head) to (r.last min nr.last)
         } )
         override def toString:String = "TreeNode "+start+" "+ops
     }
     private class IfNode(cond:BooleanNode,texp:DoubleNode,fexp:DoubleNode) extends DoubleNode {
-        override def eval(i:Int,s:Int,x:IOList,vars:Map[String,Double]):Double = if(cond.eval(i,s,x,vars)) texp.eval(i,s,x,vars) else fexp.eval(i,s,x,vars)
-        def safeRange(s:Int,x:IOList,y:IOList):Range = {
-            val cr = cond.safeRange(s,x)
-            val tr = texp.safeRange(s,x)
-            val fr = fexp.safeRange(s,x)
+        override def eval(i:Int,x:IOList,vars:Map[String,Double]):Double = if(cond.eval(i,x,vars)) texp.eval(i,x,vars) else fexp.eval(i,x,vars)
+        def safeRange(x:IOList,y:IOList):Range = {
+            val cr = cond.safeRange(x)
+            val tr = texp.safeRange(x)
+            val fr = fexp.safeRange(x)
             (cr.head max tr.head max fr.head) to (cr.last min tr.last min fr.last)
         }
     }
     
     private[util] trait BooleanNode { 
-        def eval(i:Int,s:Int,x:IOList,vars:Map[String,Double]):Boolean
-        def safeRange(s:Int,x:IOList):Range
+        def eval(i:Int,x:IOList,vars:Map[String,Double]):Boolean
+        def safeRange(x:IOList):Range
     }
     private class BooleanLiteralNode(v:Boolean) extends BooleanNode {
-        override def eval(i:Int,s:Int,x:IOList,vars:Map[String,Double]):Boolean = v
-        def safeRange(s:Int,x:IOList):Range = allRange
+        override def eval(i:Int,x:IOList,vars:Map[String,Double]):Boolean = v
+        def safeRange(x:IOList):Range = allRange
         override def toString:String = "Lit="+v
     }
     private class BooleanUnaryNode(op:(Boolean)=>Boolean,node:BooleanNode) extends BooleanNode {
-        override def eval(i:Int,s:Int,x:IOList,vars:Map[String,Double]):Boolean = op(node.eval(i,s,x,vars))
-        def safeRange(s:Int,x:IOList):Range = node.safeRange(s,x)
+        override def eval(i:Int,x:IOList,vars:Map[String,Double]):Boolean = op(node.eval(i,x,vars))
+        def safeRange(x:IOList):Range = node.safeRange(x)
     }
     private class BooleanTreeNode(start: BooleanNode, ops: List[~[(Boolean,Boolean) => Boolean,BooleanNode]]) extends BooleanNode {
-        override def eval(i:Int,s:Int,x:IOList,vars: Map[String,Double]): Boolean = (ops foldLeft start.eval(i,s,x,vars)){(res, e) => e._1(res, e._2.eval(i,s,x,vars))}
-        def safeRange(s:Int,x:IOList):Range = ops.foldLeft(start.safeRange(s,x))((r,t) => {
-            val nr=t._2.safeRange(s,x)
+        override def eval(i:Int,x:IOList,vars: Map[String,Double]): Boolean = (ops foldLeft start.eval(i,x,vars)){(res, e) => e._1(res, e._2.eval(i,x,vars))}
+        def safeRange(x:IOList):Range = ops.foldLeft(start.safeRange(x))((r,t) => {
+            val nr=t._2.safeRange(x)
             (r.head max nr.head) to (r.last min nr.last)
         } )
         override def toString:String = "TreeNode "+start+" "+ops
     }
 
     private class RelationalTreeNode(start: DoubleNode, op: (Double,Double) => Boolean, rest:DoubleNode) extends BooleanNode {
-        override def eval(i:Int,s:Int,x:IOList,vars: Map[String,Double]): Boolean = op(start.eval(i,s,x,vars),rest.eval(i,s,x,vars))
-        def safeRange(s:Int,x:IOList):Range = {
-            val sr = start.safeRange(s,x)
-            val rr = rest.safeRange(s,x)
+        override def eval(i:Int,x:IOList,vars: Map[String,Double]): Boolean = op(start.eval(i,x,vars),rest.eval(i,x,vars))
+        def safeRange(x:IOList):Range = {
+            val sr = start.safeRange(x)
+            val rr = rest.safeRange(x)
             (sr.head max rr.head) to (sr.last min rr.last)
         }
     }
