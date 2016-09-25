@@ -8,14 +8,11 @@ package util
 abstract class Function {
   
   //def apply(inputData:Vector[Vector[DataElement]]):Vector[Vector[DataElement]]={
-  def apply(){
-    var ret = Vector[Vector[DataElement]]()
+  def apply(input:Vector[DataStore]):Vector[DataStore] = {
+    var ret = Vector[DataStore]()
     
     return ret;
   }
   
-  def sizeDataVectToInputStreams() {
-    if(dataVect.size()>input.getNumStreams()) dataVect.clear();
-    while(dataVect.size()<input.getNumStreams()) dataVect.add(new ArrayList<DataElement>());
-  }
+  
 }

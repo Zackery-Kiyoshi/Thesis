@@ -3,26 +3,13 @@ package util
 class InputCollectionFilter extends Function {
   
   
-  def apply(){
-    var lastToRemove:Integer = 0
-  
-    for(s <- 0 until getSource(0).getNumStreams()) {
-      for(lastToRemove=0; lastToRemove<dataVect.get(s).size() && dataVect.get(s).get(lastToRemove).getParam(input.getNumParameters(s))<inputCount-numToKeep.getValue()+1; ++lastToRemove);
-      if(lastToRemove>0) {
-        ArrayList<DataElement> toRemove=new ArrayList<DataElement>();
-        toRemove.ensureCapacity(lastToRemove);
-        for(i <- 0 until lastToRemove) {
-          toRemove.add(dataVect.get(s).get(i));
-        }
-        dataVect.get(s).removeAll(toRemove)
-      }
-      for(i <- 0 until input.getNumElements(s)) {
-        dataVect.get(s).add(new DataElement(input.getElement(i,s),inputCount));
-      }
-    }
-    inputCount++
+  def apply(input:Vector[DataStore]):Vector[DataStore] = {
+    var ret = Vector[DataStore]()
+    
+    return ret;
   }
- 
+  
+   
 }
 
 /*

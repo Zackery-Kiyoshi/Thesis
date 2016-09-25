@@ -1,52 +1,31 @@
 package util
 
 class FunctionFilter extends Function {
-  
-  
-  def apply(){
-    sizeDataVectToInputStreams();
-    for(s <- 0 until inputVector.get(0).getNumStreams) {
-      val ss=s;
-      val indexBounds:int[] = new int[]{0,inputVector.get(0).getNumElements(s)};
-      // FunctionEntry
-      for( fe <- paramEntry) {
-        DataFormula.mergeSafeElementRanges(indexBounds,fe.formula.getSafeElementRange(this,s));
+
+  def apply(input: Vector[DataStore]): Vector[DataStore] = {
+    var ret = Vector[DataStore]()
+
+    for (i <- input) {
+      //var tmp:DataStore = i
+      var tmpDE:Vector[DataElement] = Vector.empty[DataElement]
+      for (j <- 0 until i.length) {
+        //var tmp:DataElement = i(j)
+        var tmp = new Array[Double](i(j).length)
+        for (k <- 0 until i(j).length) {
+          // do it for i(j)(k)
+          tmp
+        }
+        var De = new DataElement(tmp.toVector)
+        tmpDE = tmpDE :+ De 
       }
-      // FunctionEntry
-      for(fe <- valueEntry) {
-        DataFormula.mergeSafeElementRanges(indexBounds,fe.formula.getSafeElementRange(this,s));
-      }
-      if(indexBounds==null) return;
-      DataFormula.checkRangeSafety(indexBounds,this);
-      dataVect.get(s).ensureCapacity(indexBounds[1]-indexBounds[0]);
-      for (i <- 0 until indexBounds[1]-indexBounds[0]) {
-        dataVect.get(s).add(null);
-      }
-      ReduceLoopBody[] threadBody=new ReduceLoopBody[ThreadHandler.instance().getNumThreads()];
-      for(i <- 0 until ThreadHandler.instance().getNumThreads()) {
-        threadBody[i]=new ReduceLoopBody() {
-          @Override
-          public void execute(int start, int end) {
-            for(int i=start; i<end; ++i) {
-              for(int j=0; j<paramArray.length; j++) {
-                paramArray[j]=(int)(pForms[j].valueOf(OldFunctionFilter.this,ss,i));
-              }
-              for(int j=0; j<valueArray.length; j++) {
-                valueArray[j]=(float)(vForms[j].valueOf(OldFunctionFilter.this,ss,i));
-              }
-              dataVect.get(ss).set(i - indexBounds[0],new DataElement(paramArray,valueArray));
-            }
-          }
-          val pForms:DataFormula[] = buildParamFormulas();
-          val vForms:DataFormula[] = buildValueFormulas();
-          val paramArray:int[] = new int[paramEntry.size()];
-          val valueArray:float[] = new float[valueEntry.size()];
-        };
-      }
-      ThreadHandler.instance().chunkedForLoop(this,indexBounds[0], indexBounds[1], threadBody);
+      var t = new DataStore(new DKey(""))
+      t.set(tmpDE)
+      ret = ret :+ t
     }
+
+    return ret;
   }
-  
+
 }
 
 

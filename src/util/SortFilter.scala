@@ -3,24 +3,26 @@ package util
 class SortFilter extends Function {
   var input = 0;
   
-  def apply(){
-    if(input!=null) {
-		  sizeDataVectToInputStreams();
-          map=new Integer[getSource(0).getNumStreams()][];
-		  for(s <- 0 until getSource(0).getNumStreams()) {
-		    val ss=s
-	        map[s]=new Integer[input.getNumElements(s)];
-    	  for(i <- 0 until i<map[s].length) map[s][i]=i;
-    			Arrays.sort(map[s],new Comparator<Integer>() {
-    				@Override
-                    public int compare(Integer o1,Integer o2) {
-    					double v1=sortValue.valueOf(OldSortFilter.this,ss,o1);
-    					double v2=sortValue.valueOf(OldSortFilter.this,ss,o2);
-    				return Double.compare(v1,v2);
-    		  }
-    	  });
-		  }
+  def apply(input: Vector[DataStore]): Vector[DataStore] = {
+    var ret = Vector[DataStore]()
+    for (i <- input) {
+      var tmpDE:Vector[DataElement] = Vector.empty[DataElement]
+      for (j <- 0 until i.length) {
+        //var tmp:DataElement = i(j)
+        var tmp = new Array[Double](i(j).length)
+        for (k <- 0 until i(j).length) {
+          // collect all the elements i(j)(k)
+          tmp(k) = i(j)(k)
+        }
+        sort(tmp)
+        var De = new DataElement(tmp.toVector)
+        tmpDE = tmpDE :+ De 
+      }
+      var t = new DataStore(new DKey(""))
+      t.set(tmpDE)
+      ret = ret :+ t
     }
+    return ret
   }
   
 }
