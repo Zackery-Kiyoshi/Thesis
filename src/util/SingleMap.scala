@@ -5,27 +5,30 @@ import scala.collection.mutable.ListBuffer
  */
 class SingleMap(var f:(Double) => (Double),var id:FKey) extends Function {
   
-  var in:Vector[Vector[DataElement]] = Vector[Vector[DataElement]]()
-  var out:Vector[Vector[DataElement]] = Vector[Vector[DataElement]]()
   
-  //var output:DataStore = new DataStore( outputData, outputs)
-  
-  def apply(){
-    out = Vector[Vector[DataElement]]()
-    var outputData = Vector[DataElement]()
-    var index:Int = 0
-    for(t <- in){
-      for(i <- t){
-        var tmp = i.get()
-        tmp.map( x => f(x))
-        outputData = outputData :+ new DataElement(tmp.to[Vector])
+  def apply(input: Vector[DataStore]): Vector[DataStore] = {
+    var ret = Vector[DataStore]()
+
+    for (i <- input) {
+      var tmpDE:Vector[DataElement] = Vector.empty[DataElement]
+      for (j <- 0 until i.length) {
+        var tmp = new Array[Double](i(j).length)
+        //println( "V[" +  + "]")
+        for (k <- 0 until i(j).length) {
+          // do it for i(j)(k)
+          tmp(k) = i(j)(k);
+        }
+        tmp.map(x => f(x))
+        var De = new DataElement(tmp.toVector)
+        tmpDE = tmpDE :+ De 
       }
-      out = out :+ Vector[DataElement]()
-      //  outputData
-      outputData = Vector[DataElement]()
-      index += 1
+      var t = new DataStore(new DKey(""))
+      t.set(tmpDE)
+      ret = ret :+ t
     }
-    //output.update();
+
+    return ret;
   }
+  
   
 }

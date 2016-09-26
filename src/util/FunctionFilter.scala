@@ -13,7 +13,7 @@ class FunctionFilter extends Function {
         var tmp = new Array[Double](i(j).length)
         for (k <- 0 until i(j).length) {
           // do it for i(j)(k)
-          tmp
+          tmp(k) = i(j)(k)
         }
         var De = new DataElement(tmp.toVector)
         tmpDE = tmpDE :+ De 

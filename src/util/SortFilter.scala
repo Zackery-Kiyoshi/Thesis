@@ -2,6 +2,7 @@ package util
 
 class SortFilter extends Function {
   var input = 0;
+  var c:(Double,Double)=>Boolean
   
   def apply(input: Vector[DataStore]): Vector[DataStore] = {
     var ret = Vector[DataStore]()
@@ -14,7 +15,8 @@ class SortFilter extends Function {
           // collect all the elements i(j)(k)
           tmp(k) = i(j)(k)
         }
-        sort(tmp)
+        if(c==null) tmp.sortWith(c)
+        else tmp.sortWith(_<_)
         var De = new DataElement(tmp.toVector)
         tmpDE = tmpDE :+ De 
       }
