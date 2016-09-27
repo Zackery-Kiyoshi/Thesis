@@ -1,5 +1,8 @@
 package util
 
+import scala.collection.mutable.ArrayBuffer
+import scala.util.control.Breaks._
+
 class InputCollectionFilter extends Function {
   
   
@@ -9,16 +12,19 @@ class InputCollectionFilter extends Function {
     int lastToRemove;
     //sizeDataVectToInputStreams();
     for(s <- 0 until getSource(0).getNumStreams()) {
-      for(lastToRemove=0; lastToRemove<dataVect.get(s).size() && dataVect.get(s).get(lastToRemove).getParam(input.getNumParameters(s))<inputCount-numToKeep.getValue()+1; ++lastToRemove);
+      breakable { 
+      for(lastToRemove <- 0 until dataVect.get(s).size())
+        if(!(dataVect.get(s).get(lastToRemove).getParam(input.getNumParameters(s))<inputCount-numToKeep.getValue()+1)) break
+      }
       if(lastToRemove>0) {
-        ArrayList<DataElement> toRemove=new ArrayList<DataElement>();
-        toRemove.ensureCapacity(lastToRemove);
+        var toRemove:ArrayBuffer[DataElement] = new ArrayBuffer();
+        //toRemove.ensureCapacity(lastToRemove);
         for(i <- 0 until lastToRemove) {
           toRemove.add(dataVect.get(s).get(i));
         }
         dataVect.get(s).removeAll(toRemove);
       }
-      for(i <- 0 until input.getNumElements(s)) {
+      for(i <- 0 until input(s).length) {
         dataVect.get(s).add(new DataElement(input.getElement(i,s),inputCount));
       }
     }

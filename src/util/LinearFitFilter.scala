@@ -1,23 +1,28 @@
 package util
 
+import scala.collection.mutable.ArrayBuffer
+
 class LinearFitFilter extends Function {
   
+  private var fitFormula:DoubleFormula = new DoubleFormula("v[0]");
+  private var terms:ArrayBuffer[DoubleFormula] = new ArrayBuffer();
+  private var coefs:Array[Float]=new Array(0)
   
   def apply(input: Vector[DataStore]): Vector[DataStore] = {
     var ret = Vector[DataStore]()
     
-    for(s <-0 until input.getNumStreams()) {
+    for(s <-0 until input.length ) {
       
-            var a:Array[Array[Double]] =new Array(terms.size())(terms.size())
-            var b:Array[Double] = new Array(terms.size())
+            var a:Array[Array[Double]] =new Array(terms.size)(terms.size)
+            var b:Array[Double] = new Array(terms.size)
             var range:Array[Int]=fitFormula.getSafeElementRange(this,s);
-            for(DataFormula t:terms) {
+            foreach( t <- terms) {
                 int[] tmp=t.getSafeElementRange(this,s);
                 if(tmp[0]>range[0]) range[0]=tmp[0];
                 if(tmp[1]<range[1]) range[1]=tmp[1]; 
             }
             DataFormula.checkRangeSafety(range,this);
-            for(int i=range[0]; i<range[1]; ++i) {
+            for(i <- range(0) until range(1)  ) {
                 double[] ti=new double[terms.size()];
                 for(int j=0; j<ti.length; ++j) ti[j]=terms.get(j).valueOf(this,s,i);
                 double fit=fitFormula.valueOf(this,s,i);
@@ -51,7 +56,7 @@ class LinearFitFilter extends Function {
             }
         }
     
-    //return ret
+    return ret
   }
   
   def LUPDecompose(a:Array[Array[Double]]):Array[Int]= {
