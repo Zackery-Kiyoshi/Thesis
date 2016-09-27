@@ -9,7 +9,7 @@ class InputCollectionFilter extends Function {
   def apply(input:Vector[DataStore]):Vector[DataStore] = {
     var ret = Vector[DataStore]()
     
-    int lastToRemove;
+    var lastToRemove:Int = -1
     //sizeDataVectToInputStreams();
     for(s <- 0 until getSource(0).getNumStreams()) {
       breakable { 

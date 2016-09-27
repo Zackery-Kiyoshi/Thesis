@@ -2,6 +2,8 @@ package util
 
 class FunctionFilter extends Function {
 
+  
+  
   def apply(input: Vector[DataStore]): Vector[DataStore] = {
     var ret = Vector[DataStore]()
 

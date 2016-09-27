@@ -16,35 +16,35 @@ class LinearFitFilter extends Function {
             var a:Array[Array[Double]] =new Array(terms.size)(terms.size)
             var b:Array[Double] = new Array(terms.size)
             var range:Array[Int]=fitFormula.getSafeElementRange(this,s);
-            foreach( t <- terms) {
-                int[] tmp=t.getSafeElementRange(this,s);
+            for( t <- 0 until terms.length) {
+                int[] tmp=terms(t).getSafeElementRange(this,s);
                 if(tmp[0]>range[0]) range[0]=tmp[0];
                 if(tmp[1]<range[1]) range[1]=tmp[1]; 
             }
             DataFormula.checkRangeSafety(range,this);
             for(i <- range(0) until range(1)  ) {
-                double[] ti=new double[terms.size()];
-                for(int j=0; j<ti.length; ++j) ti[j]=terms.get(j).valueOf(this,s,i);
-                double fit=fitFormula.valueOf(this,s,i);
-                for(int j=0; j<a.length; ++j) {
-                    for(int k=0; k<a[j].length; ++k) {
-                        a[j][k]+=ti[j]*ti[k];
+                var ti:Array[Double]=new Array(terms.size)
+                for(j <- 0 until ti.length) ti(j)=terms.get(j).valueOf(this,s,i);
+                var fit=fitFormula.valueOf(this,s,i);
+                for(j <- 0 until a.length) {
+                    for(k <- 0 until a(j).length) {
+                        a(j)(k)+=ti(j)*ti(k)
                     }
-                    b[j]+=ti[j]*fit;
+                    b(j)+=ti(j)*fit
                 }
             }
 
-            int[] p=LUPDecompose(a);
-            double[] x=LUPSolve(a,p,b);
+            var p:Array[Int]=LUPDecompose(a);
+            var x:Array[Double]=LUPSolve(a,p,b);
             for(i <- 0 until x.length) {
-                coefs[i]=(float)x[i];
+                coefs(i)=(float)x(i)
             }
 
-            dataVect.get(2*s).add(new DataElement(new int[0],coefs));
-            int[] params=new int[input.getNumParameters(s)];
-            float[] values=new float[input.getNumValues(s)+2];
+            dataVect.get(2*s).add(new DataElement(new Array[Int](0),coefs));
+            var params:Array[Int] =new Array(input.getNumParameters(s))
+            var values:Array[Float]=new Array(input.getNumValues(s)+2)
             for(i <- range[0] until range[1]) {
-                DataElement de=input.getElement(i,s);
+                var de:DataElement=input.getElement(i,s);
                 for(j <- 0 until params.length) params[j]=de.getParam(j);
                 for(j <- 0 until values.length-2) values[j]=de.getValue(j);
                 values[values.length-2]=(float)fitFormula.valueOf(this,s,i);
