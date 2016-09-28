@@ -12,7 +12,7 @@ class ThinningFilter extends Function {
   
   
   def apply(){
-    
+//    /*
     if(input==null) return;
 		//sizeDataVectToInputStreams();
 		for(s <- 0 until getSource(0).getNumStreams()) {
@@ -70,17 +70,20 @@ class ThinningFilter extends Function {
                 }
     		}
 		}
-    
+//		*/
   }
   
   
   private def doGroupSelection(startIndex:Int, maxIndex:Int, sortFormula:DoubleFormula, stream:Int):Int= {
-		var v:Double = sortFormula.valueOf(this,stream,startIndex);
+		/*
+    var v:Double = sortFormula.valueOf(this,stream,startIndex);
 		var i:Int;
 		breakable {for(i <- startIndex+1 until maxIndex){
 		  if( !(sortFormula.valueOf(this,stream,i)==v) ) break
 		}}
 		return i;
+		*/
+    return 0
 	}
   
   

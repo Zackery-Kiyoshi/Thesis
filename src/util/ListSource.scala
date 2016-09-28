@@ -16,11 +16,12 @@ class ListSource (s:Double, e:Double, d:Double, var id:FKey) extends Function{
   //var outputs:Vector[Node] = Vector.empty
   //var output:DataStore = new DataStore( outputData, outputs)
   
-  override def apply(inputData:Vector[Vector[DataElement]]):Vector[Vector[DataElement]]={
-    var tmp = new DataElement(arr.to[Vector])
-    var retp = Vector.empty[DataElement]
-    retp :+ tmp
-    var ret = Vector.empty[Vector[DataElement]]
+  override def apply(inputData:Vector[DataStore]):Vector[DataStore]={
+    var tmp:Vector[DataElement] = Vector.empty
+    tmp :+ new DataElement(arr.to[Vector])
+    var retp:DataStore = new DataStore(new DKey("t"))
+    retp.set(tmp)
+    var ret:Vector[DataStore] = Vector.empty
     ret :+ retp
     return ret
   }

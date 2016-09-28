@@ -8,16 +8,15 @@ class LinearFitFilter extends Function {
   private var terms:ArrayBuffer[DoubleFormula] = new ArrayBuffer();
   private var coefs:Array[Float]=new Array(0)
   
-  def apply(input: Vector[DataStore]): Vector[DataStore] = {
+  override def apply(input: Vector[DataStore]): Vector[DataStore] = {
     var ret = Vector[DataStore]()
-    
     for(s <-0 until input.length ) {
-      
+//       /*
             var a:Array[Array[Double]] =new Array(terms.size)(terms.size)
             var b:Array[Double] = new Array(terms.size)
-            var range:Array[Int]=fitFormula.getSafeElementRange(this,s);
+            var range:Array[Int]=fitFormula.getSafeElementRange(input,s);
             for( t <- 0 until terms.length) {
-                int[] tmp=terms(t).getSafeElementRange(this,s);
+                var tmp:Array[Int] =terms(t).getSafeElementRange(this,s);
                 if(tmp[0]>range[0]) range[0]=tmp[0];
                 if(tmp[1]<range[1]) range[1]=tmp[1]; 
             }
@@ -54,8 +53,8 @@ class LinearFitFilter extends Function {
                 }
                 dataVect.get(2*s+1).add(new DataElement(params,values));
             }
+//            */
         }
-    
     return ret
   }
   

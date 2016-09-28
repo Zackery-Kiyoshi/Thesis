@@ -2,9 +2,9 @@ package util
 
 class SortFilter extends Function {
   var input = 0;
-  var c:(Double,Double)=>Boolean
+  var c:(Double,Double)=>Boolean = (x:Double, y:Double)=> x<y
   
-  def apply(input: Vector[DataStore]): Vector[DataStore] = {
+  override def apply(input: Vector[DataStore]): Vector[DataStore] = {
     var ret = Vector[DataStore]()
     for (i <- input) {
       var tmpDE:Vector[DataElement] = Vector.empty[DataElement]

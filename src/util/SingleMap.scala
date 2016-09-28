@@ -6,7 +6,8 @@ import scala.collection.mutable.ListBuffer
 class SingleMap(var f:(Double) => (Double),var id:FKey) extends Function {
   
   
-  def apply(input: Vector[DataStore]): Vector[DataStore] = {
+  
+  override def apply(input: Vector[DataStore]): Vector[DataStore] = {
     var ret = Vector[DataStore]()
 
     for (i <- input) {

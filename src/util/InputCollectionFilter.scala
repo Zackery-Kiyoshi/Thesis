@@ -5,12 +5,13 @@ import scala.util.control.Breaks._
 
 class InputCollectionFilter extends Function {
   
+  var inputCount:Int = 0;
   
-  def apply(input:Vector[DataStore]):Vector[DataStore] = {
+  override def apply(input:Vector[DataStore]):Vector[DataStore] = {
     var ret = Vector[DataStore]()
-    
     var lastToRemove:Int = -1
     //sizeDataVectToInputStreams();
+//    /*
     for(s <- 0 until getSource(0).getNumStreams()) {
       breakable { 
       for(lastToRemove <- 0 until dataVect.get(s).size())
@@ -20,7 +21,7 @@ class InputCollectionFilter extends Function {
         var toRemove:ArrayBuffer[DataElement] = new ArrayBuffer();
         //toRemove.ensureCapacity(lastToRemove);
         for(i <- 0 until lastToRemove) {
-          toRemove.add(dataVect.get(s).get(i));
+          toRemove = toRemove :+ input(s)(i)
         }
         dataVect.get(s).removeAll(toRemove);
       }
@@ -28,8 +29,8 @@ class InputCollectionFilter extends Function {
         dataVect.get(s).add(new DataElement(input.getElement(i,s),inputCount));
       }
     }
-    inputCount++;
-    
+    inputCount+=1
+//    */
     return ret;
   }
   
