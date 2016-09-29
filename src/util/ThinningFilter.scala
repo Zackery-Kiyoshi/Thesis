@@ -11,78 +11,45 @@ class ThinningFilter extends Function {
   private var groupFormula = new DoubleFormula("v[0]");
   
   
-  def apply(){
-//    /*
-    if(input==null) return;
-		//sizeDataVectToInputStreams();
-		for(s <- 0 until getSource(0).getNumStreams()) {
-		    val ss:Int =0;
-    		if(useGroups.getValue()) {
-    			ThreadHandler.instance().loadWaitTask(this,new Runnable() {
-    				@Override
-                    public void run() {
-    					int groupCount=0;
-    					int[] range=groupFormula.getSafeElementRange(OldThinningFilter.this,ss);
-    		            DataFormula.checkRangeSafety(range,OldThinningFilter.this);
-    					int i=range[0];
-    					while(i<range[1]) {
-    						int groupEnd=doGroupSelection(i,range[1],groupFormula,ss);
-    						if(groupCount%thinFactor.getValue()==0) {
-    							while(i<groupEnd) {
-    								dataVect.get(ss).add(input.getElement(i,ss));
-    								++i;
-    							}
-    						}
-    						i=groupEnd;
-    						++groupCount;
-    					}
-    				}
-    			});
-    		} else {
-    			//  parallel
-    			val vects:ArrayBuffer[ArrayBuffer[DataElement]]=new ArrayBuffer[ArrayBuffer[DataElement]]();
-                for (i <- 0 until ThreadHandler.instance().getNumThreads()) {
-                	vects.add(new ArrayList<DataElement>());
-                }
-    //          create ReduceLoopBody array
-                ReduceLoopBody[] loops=new ReduceLoopBody[vects.size()];
-                for (i <- 0 until loops.length) {
-                	val index:Int =i;
-                	loops[i]=new ReduceLoopBody() {
-                		@Override
-                        public void execute(int start, int end) {
-                			ArrayList<DataElement> data=vects.get(index);
-                			for (int j=start; j<end; j++) {
-                				if(j%thinFactor.getValue()==0) data.add(input.getElement(j,ss));
-                			}
-                		}
-                	};
-                }
-                ThreadHandler.instance().chunkedForLoop(this,0,input.getNumElements(ss),loops);
-                // merge lists
-                int size=0;
-                for (int i=0; i<vects.size(); i++) {
-                	size+=vects.get(i).size();
-                }
-                dataVect.get(s).ensureCapacity(size);
-                for (int i=0; i<vects.size(); i++) {
-                	dataVect.get(s).addAll(vects.get(i));
-                }
-    		}
-		}
-//		*/
+  
+  override def apply(input: Vector[DataStore]): Vector[DataStore] = {
+    var ret = Vector[DataStore]()
+    
+    for (i <- input) {
+      var tmpDE:Vector[DataElement] = Vector.empty[DataElement]
+      for (j <- 0 until i.length) {
+        //var tmp:DataElement = i(j)
+        var tmp:Vector[Double] = Vector.empty
+        for (k <- 0 until i(j).length) {
+          //need to thin
+          // collect all the elements i(j)(k)
+          
+          tmp = tmp :+ i(j)(k)
+          
+        }
+
+        var De = new DataElement(tmp)
+        tmpDE = tmpDE :+ De 
+      }
+      var t = new DataStore(new DKey(""))
+      t.set(tmpDE)
+      ret = ret :+ t
+    }
+    
+    
+    return ret
   }
   
   
   private def doGroupSelection(startIndex:Int, maxIndex:Int, sortFormula:DoubleFormula, stream:Int):Int= {
-		/*
+//		/*
     var v:Double = sortFormula.valueOf(this,stream,startIndex);
 		var i:Int;
 		breakable {for(i <- startIndex+1 until maxIndex){
 		  if( !(sortFormula.valueOf(this,stream,i)==v) ) break
 		}}
 		return i;
-		*/
+	//	*/
     return 0
 	}
   

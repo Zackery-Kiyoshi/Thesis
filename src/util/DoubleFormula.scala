@@ -7,12 +7,16 @@ class DoubleFormula(val str:String) {
   import DoubleFormula.IOList
     private val tree=DoubleFormula.parseAll(DoubleFormula.Expression,str).get
     def apply(i:Int,x:IOList,vars:Map[String,Double]):Double = tree.eval(i,x,vars)
+    def safeRange(x:IOList,df:DoubleFormula*):Array[Int] = {
+      var t = tree.safeRange(x)
+      return (t.start until t.end).toArray
+    }
 }
 
 object DoubleFormula extends JavaTokenParsers {
   type IOList = IndexedSeq[DataStore]
     private val allRange = -1000000000 to 1000000000
-    
+
     def apply(str:String) = new DoubleFormula(str)
     def main(args:Array[String]) {
         println(new DoubleFormula("4+5")(0,null,null))
