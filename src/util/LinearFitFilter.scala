@@ -23,8 +23,8 @@ class LinearFitFilter extends Function {
             DataFormula.checkRangeSafety(range,this);
             for(i <- range(0) until range(1)  ) {
                 var ti:Array[Double]=new Array(terms.size)
-                for(j <- 0 until ti.length) ti(j)=terms(j).valueOf(this,s,i);
-                var fit=fitFormula.valueOf(this,s,i);
+                for(j <- 0 until ti.length) ti(j)=terms(j)(i,input,null );
+                var fit=fitFormula(i,input,null)
                 for(j <- 0 until a.length) {
                     for(k <- 0 until a(j).length) {
                         a(j)(k)+=ti(j)*ti(k)
@@ -41,16 +41,16 @@ class LinearFitFilter extends Function {
             // new DataElement(new Array[Int](0),coefs)
             var tmp = new DataElement(Vector.empty)
             dataVect.get(2*s).add(tmp);
-            var params:Array[Int] =new Array(input.getNumParameters(s))
+            var params:Array[Int] =new Array(input(s).length)
             var values:Array[Float]=new Array(input(s).length+2)
             for(i <- range(0) until range(1)) {
                 var de:DataElement=input(i)(s);
                 for(j <- 0 until params.length) params(j)=de.getParam(j);
                 for(j <- 0 until values.length-2) values(j)=de(j).toFloat
-                values(values.length-2)=fitFormula.valueOf(this,s,i).toFloat
+                values(values.length-2)=fitFormula(i,input, null).toFloat
                 values(values.length-1)=0;
                 for(j <- 0 until terms.size) {
-                    values(values.length-1)+=coefs(j)*terms(j).valueOf(this,s,i)
+                    values(values.length-1)+=coefs(j)*terms(j)(i,input,null).toFloat
                 }
                 dataVect.get(2*s+1).add(new DataElement(params,values));
             }

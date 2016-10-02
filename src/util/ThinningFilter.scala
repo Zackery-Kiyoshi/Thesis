@@ -37,6 +37,65 @@ class ThinningFilter extends Function {
     }
     
     
+    for(i <- input){
+      
+      
+       val ss:Int=0
+    		if(useGroups) {
+    			ThreadHandler.instance().loadWaitTask(this,new Runnable() {
+    				@Override
+                    public void run() {
+    					int groupCount=0;
+    					int[] range=groupFormula.getSafeElementRange(ThinningFilter.this,ss);
+    		            DataFormula.checkRangeSafety(range,ThinningFilter.this);
+    					int i=range[0];
+    					while(i<range[1]) {
+    						int groupEnd=doGroupSelection(i,range[1],groupFormula,ss);
+    						if(groupCount%thinFactor.getValue()==0) {
+    							while(i<groupEnd) {
+    								dataVect.get(ss).add(input.getElement(i,ss));
+    								++i;
+    							}
+    						}
+    						i=groupEnd;
+    						++groupCount;
+    					}
+    				}
+    			});
+    		} else {
+    			//  parallel
+    			var vects:ArrayBuffer[ArrayBuffer[DataElement]]=new ArrayBuffer()
+          for (i <-0 until ThreadHandler.instance().getNumThreads()) {
+           	vects = vects :+ new ArrayBuffer[DataElement]()
+          }
+    //    create ReduceLoopBody array
+          for (i <- 0 until loops.length) {
+          	val index=i
+            //      public void execute(int start, int end) {
+          			var data:ArrayBuffer[DataElement]=vects.get(index);
+           			for (j <- start until end) {
+           				if(j%thinFactor.getValue()==0) data.add(input.getElement(j,ss));
+          			}
+          	//      }
+          }
+          
+          ThreadHandler.instance().chunkedForLoop(this,0,input.getNumElements(ss),loops);
+          // merge lists
+          var size = 0
+          for (i <- 0 until vects.size()) {
+           	size+=vects.get(i).size();
+          }
+          dataVect.get(s).ensureCapacity(size);
+          for (i <- 0 until vects.size()) {
+          	dataVect.get(s).addAll(vects.get(i));
+          }
+    		}
+      
+      
+    }
+    
+    
+    
     return ret
   }
   

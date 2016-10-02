@@ -16,7 +16,7 @@ class DoubleFormula(val str:String) {
 object DoubleFormula extends JavaTokenParsers {
   type IOList = IndexedSeq[DataStore]
     private val allRange = -1000000000 to 1000000000
-
+    
     def apply(str:String) = new DoubleFormula(str)
     def main(args:Array[String]) {
         println(new DoubleFormula("4+5")(0,null,null))
