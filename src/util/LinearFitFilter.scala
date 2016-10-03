@@ -20,7 +20,7 @@ class LinearFitFilter extends Function {
                 if(tmp(0)>range(0)) range(0)=tmp(0)
                 if(tmp(1)<range(1)) range(1)=tmp(1) 
             }
-            DataFormula.checkRangeSafety(range,this);
+         //   DataFormula.checkRangeSafety(range,this);
             for(i <- range(0) until range(1)  ) {
                 var ti:Array[Double]=new Array(terms.size)
                 for(j <- 0 until ti.length) ti(j)=terms(j)(i,input,null );
@@ -40,19 +40,29 @@ class LinearFitFilter extends Function {
             }
             // new DataElement(new Array[Int](0),coefs)
             var tmp = new DataElement(Vector.empty)
-            dataVect.get(2*s).add(tmp);
+         //   dataVect.get(2*s).add(tmp)
+//          input.get(2*s).add(tmp)
             var params:Array[Int] =new Array(input(s).length)
             var values:Array[Float]=new Array(input(s).length+2)
             for(i <- range(0) until range(1)) {
                 var de:DataElement=input(i)(s);
-                for(j <- 0 until params.length) params(j)=de.getParam(j);
+                for(j <- 0 until params.length) params(j)=de(j).toInt
                 for(j <- 0 until values.length-2) values(j)=de(j).toFloat
                 values(values.length-2)=fitFormula(i,input, null).toFloat
                 values(values.length-1)=0;
                 for(j <- 0 until terms.size) {
                     values(values.length-1)+=coefs(j)*terms(j)(i,input,null).toFloat
                 }
-                dataVect.get(2*s+1).add(new DataElement(params,values));
+        //        dataVect.get(2*s+1).add(new DataElement(params,values));
+                var r:Vector[Double] = Vector.empty
+                for(i <- 0 until values.length) r = r :+ values(i).toDouble
+                
+                // ret?
+                //  dataVect.get(2*s+1).add(new DataElement(r))
+                
+                var tmp = new DataStore( new DKey(""))
+                tmp.set(Vector.empty :+(new DataElement(r)))
+                ret = ret :+ tmp
             }
 //            */
         }
