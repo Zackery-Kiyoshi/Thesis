@@ -10,11 +10,11 @@ class ThinningFilter extends Function {
 
   private var groupFormula = new DoubleFormula("v[0]");
   
-  
+  private var inputTmp:Vector[DataStore] = null
   
   override def apply(input: Vector[DataStore]): Vector[DataStore] = {
     var ret = Vector[DataStore]()
-    
+    inputTmp = input
     for (i <- input) {
       var tmpDE:Vector[DataElement] = Vector.empty[DataElement]
       for (j <- 0 until i.length) {
@@ -72,22 +72,27 @@ class ThinningFilter extends Function {
           for (i <- 0 until loops.length) {
           	val index=i
             //      public void execute(int start, int end) {
-          			var data:ArrayBuffer[DataElement]=vects.get(index);
+          			var data:ArrayBuffer[DataElement]=vects(index)
            			for (j <- start until end) {
-           				if(j%thinFactor.getValue()==0) data.add(input.getElement(j,ss));
+           				if(j%thinFactr.getValue()==0) data += (input(j)(ss));
           			}
           	//      }
           }
           
+          
           ThreadHandler.instance().chunkedForLoop(this,0,input.getNumElements(ss),loops);
+          
+          
+          
           // merge lists
           var size = 0
-          for (i <- 0 until vects.size()) {
-           	size+=vects.get(i).size();
+          for (i <- 0 until vects.size) {
+           	size+=vects(i).size
           }
-          dataVect.get(s).ensureCapacity(size);
-          for (i <- 0 until vects.size()) {
-          	dataVect.get(s).addAll(vects.get(i));
+          //dataVect(s).ensureCapacity(size);
+          for (i <- 0 until vects.size) {
+          	//dataVect(s).addAll(vects(i))
+          	ret(s).addAll(vects(i))
           }
     		}
       
@@ -102,10 +107,11 @@ class ThinningFilter extends Function {
   
   private def doGroupSelection(startIndex:Int, maxIndex:Int, sortFormula:DoubleFormula, stream:Int):Int= {
 //		/*
-    var v:Double = sortFormula.valueOf(this,stream,startIndex);
-		var i:Int;
+    //var v:Double = sortFormula(this,stream,startIndex)
+    var v:Double = sortFormula(startIndex,inputTmp,null)
+		var i:Int=0
 		breakable {for(i <- startIndex+1 until maxIndex){
-		  if( !(sortFormula.valueOf(this,stream,i)==v) ) break
+		  if( !(sortFormula(i,inputTmp,null)==v) ) break
 		}}
 		return i;
 	//	*/

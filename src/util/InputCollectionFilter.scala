@@ -5,17 +5,19 @@ import scala.util.control.Breaks._
 
 class InputCollectionFilter extends Function {
   
-  var inputCount:Int = 0;
+  var inputCount:Int = 0
+  var numToKeep = 0
   
   override def apply(input:Vector[DataStore]):Vector[DataStore] = {
     var ret = Vector[DataStore]()
     var lastToRemove:Int = -1
     //sizeDataVectToInputStreams();
 //    /*
-    for(s <- 0 until getSource(0).getNumStreams()) {
+    for(s <- 0 until input(0).length) {
       breakable { 
-      for(lastToRemove <- 0 until dataVect.get(s).size())
-        if(!(dataVect.get(s).get(lastToRemove).getParam(input.getNumParameters(s))<inputCount-numToKeep.getValue()+1)) break
+      for(lastToRemove <- 0 until input(s).length)
+        //if(!(dataVect.get(s).get(lastToRemove).getParam(input.getNumParameters(s))<inputCount-numToKeep.getValue()+1)) break
+        if(!(input(s)(lastToRemove).getParam(input(s).length)<inputCount-numToKeep+1)) break
       }
       if(lastToRemove>0) {
         var toRemove:ArrayBuffer[DataElement] = new ArrayBuffer();
@@ -23,10 +25,12 @@ class InputCollectionFilter extends Function {
         for(i <- 0 until lastToRemove) {
           toRemove = toRemove :+ input(s)(i)
         }
+        // removing from datastore
         dataVect.get(s).removeAll(toRemove);
       }
-      for(i <- 0 until input(s).length) {
+      for(i <- 0 until input(s).length) { 
         dataVect.get(s).add(new DataElement(input.getElement(i,s),inputCount));
+        
       }
     }
     inputCount+=1

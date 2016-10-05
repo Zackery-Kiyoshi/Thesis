@@ -9,5 +9,5 @@ class DataStore(val id:DKey) {
   def apply(i: Int): DataElement = out(i)
   def length = out.length
   def set(t:Vector[DataElement]){ if(out == null) out = t }
-  
+  def add(d:DataElement) { out = out :+ d }
 }
