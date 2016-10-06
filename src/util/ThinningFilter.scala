@@ -42,6 +42,10 @@ class ThinningFilter extends Function {
       
        val ss:Int=0
     		if(useGroups) {
+    		  
+    		  // grouped by a function return using the groups with the same numbers rather than element count
+    		  
+    		  
     			ThreadHandler.instance().loadWaitTask(this,new Runnable() {
     				@Override
                     public void run() {
