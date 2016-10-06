@@ -9,7 +9,7 @@ class InputCollectionFilter extends Function {
   var numToKeep = 0
   
   override def apply(input:Vector[DataStore]):Vector[DataStore] = {
-    var ret = Vector[DataStore]()
+    var ret = input
     var lastToRemove:Int = -1
     //sizeDataVectToInputStreams();
 //    /*
@@ -17,7 +17,7 @@ class InputCollectionFilter extends Function {
       breakable { 
       for(lastToRemove <- 0 until input(s).length)
         //if(!(dataVect.get(s).get(lastToRemove).getParam(input.getNumParameters(s))<inputCount-numToKeep.getValue()+1)) break
-        if(!(input(s)(lastToRemove).getParam(input(s).length)<inputCount-numToKeep+1)) break
+        if(!(ret(s)(lastToRemove)(ret(s).length)<inputCount-numToKeep+1)) break
       }
       if(lastToRemove>0) {
         var toRemove:ArrayBuffer[DataElement] = new ArrayBuffer();
@@ -26,10 +26,10 @@ class InputCollectionFilter extends Function {
           toRemove = toRemove :+ input(s)(i)
         }
         // removing from datastore
-        dataVect.get(s).removeAll(toRemove);
+        ret(s).removeAll(toRemove)
       }
       for(i <- 0 until input(s).length) { 
-        dataVect.get(s).add(new DataElement(input.getElement(i,s),inputCount));
+        ret(s).add(new DataElement(input(i)(s),inputCount));
         
       }
     }

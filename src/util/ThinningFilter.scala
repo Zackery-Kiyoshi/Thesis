@@ -37,7 +37,7 @@ class ThinningFilter extends Function {
     }
     
     
-    for(i <- input){
+    for(s <- 0 until input.length){
       
       
        val ss:Int=0
@@ -69,12 +69,12 @@ class ThinningFilter extends Function {
            	vects = vects :+ new ArrayBuffer[DataElement]()
           }
     //    create ReduceLoopBody array
-          for (i <- 0 until loops.length) {
+          for (i <- 0 until vects.length) {
           	val index=i
             //      public void execute(int start, int end) {
           			var data:ArrayBuffer[DataElement]=vects(index)
-           			for (j <- start until end) {
-           				if(j%thinFactr.getValue()==0) data += (input(j)(ss));
+           			for (j <- 0 until input(ss).length) {
+           				if(j%thinFactor==0) data += (input(j)(ss));
           			}
           	//      }
           }

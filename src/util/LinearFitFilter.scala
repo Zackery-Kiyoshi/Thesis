@@ -39,12 +39,9 @@ class LinearFitFilter extends Function {
                 coefs(i)= x(i).toFloat
             }
             // new DataElement(new Array[Int](0),coefs)
-            var c:Vector[Double] = Vector.empty
-                for(i <- 0 until values.length) c = c :+ coefs(i).toDouble
             var tmp = new DataElement(Vector.empty)
          //   dataVect.get(2*s).add(tmp)
-            input(2*s).add(tmp)
-            ret(2*s).add(tmp)
+//           input.get(2*s).add(tmp)
             var params:Array[Int] =new Array(input(s).length)
             var values:Array[Float]=new Array(input(s).length+2)
             for(i <- range(0) until range(1)) {
@@ -59,10 +56,9 @@ class LinearFitFilter extends Function {
         //        dataVect.get(2*s+1).add(new DataElement(params,values));
                 var r:Vector[Double] = Vector.empty
                 for(i <- 0 until values.length) r = r :+ values(i).toDouble
-                ret(2*s+1).add(new DataElement(r))
+                
                 // ret?
                 //  dataVect.get(2*s+1).add(new DataElement(r))
-                
                 
                 var tmp = new DataStore( new DKey(""))
                 tmp.set(Vector.empty :+(new DataElement(r)))
