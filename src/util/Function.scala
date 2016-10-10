@@ -5,13 +5,21 @@ package util
   
  */
 // Wrapper so nodes can have any kind of Container
-abstract class Function {
+
+
+abstract class Function(var id:FKey) {
+  
+  val t:String
   
   //def apply(inputData:Vector[Vector[DataElement]]):Vector[Vector[DataElement]]={
   def apply(input:Vector[DataStore]):Vector[DataStore] = {
     var ret = Vector[DataStore]()
     
     return ret;
+  }
+  
+  def update(changes:NodeChange){
+    
   }
   
   

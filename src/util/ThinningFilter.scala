@@ -3,7 +3,9 @@ package util
 import scala.collection.mutable.ArrayBuffer
 import scala.util.control.Breaks._
 
-class ThinningFilter extends Function {
+class ThinningFilter( var id1:FKey) extends Function(id1) {
+  
+  val t:String = "ThinningFilter"
   
   var thinFactor:Int = 10
 	var useGroups:Boolean = false
@@ -45,7 +47,7 @@ class ThinningFilter extends Function {
     		  
     		  // grouped by a function return using the groups with the same numbers rather than element count
     		  
-    		  
+    		  /*
     			ThreadHandler.instance().loadWaitTask(this,new Runnable() {
     				@Override
                     public void run() {
@@ -87,7 +89,6 @@ class ThinningFilter extends Function {
           ThreadHandler.instance().chunkedForLoop(this,0,input.getNumElements(ss),loops);
           
           
-          
           // merge lists
           var size = 0
           for (i <- 0 until vects.size) {
@@ -98,6 +99,7 @@ class ThinningFilter extends Function {
           	//dataVect(s).addAll(vects(i))
           	ret(s).addAll(vects(i))
           }
+//          */
     		}
       
       

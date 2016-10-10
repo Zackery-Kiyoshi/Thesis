@@ -1,0 +1,5 @@
+package futures
+
+class FutureGraph {
+  
+}

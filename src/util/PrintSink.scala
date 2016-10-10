@@ -4,9 +4,9 @@ import scala.collection.mutable.ListBuffer
 /**
  * @author zkurimab
  */
-class PrintSink (var id:FKey) extends Function {
+class PrintSink (var id1:FKey) extends Function(id1) {
   
-  
+  val t = "PrintSink"
   
   override def apply(input: Vector[DataStore]): Vector[DataStore] = {
     var ret = Vector[DataStore]()

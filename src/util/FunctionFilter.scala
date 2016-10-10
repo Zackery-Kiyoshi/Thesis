@@ -1,21 +1,22 @@
 package util
 
-class FunctionFilter extends Function {
+class FunctionFilter(var fsts:String, var id1:FKey) extends Function(id1) {
 
-  
+  val t:String = "FunctionFilter"
+  var func:DoubleFormula = new DoubleFormula(fsts)
   
   override def apply(input: Vector[DataStore]): Vector[DataStore] = {
     var ret = Vector[DataStore]()
 
-    for (i <- input) {
+    for (i <- 0 until input.length) {
       //var tmp:DataStore = i
       var tmpDE:Vector[DataElement] = Vector.empty[DataElement]
-      for (j <- 0 until i.length) {
+      for (j <- 0 until input(i).length) {
         //var tmp:DataElement = i(j)
-        var tmp = new Array[Double](i(j).length)
-        for (k <- 0 until i(j).length) {
+        var tmp = new Array[Double](input(i)(j).length)
+        for (k <- 0 until input(i)(j).length) {
           // do it for i(j)(k)
-          tmp(k) = i(j)(k)
+          tmp(k) = func(k,input,null)
         }
         var De = new DataElement(tmp.toVector)
         tmpDE = tmpDE :+ De 
@@ -28,8 +29,31 @@ class FunctionFilter extends Function {
     return ret;
   }
 
+  
+  override def update(changes:NodeChange){
+    
+    for(c <- changes.changes){
+      val tmp:String = c._1 match {
+        // case for each mutable value
+        case "func" => {
+          
+          
+          c._1
+        }
+        case _ => {
+          
+          "error:"+c._1
+        }
+      }
+      
+      
+    }
+    
+  }
+  
 }
 
+  
 
 /*
 

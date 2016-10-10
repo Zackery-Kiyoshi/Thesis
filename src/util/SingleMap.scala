@@ -3,9 +3,9 @@ import scala.collection.mutable.ListBuffer
 /**
  * @author zkurimab
  */
-class SingleMap(var f:(Double) => (Double),var id:FKey) extends Function {
+class SingleMap(var f:(Double) => (Double),var id1:FKey) extends Function(id1) {
   
-  
+  val t:String = "SingleMap"
   
   override def apply(input: Vector[DataStore]): Vector[DataStore] = {
     var ret = Vector[DataStore]()

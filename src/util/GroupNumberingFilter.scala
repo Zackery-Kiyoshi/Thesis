@@ -2,8 +2,9 @@ package util
 
 // optional
 
-class GroupNumberingFilter extends Function {
+class GroupNumberingFilter(var id1:FKey) extends Function(id1) {
   
+  val t = "GroupNumberingFilter"
   
   def apply(){
     

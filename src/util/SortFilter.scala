@@ -1,6 +1,9 @@
 package util
 
-class SortFilter extends Function {
+class SortFilter(var id1:FKey) extends Function(id1) {
+  
+  val t = "SortFilter"
+  
   var input = 0;
   var c:(Double,Double)=>Boolean = (x:Double, y:Double)=> x<y
   

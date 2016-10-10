@@ -2,7 +2,9 @@ package util
 
 import scala.collection.mutable.ArrayBuffer
 
-class LinearFitFilter extends Function {
+class LinearFitFilter(var id1:FKey) extends Function(id1) {
+  
+  val t:String = "LinearFitFilter"
   
   private var fitFormula:DoubleFormula = new DoubleFormula("v[0]");
   private var terms:ArrayBuffer[DoubleFormula] = new ArrayBuffer();
@@ -14,9 +16,9 @@ class LinearFitFilter extends Function {
 //       /*
             var a:Array[Array[Double]] =new Array(terms.size)(terms.size)
             var b:Array[Double] = new Array(terms.size)
-            var range:Array[Int]=fitFormula.safeRange(input)
+            var range:Array[Int]=fitFormula.safeRange(input).toArray
             for( t <- 0 until terms.length) {
-                var tmp:Array[Int] =terms(t).safeRange(input)
+                var tmp:Range =terms(t).safeRange(input)
                 if(tmp(0)>range(0)) range(0)=tmp(0)
                 if(tmp(1)<range(1)) range(1)=tmp(1) 
             }

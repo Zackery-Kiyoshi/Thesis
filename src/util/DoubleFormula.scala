@@ -7,9 +7,8 @@ class DoubleFormula(val str:String) {
   import DoubleFormula.IOList
     private val tree=DoubleFormula.parseAll(DoubleFormula.Expression,str).get
     def apply(i:Int,x:IOList,vars:Map[String,Double]):Double = tree.eval(i,x,vars)
-    def safeRange(x:IOList,df:DoubleFormula*):Array[Int] = {
-      var t = tree.safeRange(x)
-      return (t.start until t.end).toArray
+    def safeRange(x:IOList,df:DoubleFormula*):Range = {
+      return tree.safeRange(x) 
     }
 }
 

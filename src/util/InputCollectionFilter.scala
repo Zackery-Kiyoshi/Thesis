@@ -3,7 +3,9 @@ package util
 import scala.collection.mutable.ArrayBuffer
 import scala.util.control.Breaks._
 
-class InputCollectionFilter extends Function {
+class InputCollectionFilter(var id1:FKey) extends Function(id1) {
+  
+  val t:String = "InputCollectionFilter"
   
   var inputCount:Int = 0
   var numToKeep = 0
@@ -26,10 +28,10 @@ class InputCollectionFilter extends Function {
           toRemove = toRemove :+ input(s)(i)
         }
         // removing from datastore
-        ret(s).removeAll(toRemove)
+      //  ret(s).removeAll(toRemove)
       }
       for(i <- 0 until input(s).length) { 
-        ret(s).add(new DataElement(input(i)(s),inputCount));
+      //  ret(s).add(new DataElement(input(i)(s),inputCount));
         
       }
     }
