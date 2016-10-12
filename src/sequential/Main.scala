@@ -12,30 +12,31 @@ object Main {
     var graph1:SequentialGraph = new SequentialGraph()
     
     var n1 = graph1.addListSouceNode(0,10,1)
-    var n2 = graph1.addFunctionFilter(func1)
+    //var n2 = graph1.addFunctionFilter(func1)
     var n3 = graph1.addPrintSkink()
     var n4 = graph1.addPrintSkink()
     
     // connect listSource to FunctionFilter
-    graph1.connectNodes(n1._2,n2._1)
+   // graph1.connectNodes(n1._2,n2._1)
     // connect FunctionFilter to PrintSink1
-    graph1.connectNodes(n2._2,n3)
+   // graph1.connectNodes(n2._2,n3)
     // connect listSource to printSink2
     graph1.connectNodes(n1._2,n4)
     
-    graph1.analyze()
+    graph1.printNodes()
+    graph1.printConnections()
+    
+    //graph1.analyze()
+    println("start")
     graph1.run()
+    println("end")
     
     
     // making a change
     
     var change1 = new NodeChange(null)
     
-    
     graph1.process(graph1,change1)
-    
-    
-    
     
     return graph1
   }
@@ -51,7 +52,6 @@ object Main {
   
   
   def main(args: Array[String]): Unit = {
-    
     //testHelp()
     simpleFuncTest()
     

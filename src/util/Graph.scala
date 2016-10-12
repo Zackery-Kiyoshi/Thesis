@@ -3,37 +3,35 @@ package util
 import scala.collection.mutable.Map
 import scala.collection.mutable.HashMap
 
-
-class FKey(var key:String){
-  def equals(s:FKey):Boolean={
+class FKey(var key: String) {
+  def equals(s: FKey): Boolean = {
     return key == s.key
   }
-  def equals(s:String):Boolean={
+  def equals(s: String): Boolean = {
     return key == s
   }
 }
 
-class DKey(var key:String){
-  def equals(s:DKey):Boolean={
+class DKey(var key: String) {
+  def equals(s: DKey): Boolean = {
     return key == s.key
   }
-  def equals(s:String):Boolean={
+  def equals(s: String): Boolean = {
     return key == s
   }
 }
-
 
 class Graph {
-  var funcKeys = HashMap.empty[FKey,Function]
-  var fKeys:List[FKey] = List()
-  var dataKeys = HashMap.empty[DKey,DataStore]
-  var dKeys:List[DKey] = List()
-  var funcToData = HashMap.empty[FKey,Vector[DKey]]
-  var dataToFunc = HashMap.empty[DKey,Vector[FKey]]
+  var funcKeys = HashMap.empty[FKey, Function]
+  var fKeys: List[FKey] = List()
+  var dataKeys = HashMap.empty[DKey, DataStore]
+  var dKeys: List[DKey] = List()
+  var funcToData = HashMap.empty[FKey, Vector[DKey]]
+  var dataToFunc = HashMap.empty[DKey, Vector[FKey]]
   var fkey = 0
   var dkey = 0
-  
-  override def clone():Graph={
+
+  override def clone(): Graph = {
     var tmp = new Graph()
     tmp.funcKeys = funcKeys
     tmp.fKeys = fKeys
@@ -45,9 +43,9 @@ class Graph {
     tmp.dkey = dkey
     return tmp
   }
-  
+
   //method(Graph): Graph
-  def help(){
+  def help() {
     println("analyze() ")
     println("  Where the code is updated")
     println("  possible modifications:")
@@ -64,221 +62,239 @@ class Graph {
     println("  possible modifications:")
     println("     ")
   }
-  
-  
-  def analyze(): Boolean={ /* (Checks for warnings/errors) */
+
+  def analyze(): Boolean = { /* (Checks for warnings/errors) */
     var ret = false
     println("analyze not inplimented")
     return ret
   }
-  
-  def process(g:Graph,c:NodeChange):Graph={
+
+  def process(g: Graph, c: NodeChange): Graph = {
     var ret = g.clone()
-    
+
     println("process not inplimented")
-    
+
     return ret
   }
-  
-  def run(){
+
+  def run() {
     println("run not inplimented")
   }
-  
-  
-  
-  def connectNode(f:FKey, d:DKey) : Boolean = {
+
+  def connectNode(f: FKey, d: DKey): Boolean = {
     var ret = false
-    
+
     return ret
   }
-  def connectNode(d:DKey, f:FKey) : Boolean = {
+  def connectNode(d: DKey, f: FKey): Boolean = {
     var ret = false
-    
+
     return ret
   }
-  def disconnectNodes(f:FKey, d:DKey) : Boolean = {
+  def disconnectNodes(f: FKey, d: DKey): Boolean = {
     var ret = false
-    
+
     return ret
   }
-  def disconnectNodes(d:DKey, f:FKey) : Boolean = {
+  def disconnectNodes(d: DKey, f: FKey): Boolean = {
     var ret = false
-    
+
     return ret
   }
 
-  def printNodes(): String={ /* {Key, NodeType } */
+  def printNodes(): String = { /* {Key, NodeType } */
     var ret = ""
-    
-    for(i <- 0 until fKeys.length){
-      ret += fKeys(i).key + ":" + funcKeys(fKeys(i)).t + "/n"
+
+    for (i <- 0 until fKeys.length) {
+      ret += fKeys(i).key + ":" + funcKeys(fKeys(i)).t + ":" + fKeys(i) + "\n"
     }
-    for(i <- 0 until dKeys.length){
-      ret += dKeys(i).key + ":" + "DataNode" + "/n"
+    for (i <- 0 until dKeys.length) {
+      ret += dKeys(i).key + ":" + "DataNode :" + dKeys(i) + "\n"
     }
-    
+    println(ret)
     return ret
   }
 
-  def printConnections(): String={ /* fKey : connectedNodes, */
+  def printConnections(): String = { /* fKey : connectedNodes, */
     var ret = ""
-    
-    
-    for(i <- 0 until fKeys.length){
-      fKeys(i).key + ":"
+
+    println(fKeys.length)
+    for (i <- 0 until fKeys.length) {
+      println(i + ":" + fKeys(i))
+      ret += fKeys(i).key + ": ["
+      if (funcToData(fKeys(i)) != null) {
+        for (j <- 0 until funcToData(fKeys(i)).length) {
+          ret += funcToData(fKeys(i))(j).key
+          if (j < funcToData(fKeys(i)).length - 1) ret += ","
+        }
+      }
+      ret += "] \n"
     }
-    for(i <- 0 until dKeys.length){
+    for (i <- 0 until dKeys.length) {
       dKeys(i).key + ":"
     }
-    
+    println(ret)
     return ret
   }
-  
 
-  def removeNode(f:FKey): Boolean = {
+  def removeNode(f: FKey): Boolean = {
     var ret = false
     // must delete associated DataNodes
-    
-    
+
     // delete the actual node
-    
-    
+
     return ret
   }
-  def removeNode(f:String): Boolean = {
-    var ret:FKey = null
+  def removeNode(f: String): Boolean = {
+    var ret: FKey = null
     // find the fkey
-    for(i <- 0 until fKeys.length){
-      if(fKeys(i).key == f) ret = fKeys(i)
+    for (i <- 0 until fKeys.length) {
+      if (fKeys(i).key == f) ret = fKeys(i)
     }
     return removeNode(ret)
   }
-  
-  def addListSouceNode(s:Double, e:Double, di:Double):Pair[FKey,DKey]={
-    var fKey = new FKey("f"+fkey)
-    var n:Function = new ListSource(s,e,di,fKey)
+
+  def addListSouceNode(s: Double, e: Double, di: Double): Pair[FKey, DKey] = {
+    var fKey = new FKey("f" + fkey)
+    var n: Function = new ListSource(s, e, di, fKey)
     funcKeys += (fKey -> n)
-    fkey+=1
-    
-    var dKey = new DKey("d"+dkey)
-    var d:DataStore = new DataStore(dKey)
-    
+    var tmp:Vector[DKey] = Vector.empty
+    funcToData += (fKey -> tmp)
+    fKeys = fKeys :+ fKey
+    fkey += 1
+
+    var dKey = new DKey("d" + dkey)
+    var d: DataStore = new DataStore(dKey)
+    dKeys = dKeys :+ dKey
     dataKeys += (dKey -> d)
-    dkey+=1
-    var out:Vector[DKey] = Vector.empty
-    out :+ dKey
-    funcToData += (fKey -> out )
-    return new Pair(fKey,dKey)
-  }
-  def addListSouceNode(s:Double, e:Double, di:Double,fk:String,dk:String):Pair[FKey,DKey]={
-    var fKey = new FKey(fk)
-    var n:Function = new ListSource(s,e,di,fKey)
-    funcKeys += (fKey -> n)
-    
-    var dKey = new DKey(dk)
-    var d:DataStore = new DataStore(dKey)
-    
-    dataKeys += (dKey -> d)
-    var out:Vector[DKey] = Vector.empty
-    out :+ dKey
-    funcToData += (fKey -> out )
-    return new Pair(fKey,dKey)
-  }
-  
-  def addFunctionFilter(s:String):Pair[FKey,DKey]={
-    var fKey = new FKey("f"+fkey)
-    var n:Function = new FunctionFilter(s,fKey)
-    //n.c = new SingleMap(, new FKey(""))
-    funcKeys += (fKey -> n)
-    fkey+=1
-    
-    var dKey = new DKey("d"+dkey)
-    var d:DataStore = new DataStore(dKey)
-    dataKeys += (dKey -> d)
-    dkey+=1
-    var out:Vector[DKey] = Vector.empty
+    dkey += 1
+    var out: Vector[DKey] = Vector.empty
     out :+ dKey
     funcToData += (fKey -> out)
-    return new Pair(fKey,dKey)
+    return new Pair(fKey, dKey)
   }
-  def addFunctionFilter(s:String,fk:String,dk:String):Pair[FKey,DKey]={
+  def addListSouceNode(s: Double, e: Double, di: Double, fk: String, dk: String): Pair[FKey, DKey] = {
     var fKey = new FKey(fk)
-    var n:Function = new FunctionFilter(s,fKey)
-    //n.c = new SingleMap(, new FKey(""))
+    var n: Function = new ListSource(s, e, di, fKey)
     funcKeys += (fKey -> n)
-    
+    var tmp:Vector[DKey] = Vector.empty
+    funcToData += (fKey -> tmp)
+    fKeys = fKeys :+ fKey
+
     var dKey = new DKey(dk)
-    var d:DataStore = new DataStore(dKey)
+    var d: DataStore = new DataStore(dKey)
+    dKeys = dKeys :+ dKey
     dataKeys += (dKey -> d)
-    var out:Vector[DKey] = Vector.empty
+    var out: Vector[DKey] = Vector.empty
     out :+ dKey
     funcToData += (fKey -> out)
-    return new Pair(fKey,dKey)
+    return new Pair(fKey, dKey)
   }
-  
-  
-  def addPrintSkink():FKey={
-    var fKey = new FKey("f"+fkey)
-    var n:Function = new PrintSink(fKey)
-    
-    //n.c = new Fnode(, fKey)
+
+  def addFunctionFilter(s: String): Pair[FKey, DKey] = {
+    var fKey = new FKey("f" + fkey)
+    var n: Function = new FunctionFilter(s, fKey)
+    //n.c = new SingleMap(, new FKey(""))
     funcKeys += (fKey -> n)
-    fkey+=1
-    
-    return fKey
+    var tmp:Vector[DKey] = Vector.empty
+    funcToData += (fKey -> tmp)
+    fKeys = fKeys :+ fKey
+    fkey += 1
+
+    var dKey = new DKey("d" + dkey)
+    var d: DataStore = new DataStore(dKey)
+    dKeys = dKeys :+ dKey
+    dataKeys += (dKey -> d)
+    dkey += 1
+    var out: Vector[DKey] = Vector.empty
+    out :+ dKey
+    funcToData += (fKey -> out)
+    return new Pair(fKey, dKey)
   }
-  def addPrintSkink(fk:String):FKey={
+  def addFunctionFilter(s: String, fk: String, dk: String): Pair[FKey, DKey] = {
     var fKey = new FKey(fk)
-    var n:Function = new PrintSink(fKey)
-    
+    var n: Function = new FunctionFilter(s, fKey)
+    //n.c = new SingleMap(, new FKey(""))
+    funcKeys += (fKey -> n)
+    var tmp:Vector[DKey] = Vector.empty
+    funcToData += (fKey -> tmp)
+    fKeys = fKeys :+ fKey
+
+    var dKey = new DKey(dk)
+    var d: DataStore = new DataStore(dKey)
+    dKeys = dKeys :+ dKey
+    dataKeys += (dKey -> d)
+    var out: Vector[DKey] = Vector.empty
+    out :+ dKey
+    funcToData += (fKey -> out)
+    return new Pair(fKey, dKey)
+  }
+
+  def addPrintSkink(): FKey = {
+    var fKey = new FKey("f" + fkey)
+    var n: Function = new PrintSink(fKey)
+
     //n.c = new Fnode(, fKey)
     funcKeys += (fKey -> n)
-    
+    var tmp:Vector[DKey] = Vector.empty
+    funcToData += (fKey -> tmp)
+    fKeys = fKeys :+ fKey
+    fkey += 1
+
     return fKey
   }
-  
-  
-  def connectNodes(input:DKey, output:FKey){
+  def addPrintSkink(fk: String): FKey = {
+    var fKey = new FKey(fk)
+    var n: Function = new PrintSink(fKey)
+
+    //n.c = new Fnode(, fKey)
+    funcKeys += (fKey -> n)
+    var tmp:Vector[DKey] = Vector.empty
+    funcToData += (fKey -> tmp)
+    fKeys = fKeys :+ fKey
+    return fKey
+  }
+
+  def connectNodes(input: DKey, output: FKey) {
     var tmp = dataToFunc.get(input)
     var t = tmp.getOrElse(null)
-    if(t != null){
+    if (t != null) {
       t :+ output
       dataToFunc += (input -> t)
-    }else{
+    } else {
       t = Vector.empty
       t :+ output
       dataToFunc += (input -> t)
     }
   }
-  def connectNodes(input:String, output:String){
+  def connectNodes(input: String, output: String) {
     var i = getDKey(input);
     var tmp = dataToFunc.get(i)
     var t = tmp.getOrElse(null)
-    if(t != null){
+    if (t != null) {
       t :+ output
       dataToFunc += (i -> t)
-    }else{
+    } else {
       t = Vector.empty
       t :+ output
       dataToFunc += (i -> t)
     }
   }
-  
-  
-  private def getDKey(s:String):DKey={
-    var ret:DKey = null
-    for(i <- 0 until dKeys.length){
-      if(dKeys(i).key == s) ret = dKeys(i)
+
+  private def getDKey(s: String): DKey = {
+    var ret: DKey = null
+    for (i <- 0 until dKeys.length) {
+      if (dKeys(i).key == s) ret = dKeys(i)
     }
     return ret
   }
-  
-  private def getFKey(s:String):FKey={
-    var ret:FKey = null
-    for(i <- 0 until fKeys.length){
-      if(fKeys(i).key == s) ret = fKeys(i)
+
+  private def getFKey(s: String): FKey = {
+    var ret: FKey = null
+    for (i <- 0 until fKeys.length) {
+      if (fKeys(i).key == s) ret = fKeys(i)
     }
     return ret
   }
-  
+
 }
