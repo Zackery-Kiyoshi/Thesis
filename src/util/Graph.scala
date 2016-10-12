@@ -1,9 +1,6 @@
 package util
 
-import scala.collection.mutable.Map
-import scala.collection.mutable.HashMap
-
-class FKey(var key: String) {
+case class FKey(val key: String) {
   def equals(s: FKey): Boolean = {
     return key == s.key
   }
@@ -12,7 +9,7 @@ class FKey(var key: String) {
   }
 }
 
-class DKey(var key: String) {
+case class DKey(val key: String) {
   def equals(s: DKey): Boolean = {
     return key == s.key
   }
@@ -21,27 +18,34 @@ class DKey(var key: String) {
   }
 }
 
-class Graph {
-  var funcKeys = HashMap.empty[FKey, Function]
-  var fKeys: List[FKey] = List()
-  var dataKeys = HashMap.empty[DKey, DataStore]
-  var dKeys: List[DKey] = List()
-  var funcToData = HashMap.empty[FKey, Vector[DKey]]
-  var dataToFunc = HashMap.empty[DKey, Vector[FKey]]
-  var fkey = 0
-  var dkey = 0
-
-  override def clone(): Graph = {
-    var tmp = new Graph()
-    tmp.funcKeys = funcKeys
-    tmp.fKeys = fKeys
-    tmp.dataKeys = dataKeys
-    tmp.dKeys = dKeys
-    tmp.funcToData = funcToData
-    tmp.dataToFunc = dataToFunc
-    tmp.fkey = fkey
-    tmp.dkey = dkey
-    return tmp
+class Graph private(
+  val funcKeys: Map[FKey, Function],
+  val fKeys: List[FKey],
+  val dataKeys: Map[DKey, DataStore],
+  val dKeys: List[DKey],
+  val funcToData: Map[FKey, Vector[DKey]],
+  val dataToFunc: Map[DKey, Vector[FKey]],
+  val nextfkey: Int,
+  val nextdkey: Int) {
+  
+  def apply(fstr: String): Function = funcKeys(FKey(fstr))
+  
+  def replace(fstr: String, f2: Function): Graph = {
+    // TODO - This doesn't clear the downstream data stores
+    new Graph(funcKeys.map { case (k, f) => if(k.key == fstr) k -> f2 else k -> f },
+        fKeys, dataKeys, dKeys, funcToData, dataToFunc, nextfkey, nextdkey)
+  }
+  
+  def modify(fstr: String)(func: Function => Function):Graph = {
+    // TODO - This doesn't clear the downstream data stores
+    new Graph(funcKeys.map { case (k, f) => if(k.key == fstr) k -> func(f) else k -> f },
+        fKeys, dataKeys, dKeys, funcToData, dataToFunc, nextfkey, nextdkey)
+  }
+  
+  def addFilter(filter:Function, name: String = ""): Graph = {
+    val (fkey, next) = if (name=="") (FKey("filt"+nextfkey), nextfkey+1) else (FKey(name),nextfkey)
+    new Graph(funcKeys + (fkey -> filter), fkey::fKeys, dataKeys, dKeys, funcToData, dataToFunc, next, nextdkey)
+    //TODO - This doesn't add a datastore for the filter
   }
 
   //method(Graph): Graph
@@ -69,12 +73,10 @@ class Graph {
     return ret
   }
 
-  def process(g: Graph, c: NodeChange): Graph = {
-    var ret = g.clone()
-
+  def process(c: NodeChange): Graph = {
     println("process not inplimented")
 
-    return ret
+    return this
   }
 
   def run() {
@@ -121,7 +123,7 @@ class Graph {
     println(fKeys.length)
     for (i <- 0 until fKeys.length) {
       println(i + ":" + fKeys(i))
-      ret += fKeys(i).key + ": ["
+      ret += fKeys(i).key + ": (" + funcToData(fKeys(i)).length + ") ["
       if (funcToData(fKeys(i)) != null) {
         for (j <- 0 until funcToData(fKeys(i)).length) {
           ret += funcToData(fKeys(i))(j).key
@@ -154,31 +156,33 @@ class Graph {
     return removeNode(ret)
   }
 
-  def addListSouceNode(s: Double, e: Double, di: Double): Pair[FKey, DKey] = {
-    var fKey = new FKey("f" + fkey)
-    var n: Function = new ListSource(s, e, di, fKey)
+  /**
+   * 
+   */
+  /*
+  def addListSouceNode(s: Double, e: Double, di: Double): Graph = {
+    val fKey = new FKey("f" + fkey)
+    val n: Function = new ListSource(s, e, di, fKey)
     funcKeys += (fKey -> n)
-    var tmp:Vector[DKey] = Vector.empty
-    funcToData += (fKey -> tmp)
     fKeys = fKeys :+ fKey
     fkey += 1
 
-    var dKey = new DKey("d" + dkey)
-    var d: DataStore = new DataStore(dKey)
+    val dKey = new DKey("d" + dkey)
+    val d: DataStore = new DataStore(dKey)
     dKeys = dKeys :+ dKey
     dataKeys += (dKey -> d)
     dkey += 1
-    var out: Vector[DKey] = Vector.empty
+    val out: Vector[DKey] = Vector.empty
     out :+ dKey
     funcToData += (fKey -> out)
+    val tmp:Vector[FKey] = Vector.empty
+    dataToFunc += (dKey -> tmp)
     return new Pair(fKey, dKey)
   }
   def addListSouceNode(s: Double, e: Double, di: Double, fk: String, dk: String): Pair[FKey, DKey] = {
     var fKey = new FKey(fk)
     var n: Function = new ListSource(s, e, di, fKey)
     funcKeys += (fKey -> n)
-    var tmp:Vector[DKey] = Vector.empty
-    funcToData += (fKey -> tmp)
     fKeys = fKeys :+ fKey
 
     var dKey = new DKey(dk)
@@ -188,6 +192,8 @@ class Graph {
     var out: Vector[DKey] = Vector.empty
     out :+ dKey
     funcToData += (fKey -> out)
+    var tmp:Vector[FKey] = Vector.empty
+    dataToFunc += (dKey -> tmp)
     return new Pair(fKey, dKey)
   }
 
@@ -196,8 +202,6 @@ class Graph {
     var n: Function = new FunctionFilter(s, fKey)
     //n.c = new SingleMap(, new FKey(""))
     funcKeys += (fKey -> n)
-    var tmp:Vector[DKey] = Vector.empty
-    funcToData += (fKey -> tmp)
     fKeys = fKeys :+ fKey
     fkey += 1
 
@@ -209,6 +213,8 @@ class Graph {
     var out: Vector[DKey] = Vector.empty
     out :+ dKey
     funcToData += (fKey -> out)
+    var tmp:Vector[FKey] = Vector.empty
+    dataToFunc += (dKey -> tmp)
     return new Pair(fKey, dKey)
   }
   def addFunctionFilter(s: String, fk: String, dk: String): Pair[FKey, DKey] = {
@@ -216,8 +222,6 @@ class Graph {
     var n: Function = new FunctionFilter(s, fKey)
     //n.c = new SingleMap(, new FKey(""))
     funcKeys += (fKey -> n)
-    var tmp:Vector[DKey] = Vector.empty
-    funcToData += (fKey -> tmp)
     fKeys = fKeys :+ fKey
 
     var dKey = new DKey(dk)
@@ -227,6 +231,8 @@ class Graph {
     var out: Vector[DKey] = Vector.empty
     out :+ dKey
     funcToData += (fKey -> out)
+    var tmp:Vector[FKey] = Vector.empty
+    dataToFunc += (dKey -> tmp)
     return new Pair(fKey, dKey)
   }
 
@@ -255,31 +261,22 @@ class Graph {
     return fKey
   }
 
-  def connectNodes(input: DKey, output: FKey) {
-    var tmp = dataToFunc.get(input)
-    var t = tmp.getOrElse(null)
-    if (t != null) {
-      t :+ output
-      dataToFunc += (input -> t)
-    } else {
-      t = Vector.empty
-      t :+ output
-      dataToFunc += (input -> t)
-    }
+  def connectNodes(input: DKey, output: FKey): Unit = {
+    var tmp = dataToFunc(input)
+    tmp = tmp :+ output
+    dataToFunc(input) = (tmp)
   }
+  
   def connectNodes(input: String, output: String) {
-    var i = getDKey(input);
-    var tmp = dataToFunc.get(i)
-    var t = tmp.getOrElse(null)
-    if (t != null) {
-      t :+ output
-      dataToFunc += (i -> t)
-    } else {
-      t = Vector.empty
-      t :+ output
-      dataToFunc += (i -> t)
-    }
+    var in = getDKey(input);
+    var tmp = dataToFunc(in);
+    var f = getFKey(output)
+    tmp = tmp :+ f
+    dataToFunc(in) = (tmp)
+    
   }
+  Guture(Graph)
+  */
 
   private def getDKey(s: String): DKey = {
     var ret: DKey = null
@@ -297,4 +294,11 @@ class Graph {
     return ret
   }
 
+}
+
+object Graph {
+  def apply(): Graph = {
+//    new Graph(???)
+    ???
+  }
 }

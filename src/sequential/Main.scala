@@ -7,7 +7,7 @@ object Main {
   
   def simpleFuncTest():Graph={
     
-    var func1 = "(4+5)*3"
+    var func1 = "(2+3)*3"
     
     var graph1:SequentialGraph = new SequentialGraph()
     
@@ -16,6 +16,8 @@ object Main {
     var n3 = graph1.addPrintSkink()
     var n4 = graph1.addPrintSkink()
     
+    //graph1.printNodes()
+    
     // connect listSource to FunctionFilter
    // graph1.connectNodes(n1._2,n2._1)
     // connect FunctionFilter to PrintSink1
@@ -23,7 +25,7 @@ object Main {
     // connect listSource to printSink2
     graph1.connectNodes(n1._2,n4)
     
-    graph1.printNodes()
+    
     graph1.printConnections()
     
     //graph1.analyze()
