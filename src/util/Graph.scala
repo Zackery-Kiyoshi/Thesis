@@ -32,12 +32,18 @@ class Graph private(
   
   def replace(fstr: String, f2: Function): Graph = {
     // TODO - This doesn't clear the downstream data stores
+    
+    
+    
     new Graph(funcKeys.map { case (k, f) => if(k.key == fstr) k -> f2 else k -> f },
         fKeys, dataKeys, dKeys, funcToData, dataToFunc, nextfkey, nextdkey)
   }
   
   def modify(fstr: String)(func: Function => Function):Graph = {
     // TODO - This doesn't clear the downstream data stores
+    
+    
+    
     new Graph(funcKeys.map { case (k, f) => if(k.key == fstr) k -> func(f) else k -> f },
         fKeys, dataKeys, dKeys, funcToData, dataToFunc, nextfkey, nextdkey)
   }
@@ -83,22 +89,13 @@ class Graph private(
     println("run not inplimented")
   }
 
-  def connectNode(f: FKey, d: DKey): Boolean = {
-    var ret = false
-
-    return ret
-  }
   def connectNode(d: DKey, f: FKey): Boolean = {
     var ret = false
 
     return ret
   }
-  def disconnectNodes(f: FKey, d: DKey): Boolean = {
-    var ret = false
-
-    return ret
-  }
-  def disconnectNodes(d: DKey, f: FKey): Boolean = {
+  
+  def disconnectNodes(d: DKey, f: FKey): Graph = {
     var ret = false
 
     return ret
@@ -275,7 +272,11 @@ class Graph private(
     dataToFunc(in) = (tmp)
     
   }
-  Guture(Graph)
+  
+  possible implementations
+  Future(Graph)
+  Future(DataStore)
+  
   */
 
   private def getDKey(s: String): DKey = {
@@ -299,6 +300,8 @@ class Graph private(
 object Graph {
   def apply(): Graph = {
 //    new Graph(???)
-    ???
+    return new Graph( Map[FKey, Function](), List[FKey](),
+        Map[DKey, DataStore](), List[DKey](), 
+        Map[FKey, Vector[DKey]](), Map[DKey, Vector[FKey]](), 0,0)
   }
 }
