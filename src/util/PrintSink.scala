@@ -4,7 +4,7 @@ import scala.collection.mutable.ListBuffer
 /**
  * @author zkurimab
  */
-class PrintSink (var id1:FKey) extends Function(id1) {
+class PrintSink (var id1:FKey) extends Filter(id1) {
   
   val t = "PrintSink"
   

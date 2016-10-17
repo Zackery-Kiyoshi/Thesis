@@ -1,6 +1,6 @@
 package util
 
-class SortFilter(var id1:FKey) extends Function(id1) {
+class SortFilter(var id1:FKey) extends Filter(id1) {
   
   val t = "SortFilter"
   

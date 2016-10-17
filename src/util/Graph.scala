@@ -18,8 +18,8 @@ case class DKey(val key: String) {
   }
 }
 
-class Graph private(
-  val funcKeys: Map[FKey, Function],
+class Graph (
+  val filtKeys: Map[FKey, Filter],
   val fKeys: List[FKey],
   val dataKeys: Map[DKey, DataStore],
   val dKeys: List[DKey],
@@ -28,87 +28,76 @@ class Graph private(
   val nextfkey: Int,
   val nextdkey: Int) {
   
-  def apply(fstr: String): Function = funcKeys(FKey(fstr))
+  def apply(fstr: String): Filter = filtKeys(FKey(fstr))
   
-  def replace(fstr: String, f2: Function): Graph = {
-    // TODO - This doesn't clear the downstream data stores
-    new Graph(funcKeys.map { case (k, f) => if(k.key == fstr) k -> f2 else k -> f },
+  private def ClearDownstream(f:FKey):Map[DKey, DataStore]={
+    var tmp:Map[DKey, DataStore] = dataKeys
+    
+    var cur:List[FKey] = (f) :: List() 
+    
+    while(cur.length != 0){
+      for( i <- funcToData(cur(0))){
+        dataKeys+(i-> new DataStore(i))
+        cur = cur ::: dataToFunc(i).toList
+      }
+      cur = cur.tail
+    }
+    return tmp
+  }
+  
+  def replace(fstr: String, f2: Filter): Graph = {
+    var tmp = ClearDownstream(FKey(fstr))
+    new Graph(filtKeys.map { case (k, f) => if(k.key == fstr) k -> f2 else k -> f },
         fKeys, dataKeys, dKeys, funcToData, dataToFunc, nextfkey, nextdkey)
   }
   
-  def modify(fstr: String)(func: Function => Function):Graph = {
-    // TODO - This doesn't clear the downstream data stores
-    new Graph(funcKeys.map { case (k, f) => if(k.key == fstr) k -> func(f) else k -> f },
+  def modify(fstr: String)(func: Filter => Filter):Graph = {
+    var tmp = ClearDownstream(FKey(fstr))
+    new Graph(filtKeys.map { case (k, f) => if(k.key == fstr) k -> func(f) else k -> f },
         fKeys, dataKeys, dKeys, funcToData, dataToFunc, nextfkey, nextdkey)
   }
   
-  def addFilter(filter:Function, name: String = ""): Graph = {
-    val (fkey, next) = if (name=="") (FKey("filt"+nextfkey), nextfkey+1) else (FKey(name),nextfkey)
-    new Graph(funcKeys + (fkey -> filter), fkey::fKeys, dataKeys, dKeys, funcToData, dataToFunc, next, nextdkey)
+  def addFilter(filter:Filter, fName: String = "", dName: String = ""): Graph = {
+    val (fkey, nextf) = if (fName=="") (FKey("filt"+nextfkey), nextfkey+1) else (FKey(fName),nextfkey)
+    val (dkey, nextd) = if (dName=="") (DKey("data"+nextdkey), nextdkey+1) else (DKey(dName),nextdkey)
     //TODO - This doesn't add a datastore for the filter
+    new Graph(filtKeys + (fkey -> filter), fkey::fKeys, dataKeys+(dkey -> new DataStore(dkey) ), dkey::dKeys, funcToData + (fkey -> funcToData(fkey).+:(dkey)), dataToFunc, nextf, nextd)
   }
 
   //method(Graph): Graph
-  def help() {
-    println("analyze() ")
-    println("  Where the code is updated")
-    println("  possible modifications:")
-    println("     To identify types for filters and data ")
-    println("     Show errors in graph")
-    println("     ")
-    println("process(Graph,Command):Graph ")
-    println("  Where the code is updated")
-    println("  possible modifications:")
-    println("     command to store")
-    println("     ")
-    println("run() ")
-    println("  Where implementation of parallelesm or lack there of")
-    println("  possible modifications:")
-    println("     ")
-  }
-
-  def analyze(): Boolean = { /* (Checks for warnings/errors) */
+  
+  /* (Checks for warnings/errors) */
+  def analyze(): Boolean = { 
     var ret = false
     println("analyze not inplimented")
     return ret
   }
 
-  def process(c: NodeChange): Graph = {
-    println("process not inplimented")
-
-    return this
-  }
-
-  def run() {
+  /*  */
+  def run():Unit={
     println("run not inplimented")
   }
-
-  def connectNode(f: FKey, d: DKey): Boolean = {
-    var ret = false
-
-    return ret
+  
+  
+  
+  def connectNode(d: DKey, f: FKey): Graph = {
+    // need to actually add f to dataToFunc(d)
+    var tmp:Vector[FKey] = dataToFunc(d)
+    tmp = tmp :+ f
+    new Graph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc + (d -> tmp ), nextfkey, nextdkey)
   }
-  def connectNode(d: DKey, f: FKey): Boolean = {
-    var ret = false
-
-    return ret
-  }
-  def disconnectNodes(f: FKey, d: DKey): Boolean = {
-    var ret = false
-
-    return ret
-  }
-  def disconnectNodes(d: DKey, f: FKey): Boolean = {
-    var ret = false
-
-    return ret
+  def disconnectNodes(d: DKey, f: FKey): Graph = {
+    // need to actually remove (f) from dataToFunc(d)
+    var tmp:Vector[FKey] = Vector.empty
+    for(i <- dataToFunc(d)) if(i.key != f.key) tmp = tmp :+ i
+    new Graph(filtKeys , fKeys, dataKeys, dKeys, funcToData, dataToFunc + (d -> tmp ), nextfkey, nextdkey)
   }
 
   def printNodes(): String = { /* {Key, NodeType } */
     var ret = ""
 
     for (i <- 0 until fKeys.length) {
-      ret += fKeys(i).key + ":" + funcKeys(fKeys(i)).t + ":" + fKeys(i) + "\n"
+      ret += fKeys(i).key + ":" + filtKeys(fKeys(i)).t + ":" + fKeys(i) + "\n"
     }
     for (i <- 0 until dKeys.length) {
       ret += dKeys(i).key + ":" + "DataNode :" + dKeys(i) + "\n"
@@ -139,15 +128,22 @@ class Graph private(
     return ret
   }
 
-  def removeNode(f: FKey): Boolean = {
-    var ret = false
+  def removeNode(f: FKey): Graph = {
     // must delete associated DataNodes
-
+    var d = funcToData(f)
+    var tmpDataToFunc = dataToFunc
+    var tmpdKeys = dKeys
+    var tmpDataKeys = dataKeys
+    for(i<-d){
+      tmpDataToFunc = tmpDataToFunc - i
+      tmpDataKeys = tmpDataKeys - i
+      tmpdKeys = tmpdKeys.filter(_!=i)
+    }
+    
     // delete the actual node
-
-    return ret
+    new Graph(filtKeys-f, fKeys.filter(_!=f), tmpDataKeys, tmpdKeys, funcToData-f, tmpDataToFunc, nextfkey, nextdkey)
   }
-  def removeNode(f: String): Boolean = {
+  def removeNode(f: String): Graph = {
     var ret: FKey = null
     // find the fkey
     for (i <- 0 until fKeys.length) {
@@ -156,128 +152,7 @@ class Graph private(
     return removeNode(ret)
   }
 
-  /**
-   * 
-   */
-  /*
-  def addListSouceNode(s: Double, e: Double, di: Double): Graph = {
-    val fKey = new FKey("f" + fkey)
-    val n: Function = new ListSource(s, e, di, fKey)
-    funcKeys += (fKey -> n)
-    fKeys = fKeys :+ fKey
-    fkey += 1
-
-    val dKey = new DKey("d" + dkey)
-    val d: DataStore = new DataStore(dKey)
-    dKeys = dKeys :+ dKey
-    dataKeys += (dKey -> d)
-    dkey += 1
-    val out: Vector[DKey] = Vector.empty
-    out :+ dKey
-    funcToData += (fKey -> out)
-    val tmp:Vector[FKey] = Vector.empty
-    dataToFunc += (dKey -> tmp)
-    return new Pair(fKey, dKey)
-  }
-  def addListSouceNode(s: Double, e: Double, di: Double, fk: String, dk: String): Pair[FKey, DKey] = {
-    var fKey = new FKey(fk)
-    var n: Function = new ListSource(s, e, di, fKey)
-    funcKeys += (fKey -> n)
-    fKeys = fKeys :+ fKey
-
-    var dKey = new DKey(dk)
-    var d: DataStore = new DataStore(dKey)
-    dKeys = dKeys :+ dKey
-    dataKeys += (dKey -> d)
-    var out: Vector[DKey] = Vector.empty
-    out :+ dKey
-    funcToData += (fKey -> out)
-    var tmp:Vector[FKey] = Vector.empty
-    dataToFunc += (dKey -> tmp)
-    return new Pair(fKey, dKey)
-  }
-
-  def addFunctionFilter(s: String): Pair[FKey, DKey] = {
-    var fKey = new FKey("f" + fkey)
-    var n: Function = new FunctionFilter(s, fKey)
-    //n.c = new SingleMap(, new FKey(""))
-    funcKeys += (fKey -> n)
-    fKeys = fKeys :+ fKey
-    fkey += 1
-
-    var dKey = new DKey("d" + dkey)
-    var d: DataStore = new DataStore(dKey)
-    dKeys = dKeys :+ dKey
-    dataKeys += (dKey -> d)
-    dkey += 1
-    var out: Vector[DKey] = Vector.empty
-    out :+ dKey
-    funcToData += (fKey -> out)
-    var tmp:Vector[FKey] = Vector.empty
-    dataToFunc += (dKey -> tmp)
-    return new Pair(fKey, dKey)
-  }
-  def addFunctionFilter(s: String, fk: String, dk: String): Pair[FKey, DKey] = {
-    var fKey = new FKey(fk)
-    var n: Function = new FunctionFilter(s, fKey)
-    //n.c = new SingleMap(, new FKey(""))
-    funcKeys += (fKey -> n)
-    fKeys = fKeys :+ fKey
-
-    var dKey = new DKey(dk)
-    var d: DataStore = new DataStore(dKey)
-    dKeys = dKeys :+ dKey
-    dataKeys += (dKey -> d)
-    var out: Vector[DKey] = Vector.empty
-    out :+ dKey
-    funcToData += (fKey -> out)
-    var tmp:Vector[FKey] = Vector.empty
-    dataToFunc += (dKey -> tmp)
-    return new Pair(fKey, dKey)
-  }
-
-  def addPrintSkink(): FKey = {
-    var fKey = new FKey("f" + fkey)
-    var n: Function = new PrintSink(fKey)
-
-    //n.c = new Fnode(, fKey)
-    funcKeys += (fKey -> n)
-    var tmp:Vector[DKey] = Vector.empty
-    funcToData += (fKey -> tmp)
-    fKeys = fKeys :+ fKey
-    fkey += 1
-
-    return fKey
-  }
-  def addPrintSkink(fk: String): FKey = {
-    var fKey = new FKey(fk)
-    var n: Function = new PrintSink(fKey)
-
-    //n.c = new Fnode(, fKey)
-    funcKeys += (fKey -> n)
-    var tmp:Vector[DKey] = Vector.empty
-    funcToData += (fKey -> tmp)
-    fKeys = fKeys :+ fKey
-    return fKey
-  }
-
-  def connectNodes(input: DKey, output: FKey): Unit = {
-    var tmp = dataToFunc(input)
-    tmp = tmp :+ output
-    dataToFunc(input) = (tmp)
-  }
   
-  def connectNodes(input: String, output: String) {
-    var in = getDKey(input);
-    var tmp = dataToFunc(in);
-    var f = getFKey(output)
-    tmp = tmp :+ f
-    dataToFunc(in) = (tmp)
-    
-  }
-  Guture(Graph)
-  */
-
   private def getDKey(s: String): DKey = {
     var ret: DKey = null
     for (i <- 0 until dKeys.length) {
@@ -298,7 +173,6 @@ class Graph private(
 
 object Graph {
   def apply(): Graph = {
-//    new Graph(???)
-    ???
+    new Graph( Map[FKey, Filter](), List[FKey](), Map[DKey, DataStore](), List[DKey](), Map[FKey, Vector[DKey]](), Map[DKey, Vector[FKey]](), 0, 0)
   }
 }

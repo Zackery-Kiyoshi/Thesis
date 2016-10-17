@@ -6,7 +6,7 @@ import Array._
 /**
  * @author zkurimab
  */
-class ListSource (s:Double, e:Double, d:Double, var id1:FKey) extends Function(id1){
+class ListSource (s:Double, e:Double, d:Double, var id1:FKey) extends Filter(id1){
   
   val t = "ListSource" 
   

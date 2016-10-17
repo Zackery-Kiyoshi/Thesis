@@ -2,20 +2,16 @@ package sequential
 
 import util._
 
-class SequentialGraph extends Graph{
-  
-  override def clone():SequentialGraph={
-    var tmp = new SequentialGraph()
-    tmp.funcKeys = funcKeys
-    tmp.fKeys = fKeys
-    tmp.dataKeys = dataKeys
-    tmp.dKeys = dKeys
-    tmp.funcToData = funcToData
-    tmp.dataToFunc = dataToFunc
-    tmp.fkey = fkey
-    tmp.dkey = dkey
-    return tmp
-  }
+class SequentialGraph private(
+  override val filtKeys: Map[FKey, Filter],
+  override val fKeys: List[FKey],
+  override val dataKeys: Map[DKey, DataStore],
+  override val dKeys: List[DKey],
+  override val funcToData: Map[FKey, Vector[DKey]],
+  override val dataToFunc: Map[DKey, Vector[FKey]],
+  override val nextfkey: Int,
+  override val nextdkey: Int
+  ) extends Graph(filtKeys,fKeys,dataKeys,dKeys,funcToData,dataToFunc,nextfkey,nextdkey){
   
   override def analyze():Boolean={
     var ret = false
@@ -24,15 +20,6 @@ class SequentialGraph extends Graph{
   }
   
   
-  def process(g:SequentialGraph,c:NodeChange):SequentialGraph={
-    var ret = g.clone()
-    
-    //println("process not inplimented")
-    
-    
-    
-    return ret
-  }
   
 //  /*
   override def run(){
@@ -63,9 +50,9 @@ class SequentialGraph extends Graph{
     var running = true
     // need to run each loop
     while(running){
-      var curNode:Function = null
+      var curNode:Filter = null
       if(curRoot>=0){
-        if(curRoot < roots.length) curNode = funcKeys(roots(curRoot))
+        if(curRoot < roots.length) curNode = filtKeys(roots(curRoot))
         else running = false
       }
     }
@@ -74,4 +61,11 @@ class SequentialGraph extends Graph{
   }
 //  */
   
+}
+
+
+object SequentialGraph {
+  def apply(): SequentialGraph = {
+    new SequentialGraph( Map[FKey, Filter](), List[FKey](), Map[DKey, DataStore](), List[DKey](), Map[FKey, Vector[DKey]](), Map[DKey, Vector[FKey]](), 0, 0)
+  }
 }
