@@ -1,6 +1,6 @@
 package util
 
-class FunctionFilter(var fsts:String, var id1:FKey) extends Filter(id1) {
+class FunctionFilter(var fsts:String) extends Filter() {
 
   val t:String = "FunctionFilter"
   var func:DoubleFormula = new DoubleFormula(fsts)

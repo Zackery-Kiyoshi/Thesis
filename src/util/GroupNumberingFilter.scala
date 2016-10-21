@@ -2,7 +2,7 @@ package util
 
 // optional
 
-class GroupNumberingFilter(var id1:FKey) extends Filter(id1) {
+class GroupNumberingFilter() extends Filter() {
   
   val t = "GroupNumberingFilter"
   

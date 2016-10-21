@@ -3,7 +3,7 @@ import scala.collection.mutable.ListBuffer
 /**
  * @author zkurimab
  */
-class SingleMap(var f:(Double) => (Double),var id1:FKey) extends Filter(id1) {
+class SingleMap(var f:(Double) => (Double)) extends Filter() {
   
   val t:String = "SingleMap"
   

@@ -3,7 +3,7 @@ package util
 import scala.collection.mutable.ArrayBuffer
 import scala.util.control.Breaks._
 
-class ThinningFilter( var id1:FKey) extends Filter(id1) {
+class ThinningFilter() extends Filter() {
   
   val t:String = "ThinningFilter"
   

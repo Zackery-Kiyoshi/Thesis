@@ -30,20 +30,7 @@ class Graph (
   
   def apply(fstr: String): Filter = filtKeys(FKey(fstr))
   
-  private def ClearDownstream(f:FKey):Map[DKey, DataStore]={
-    var tmp:Map[DKey, DataStore] = dataKeys
-    
-    var cur:List[FKey] = (f) :: List() 
-    
-    while(cur.length != 0){
-      for( i <- funcToData(cur(0))){
-        dataKeys+(i-> new DataStore(i))
-        cur = cur ::: dataToFunc(i).toList
-      }
-      cur = cur.tail
-    }
-    return tmp
-  }
+  
   
   def replace(fstr: String, f2: Filter): Graph = {
     var tmp = ClearDownstream(FKey(fstr))
@@ -61,25 +48,11 @@ class Graph (
     val (fkey, nextf) = if (fName=="") (FKey("filt"+nextfkey), nextfkey+1) else (FKey(fName),nextfkey)
     val (dkey, nextd) = if (dName=="") (DKey("data"+nextdkey), nextdkey+1) else (DKey(dName),nextdkey)
     //TODO - This doesn't add a datastore for the filter
-    new Graph(filtKeys + (fkey -> filter), fkey::fKeys, dataKeys+(dkey -> new DataStore(dkey) ), dkey::dKeys, funcToData + (fkey -> funcToData(fkey).+:(dkey)), dataToFunc, nextf, nextd)
+    var tmp = filtKeys + (fkey -> filter)
+    new Graph(filtKeys + (fkey -> filter), fkey::fKeys, dataKeys+(dkey -> new DataStore(dkey) ), dkey::dKeys, funcToData + (fkey -> Vector.empty.+:(dkey)), dataToFunc, nextf, nextd)
   }
 
-  //method(Graph): Graph
-  
-  /* (Checks for warnings/errors) */
-  def analyze(): Boolean = { 
-    var ret = false
-    println("analyze not inplimented")
-    return ret
-  }
-
-  /*  */
-  def run():Unit={
-    println("run not inplimented")
-  }
-  
-  
-  
+ 
   def connectNode(d: DKey, f: FKey): Graph = {
     // need to actually add f to dataToFunc(d)
     var tmp:Vector[FKey] = dataToFunc(d)
@@ -93,6 +66,44 @@ class Graph (
     new Graph(filtKeys , fKeys, dataKeys, dKeys, funcToData, dataToFunc + (d -> tmp ), nextfkey, nextdkey)
   }
 
+  def removeNode(f: FKey): Graph = {
+    // must delete associated DataNodes
+    var d = funcToData(f)
+    var tmpDataToFunc = dataToFunc
+    var tmpdKeys = dKeys
+    var tmpDataKeys = dataKeys
+    for(i<-d){
+      tmpDataToFunc = tmpDataToFunc - i
+      tmpDataKeys = tmpDataKeys - i
+      tmpdKeys = tmpdKeys.filter(_!=i)
+    }
+    
+    // delete the actual node
+    new Graph(filtKeys-f, fKeys.filter(_!=f), tmpDataKeys, tmpdKeys, funcToData-f, tmpDataToFunc, nextfkey, nextdkey)
+  }
+  def removeNode(f: String): Graph = {
+    var ret: FKey = null
+    // find the fkey
+    for (i <- 0 until fKeys.length) {
+      if (fKeys(i).key == f) ret = fKeys(i)
+    }
+    return removeNode(ret)
+  }
+  
+  
+  
+  def analyze(): Boolean = { 
+    var ret = false
+    println("analyze not inplimented")
+    return ret
+  }
+
+  /*  */
+  def run():Unit={
+    println("run not inplimented")
+  }
+  
+  
   def printNodes(): String = { /* {Key, NodeType } */
     var ret = ""
 
@@ -128,30 +139,21 @@ class Graph (
     return ret
   }
 
-  def removeNode(f: FKey): Graph = {
-    // must delete associated DataNodes
-    var d = funcToData(f)
-    var tmpDataToFunc = dataToFunc
-    var tmpdKeys = dKeys
-    var tmpDataKeys = dataKeys
-    for(i<-d){
-      tmpDataToFunc = tmpDataToFunc - i
-      tmpDataKeys = tmpDataKeys - i
-      tmpdKeys = tmpdKeys.filter(_!=i)
-    }
+  
+  private def ClearDownstream(f:FKey):Map[DKey, DataStore]={
+    var tmp:Map[DKey, DataStore] = dataKeys
     
-    // delete the actual node
-    new Graph(filtKeys-f, fKeys.filter(_!=f), tmpDataKeys, tmpdKeys, funcToData-f, tmpDataToFunc, nextfkey, nextdkey)
-  }
-  def removeNode(f: String): Graph = {
-    var ret: FKey = null
-    // find the fkey
-    for (i <- 0 until fKeys.length) {
-      if (fKeys(i).key == f) ret = fKeys(i)
+    var cur:List[FKey] = (f) :: List() 
+    
+    while(cur.length != 0){
+      for( i <- funcToData(cur(0))){
+        dataKeys+(i-> new DataStore(i))
+        cur = cur ::: dataToFunc(i).toList
+      }
+      cur = cur.tail
     }
-    return removeNode(ret)
+    return tmp
   }
-
   
   private def getDKey(s: String): DKey = {
     var ret: DKey = null
@@ -175,4 +177,7 @@ object Graph {
   def apply(): Graph = {
     new Graph( Map[FKey, Filter](), List[FKey](), Map[DKey, DataStore](), List[DKey](), Map[FKey, Vector[DKey]](), Map[DKey, Vector[FKey]](), 0, 0)
   }
+  
+  
+  
 }

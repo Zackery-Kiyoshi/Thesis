@@ -7,7 +7,7 @@ package util
 // Wrapper so nodes can have any kind of Container
 
 
-abstract class Filter(var id:FKey) {
+abstract class Filter() {
   
   val t:String
   

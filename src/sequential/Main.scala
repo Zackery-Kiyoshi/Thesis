@@ -11,9 +11,10 @@ object Main {
     
     var graph1:SequentialGraph = SequentialGraph()
     
+    graph1 = graph1.addFilter(new ListSource(0,10,1), "ls1")
+    graph1 = graph1.addFilter(new PrintSink(), "ps1")
     
-    
-    //graph1.printNodes()
+    graph1.printNodes()
     
     // connect listSource to FunctionFilter
    // graph1.connectNodes(n1._2,n2._1)

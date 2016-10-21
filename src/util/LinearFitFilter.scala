@@ -2,7 +2,7 @@ package util
 
 import scala.collection.mutable.ArrayBuffer
 
-class LinearFitFilter(var id1:FKey) extends Filter(id1) {
+class LinearFitFilter() extends Filter() {
   
   val t:String = "LinearFitFilter"
   

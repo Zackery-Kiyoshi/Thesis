@@ -3,7 +3,7 @@ package util
 import scala.collection.mutable.ArrayBuffer
 import scala.util.control.Breaks._
 
-class InputCollectionFilter(var id1:FKey) extends Filter(id1) {
+class InputCollectionFilter() extends Filter() {
   
   val t:String = "InputCollectionFilter"
   
