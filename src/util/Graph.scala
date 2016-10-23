@@ -35,13 +35,13 @@ class Graph (
   def replace(fstr: String, f2: Filter): Graph = {
     var tmp = ClearDownstream(FKey(fstr))
     new Graph(filtKeys.map { case (k, f) => if(k.key == fstr) k -> f2 else k -> f },
-        fKeys, dataKeys, dKeys, funcToData, dataToFunc, nextfkey, nextdkey)
+        fKeys, tmp, dKeys, funcToData, dataToFunc, nextfkey, nextdkey)
   }
   
   def modify(fstr: String)(func: Filter => Filter):Graph = {
     var tmp = ClearDownstream(FKey(fstr))
     new Graph(filtKeys.map { case (k, f) => if(k.key == fstr) k -> func(f) else k -> f },
-        fKeys, dataKeys, dKeys, funcToData, dataToFunc, nextfkey, nextdkey)
+        fKeys, tmp, dKeys, funcToData, dataToFunc, nextfkey, nextdkey)
   }
   
   def addFilter(filter:Filter, fName: String = "", dName: String = ""): Graph = {
@@ -49,23 +49,31 @@ class Graph (
     val (dkey, nextd) = if (dName=="") (DKey("data"+nextdkey), nextdkey+1) else (DKey(dName),nextdkey)
     //TODO - This doesn't add a datastore for the filter
     var tmp = filtKeys + (fkey -> filter)
-    new Graph(filtKeys + (fkey -> filter), fkey::fKeys, dataKeys+(dkey -> new DataStore(dkey) ), dkey::dKeys, funcToData + (fkey -> Vector.empty.+:(dkey)), dataToFunc, nextf, nextd)
+    new Graph(filtKeys + (fkey -> filter), fkey::fKeys, dataKeys+(dkey -> new DataStore() ), dkey::dKeys, funcToData + (fkey -> Vector.empty.+:(dkey)), dataToFunc+(dkey -> Vector.empty ), nextf, nextd)
   }
 
  
-  def connectNode(d: DKey, f: FKey): Graph = {
+  def connectNodes(d: DKey, f: FKey): Graph = {
     // need to actually add f to dataToFunc(d)
     var tmp:Vector[FKey] = dataToFunc(d)
     tmp = tmp :+ f
+    for(i <- tmp) println(i.key)
     new Graph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc + (d -> tmp ), nextfkey, nextdkey)
   }
+  def connectNodes(d:String, f:String): Graph = {
+    return connectNodes(getDKey(d),getFKey(f))
+  }
+  
   def disconnectNodes(d: DKey, f: FKey): Graph = {
     // need to actually remove (f) from dataToFunc(d)
     var tmp:Vector[FKey] = Vector.empty
     for(i <- dataToFunc(d)) if(i.key != f.key) tmp = tmp :+ i
     new Graph(filtKeys , fKeys, dataKeys, dKeys, funcToData, dataToFunc + (d -> tmp ), nextfkey, nextdkey)
   }
-
+  def disconnectNodes(d:String, f:String): Graph = {
+    return disconnectNodes(getDKey(d),getFKey(f))
+  }
+   
   def removeNode(f: FKey): Graph = {
     // must delete associated DataNodes
     var d = funcToData(f)
@@ -90,10 +98,15 @@ class Graph (
     return removeNode(ret)
   }
   
+  def resetDataStores(){
+    var tmp =  Map[DKey, DataStore]()
+    for(d <- dKeys) tmp = tmp +(d -> new DataStore())
+    new Graph(filtKeys, fKeys, tmp, dKeys, funcToData, dataToFunc, nextfkey, nextdkey)
+  }
   
   
   def analyze(): Boolean = { 
-    var ret = false
+    var ret = true
     println("analyze not inplimented")
     return ret
   }
@@ -120,9 +133,10 @@ class Graph (
   def printConnections(): String = { /* fKey : connectedNodes, */
     var ret = ""
 
-    println(fKeys.length)
+    //println("#FKeys:"+fKeys.length)
+    ret += "  Filters \n"
     for (i <- 0 until fKeys.length) {
-      println(i + ":" + fKeys(i))
+      //println(i + ":" + fKeys(i))
       ret += fKeys(i).key + ": (" + funcToData(fKeys(i)).length + ") ["
       if (funcToData(fKeys(i)) != null) {
         for (j <- 0 until funcToData(fKeys(i)).length) {
@@ -132,8 +146,17 @@ class Graph (
       }
       ret += "] \n"
     }
+    //println("#DKeys:"+dKeys.length)
+    ret += "  DataStores \n"
     for (i <- 0 until dKeys.length) {
-      dKeys(i).key + ":"
+      ret += dKeys(i).key + ": (" + dataToFunc(dKeys(i)).length + ") ["
+      if (dataToFunc(dKeys(i)) != null) {
+        for (j <- 0 until dataToFunc(dKeys(i)).length) {
+          ret += dataToFunc(dKeys(i))(j).key
+          if (j < dataToFunc(dKeys(i)).length - 1) ret += ","
+        }
+      }
+      ret += "] \n"
     }
     println(ret)
     return ret
@@ -147,7 +170,7 @@ class Graph (
     
     while(cur.length != 0){
       for( i <- funcToData(cur(0))){
-        dataKeys+(i-> new DataStore(i))
+        dataKeys+(i-> new DataStore())
         cur = cur ::: dataToFunc(i).toList
       }
       cur = cur.tail

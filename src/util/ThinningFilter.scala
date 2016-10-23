@@ -33,7 +33,7 @@ class ThinningFilter() extends Filter() {
         var De = new DataElement(tmp)
         tmpDE = tmpDE :+ De 
       }
-      var t = new DataStore(new DKey(""))
+      var t = new DataStore()
       t.set(tmpDE)
       ret = ret :+ t
     }

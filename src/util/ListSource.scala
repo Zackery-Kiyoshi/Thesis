@@ -22,7 +22,7 @@ class ListSource (s:Double, e:Double, d:Double) extends Filter(){
   override def apply(inputData:Vector[DataStore]):Vector[DataStore]={
     var tmp:Vector[DataElement] = Vector.empty
     tmp :+ new DataElement(arr.to[Vector])
-    var retp:DataStore = new DataStore(new DKey("t"))
+    var retp:DataStore = new DataStore()
     retp.set(tmp)
     var ret:Vector[DataStore] = Vector.empty
     ret :+ retp

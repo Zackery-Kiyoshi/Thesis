@@ -23,7 +23,7 @@ class SortFilter() extends Filter() {
         var De = new DataElement(tmp.toVector)
         tmpDE = tmpDE :+ De 
       }
-      var t = new DataStore(new DKey(""))
+      var t = new DataStore()
       t.set(tmpDE)
       ret = ret :+ t
     }

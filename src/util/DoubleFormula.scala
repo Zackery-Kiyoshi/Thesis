@@ -24,19 +24,19 @@ object DoubleFormula extends JavaTokenParsers {
         println(new DoubleFormula("4+5-3")(0,null,null))
         println(new DoubleFormula("4*5/3")(0,null,null))
         println(new DoubleFormula("4+5*i")(0,null,Map(("i"->3.0))))
-        var tmp1 = new DataStore(new DKey("1"))
+        var tmp1 = new DataStore()
         tmp1.set( Vector.empty :+ new DataElement(Vector(3.0,4.0)) )
         println(new BooleanFormula("5>3")(0,null,null))
         println(new DoubleFormula("if(5>3) 4+5*3 else 4+5")(0,null,null))
         // Original Test
         //println( new DoubleFormula("y[1]+5*x[0]")(0,IndexedSeq(tmp1),null) )
         println( new DoubleFormula("x[1]+5*x[0]")(0,IndexedSeq(tmp1),null) )
-        tmp1 = new DataStore(new DKey("1"))
+        tmp1 = new DataStore()
         tmp1.set( Vector.empty :+ new DataElement(Vector(3.0,4.0)) )
         // Original Test
         //println(new DoubleFormula("y[0][1]+5*x[0][0]")(0,IndexedSeq( tmp1 ),null))
         println(new DoubleFormula("x[0][1]+5*x[0][0]")(0,IndexedSeq( tmp1 ),null))
-        tmp1 = new DataStore(new DKey("1"))
+        tmp1 = new DataStore()
         tmp1.set( Vector.empty :+ new DataElement(Vector(3.0,4.0)) )
         // Original Test
         //println(new DoubleFormula("y[0][0][1]+5*x[0][0][0]")(0,IndexedSeq(tmp1),null))

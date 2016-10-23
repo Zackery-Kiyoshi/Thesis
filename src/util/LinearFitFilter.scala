@@ -62,7 +62,7 @@ class LinearFitFilter() extends Filter() {
                 // ret?
                 //  dataVect.get(2*s+1).add(new DataElement(r))
                 
-                var tmp = new DataStore( new DKey(""))
+                var tmp = new DataStore()
                 tmp.set(Vector.empty :+(new DataElement(r)))
                 ret = ret :+ tmp
             }
