@@ -118,7 +118,7 @@ class SequentialGraph private(
     // need to run each loop
     while(running){
       var curNode:Filter = null
-      if(needNewPath){
+      if(needNewPath || todo.isEmpty){
         curRoot-=1
         if(curRoot >=0){
           curNode = filtKeys(roots(curRoot))
@@ -130,15 +130,19 @@ class SequentialGraph private(
         curNode = filtKeys(todo(0))
       }
       // need to get the correct input data
-      rezData = curNode.apply(data)
-      for(d<-funcToData(todo(0))){
-        // update dataStores
-        dataKeys + (d->rezData)
-        for(f <- dataToFunc(d)){
-          todo = todo :+ (f)
+      
+      if(curNode==null)needNewPath=true
+      else{
+        println()
+        rezData = curNode.apply(data)
+        for(d<-funcToData(todo(0))){
+          // update dataStores
+          dataKeys + (d->rezData)
+          for(f <- dataToFunc(d)){
+            todo = todo :+ (f)
+          }
         }
       }
-      
       
       
       if(!needNewPath) todo = todo.tail

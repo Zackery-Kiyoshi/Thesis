@@ -30,7 +30,6 @@ class Graph (
   
   def apply(fstr: String): Filter = filtKeys(FKey(fstr))
   
-  
   def replace(fstr: String, f2: Filter): Graph = {
     var tmp = ClearDownstream(FKey(fstr))
     new Graph(filtKeys.map { case (k, f) => if(k.key == fstr) k -> f2 else k -> f },
@@ -50,13 +49,11 @@ class Graph (
     var tmp = filtKeys + (fkey -> filter)
     new Graph(filtKeys + (fkey -> filter), fkey::fKeys, dataKeys+(dkey -> new DataStore() ), dkey::dKeys, funcToData + (fkey -> Vector.empty.+:(dkey)), dataToFunc+(dkey -> Vector.empty ), nextf, nextd)
   }
-
  
   def connectNodes(d: DKey, f: FKey): Graph = {
     // need to actually add f to dataToFunc(d)
     var tmp:Vector[FKey] = dataToFunc(d)
     tmp = tmp :+ f
-    for(i <- tmp) println(i.key)
     new Graph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc + (d -> tmp ), nextfkey, nextdkey)
   }
   def connectNodes(d:String, f:String): Graph = {
@@ -103,7 +100,6 @@ class Graph (
     new Graph(filtKeys, fKeys, tmp, dKeys, funcToData, dataToFunc, nextfkey, nextdkey)
   }
   
-  
   def analyze(): Boolean = { 
     var ret = true
     println("analyze not inplimented")
@@ -111,11 +107,9 @@ class Graph (
     return ret
   }
 
-  /*  */
   def run():Unit={
     println("run not inplimented")
   }
-  
   
   def printNodes(): String = { /* {Key, NodeType } */
     var ret = ""
@@ -132,7 +126,6 @@ class Graph (
 
   def printConnections(): String = { /* fKey : connectedNodes, */
     var ret = ""
-
     //println("#FKeys:"+fKeys.length)
     ret += "  Filters \n"
     for (i <- 0 until fKeys.length) {
@@ -163,6 +156,7 @@ class Graph (
   }
 
   
+  
   private def ClearDownstream(f:FKey):Map[DKey, DataStore]={
     var tmp:Map[DKey, DataStore] = dataKeys
     
@@ -182,7 +176,6 @@ class Graph (
   possible implementations
   Future(Graph)
   Future(DataStore)
-  
 //  */
 
   private def getDKey(s: String): DKey = {
