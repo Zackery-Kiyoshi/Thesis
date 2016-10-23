@@ -31,7 +31,6 @@ class Graph (
   def apply(fstr: String): Filter = filtKeys(FKey(fstr))
   
   
-  
   def replace(fstr: String, f2: Filter): Graph = {
     var tmp = ClearDownstream(FKey(fstr))
     new Graph(filtKeys.map { case (k, f) => if(k.key == fstr) k -> f2 else k -> f },
@@ -108,6 +107,7 @@ class Graph (
   def analyze(): Boolean = { 
     var ret = true
     println("analyze not inplimented")
+
     return ret
   }
 
@@ -178,6 +178,13 @@ class Graph (
     return tmp
   }
   
+  /*
+  possible implementations
+  Future(Graph)
+  Future(DataStore)
+  
+//  */
+
   private def getDKey(s: String): DKey = {
     var ret: DKey = null
     for (i <- 0 until dKeys.length) {
