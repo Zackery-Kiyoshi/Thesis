@@ -116,8 +116,6 @@ class SequentialGraph private(
     
     // need to run each loop
     
-    
-    
   }
   
   def run(todo:List[FKey]):SequentialGraph={
@@ -159,6 +157,7 @@ class SequentialGraph private(
       for(f <- dataToFunc(d)){
         newTodo = newTodo :+ (f)
       }
+
     }
     
     var n = new SequentialGraph(filtKeys,fKeys,Map(tmpDataKeys.toSeq: _*),dKeys,funcToData,dataToFunc,nextfkey,nextdkey)
