@@ -56,7 +56,7 @@ class Graph (
     // need to actually add f to dataToFunc(d)
     var tmp:Vector[FKey] = dataToFunc(d)
     tmp = tmp :+ f
-    for(i <- tmp) println(i.key)
+    //for(i <- tmp) println(i.key)
     new Graph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc + (d -> tmp ), nextfkey, nextdkey)
   }
   def connectNodes(d:String, f:String): Graph = {

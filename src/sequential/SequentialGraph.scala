@@ -109,48 +109,68 @@ class SequentialGraph private(
     println("Roots:")
     for(i <- roots) println(" "+i.key)
 //    */
-    var curRoot = roots.length - 1
-    var todo:List[FKey] = List()
-    var needNewPath = false
-    var data:Vector[DataStore] = Vector.empty
-    var rezData:Vector[DataStore] = Vector.empty
-    var running = true
+    
+    // needs to return a new graph
+    run(roots)
+    
+    
     // need to run each loop
-    while(running){
-      var curNode:Filter = null
-      if(needNewPath){
-        curRoot-=1
-        if(curRoot >=0){
-          curNode = filtKeys(roots(curRoot))
-          needNewPath = false
-        }
-        else running = false
-      }
-      else {
-        curNode = filtKeys(todo(0))
-      }
-      // need to get the correct input data
-      rezData = curNode.apply(data)
-      for(d<-funcToData(todo(0))){
-        // update dataStores
-        dataKeys + (d->rezData)
-        for(f <- dataToFunc(d)){
-          todo = todo :+ (f)
-        }
-      }
-      
-      
-      
-      if(!needNewPath) todo = todo.tail
-      
-      if(todo.isEmpty)needNewPath=true
-    }
+    
     
     
   }
+  
+  def run(todo:List[FKey]):SequentialGraph={
+    var newTodo:List[FKey] = List.empty 
+    var curNode:Filter = null
+    if(todo.isEmpty){
+      return this
+    }else {
+      newTodo = todo.tail
+      //println(todo(0).key)
+      curNode = filtKeys(todo(0))
+    }
+    
+    var tmpDataKeys:collection.mutable.Map[DKey, DataStore] = collection.mutable.Map(dataKeys.toSeq: _*)
+    
+    // need to get the correct input data
+    var data:Vector[DataStore] = Vector.empty  
+    for(d <- dKeys){
+      if(dataToFunc(d).contains(todo(0))){
+        data = data :+ dataKeys(d)
+      }
+    }
+    //if(data.length >0)
+      //println( data.length + ":" + data(0) )
+    var rezData:Vector[DataStore] = curNode.apply(data)  
+    // in creation each need filter needs to know how many of each
+    var i=0
+    
+    //println(funcToData(todo(0)).length)
+    //println("  " + rezData.length)
+    
+    for(d<- funcToData(todo(0))){
+      // update dataStores
+      //for sinks
+      if(rezData.length >i){
+        tmpDataKeys(d) = rezData(i)
+        i+=1
+      }
+      for(f <- dataToFunc(d)){
+        newTodo = newTodo :+ (f)
+      }
+    }
+    
+    var n = new SequentialGraph(filtKeys,fKeys,Map(tmpDataKeys.toSeq: _*),dKeys,funcToData,dataToFunc,nextfkey,nextdkey)
+    n.run(newTodo)
+  }
+  
 //  */
   
 }
+
+  
+
 
 
 object SequentialGraph {
