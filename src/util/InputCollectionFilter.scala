@@ -11,7 +11,7 @@ class InputCollectionFilter() extends Filter() {
   var numToKeep = 0
   
   override def apply(input:Vector[DataStore]):Vector[DataStore] = {
-    var ret = input
+    var ret:Vector[DataStore] = Vector.empty
     var lastToRemove:Int = -1
     //sizeDataVectToInputStreams();
 //    /*
@@ -28,6 +28,11 @@ class InputCollectionFilter() extends Filter() {
           toRemove = toRemove :+ input(s)(i)
         }
         // removing from datastore
+        ret = ret :+ new DataStore()
+        var newS:Vector[DataElement] = Vector.empty
+        // loop through input(s) and keep wanted data
+        
+        ret(s).set(newS)
       //  ret(s).removeAll(toRemove)
       }
       for(i <- 0 until input(s).length) { 
