@@ -14,34 +14,53 @@ class SequentialGraph private(
   override val dKeys: List[DKey],
   override val funcToData: Map[FKey, Vector[DKey]],
   override val dataToFunc: Map[DKey, Vector[FKey]],
+  override val funcToInputs: Map[FKey, Vector[DKey]],
   override val nextfkey: Int,
-  override val nextdkey: Int
-  ) extends Graph(filtKeys,fKeys,dataKeys,dKeys,funcToData,dataToFunc,nextfkey,nextdkey){
+  override val nextdkey: Int,
+  override val runOnModify:Boolean
+  ) extends Graph(filtKeys,fKeys,dataKeys,dKeys,funcToData,dataToFunc,funcToInputs,nextfkey,nextdkey,runOnModify){
   
+//  private val runOnModify = true
+  private var running = true
+  
+  
+  override def setInput(f:FKey,newInputs:Vector[DKey]):SequentialGraph={
+    new SequentialGraph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc,funcToInputs+(f->newInputs), nextfkey, nextdkey,runOnModify)
+  }
+  override def setInput(f:String,newInputs:Vector[DKey]):SequentialGraph={
+    var ret = toSequentialGraph(super.setInput(f,newInputs))
+    ret.run( List.empty:+ super.getFKey(f))
+    return ret
+  }
   
   override def replace(fstr: String, f2: Filter): SequentialGraph = {
-    var ret = super.replace(fstr,f2)
-    toSequentialGraph(ret)
+    var ret = toSequentialGraph(super.replace(fstr,f2))
+    ret.run( List.empty:+ super.getFKey(fstr))
+    return ret
   }
   
   override def modify(fstr: String)(func: Filter => Filter):SequentialGraph = {
-    var ret = super.modify(fstr)(func)
-    toSequentialGraph(ret)
+    var ret = toSequentialGraph(super.modify(fstr)(func))
+    ret.run( List.empty:+ super.getFKey(fstr))
+    return ret
   }
   
   override def addFilter(filter:Filter, fName: String = "", dName: String = ""): SequentialGraph = {
-    var ret = super.addFilter(filter, fName, dName)
-    toSequentialGraph(ret)
+    var ret = toSequentialGraph(super.addFilter(filter, fName, dName))
+    ret.run( if (fName=="") List.empty:+(FKey("filt"+nextfkey)) else List.empty:+(FKey(fName)) )
+    return ret
   }
 
  
   override def connectNodes(d: DKey, f: FKey): SequentialGraph = {
-    var ret = super.connectNodes(d,f)
-    toSequentialGraph(ret)
+    var ret = toSequentialGraph(super.connectNodes(d,f))
+    ret.run( List.empty:+ f)
+    return ret
   }
   override def connectNodes(d:String, f:String): SequentialGraph = {
-    var ret = super.connectNodes(d,f)
-    toSequentialGraph(ret)
+    var ret = toSequentialGraph(super.connectNodes(d,f)) 
+    ret.run( List.empty:+ super.getFKey(f))
+    return ret
   }
   
   override def disconnectNodes(d: DKey, f: FKey): SequentialGraph = {
@@ -63,7 +82,7 @@ class SequentialGraph private(
   }
   
   private def toSequentialGraph(g:Graph):SequentialGraph={
-    new SequentialGraph(g.filtKeys,g.fKeys,g.dataKeys,g.dKeys,g.funcToData,g.dataToFunc,g.nextfkey,g.nextdkey)
+    new SequentialGraph(g.filtKeys,g.fKeys,g.dataKeys,g.dKeys,g.funcToData,g.dataToFunc,g.funcToInputs,g.nextfkey,g.nextdkey,runOnModify)
   }
   
   
@@ -85,7 +104,7 @@ class SequentialGraph private(
       println("There is an error in the graph please fix before running again")
       return
     }
-    
+    running = true
     
     var roots:List[FKey] = List()
     // need to find roots
@@ -111,6 +130,7 @@ class SequentialGraph private(
 //    */
     
     // needs to return a new graph
+    
     run(roots)
     
     
@@ -119,6 +139,11 @@ class SequentialGraph private(
   }
   
   def run(todo:List[FKey]):SequentialGraph={
+    if(running==false){
+      running = runOnModify
+      return this
+    }
+    
     var newTodo:List[FKey] = List.empty 
     var curNode:Filter = null
     if(todo.isEmpty){
@@ -160,21 +185,34 @@ class SequentialGraph private(
 
     }
     
-    var n = new SequentialGraph(filtKeys,fKeys,Map(tmpDataKeys.toSeq: _*),dKeys,funcToData,dataToFunc,nextfkey,nextdkey)
+    var n = new SequentialGraph(filtKeys,fKeys,Map(tmpDataKeys.toSeq: _*),dKeys,funcToData,dataToFunc,funcToInputs,nextfkey,nextdkey,runOnModify)
     n.run(newTodo)
   }
   
 //  */
   
+  // will stop this graph from running safely
+  def terminate():Unit={
+    //
+    running=false
+    
+  }
+  
+  override def setRunOnModify(b:Boolean):SequentialGraph={
+    toSequentialGraph(super.setRunOnModify(b))
+  }
+  
 }
 
+// modifications will start running depending on settings
   
-
+// datastores should really be future[DataStore]
+// functions give promises for the future[DataStore]
 
 
 object SequentialGraph {
-  def apply(): SequentialGraph = {
-    new SequentialGraph( Map[FKey, Filter](), List[FKey](), Map[DKey, DataStore](), List[DKey](), Map[FKey, Vector[DKey]](), Map[DKey, Vector[FKey]](), 0, 0)
+  def apply(b: Boolean = true): SequentialGraph = {
+    new SequentialGraph( Map[FKey, Filter](), List[FKey](), Map[DKey, DataStore](), List[DKey](), Map[FKey, Vector[DKey]](), Map[DKey, Vector[FKey]](), Map[FKey, Vector[DKey]](), 0, 0,b)
   }
   
 }

@@ -25,37 +25,64 @@ class Graph (
   val dKeys: List[DKey],
   val funcToData: Map[FKey, Vector[DKey]],
   val dataToFunc: Map[DKey, Vector[FKey]],
+  val funcToInputs: Map[FKey, Vector[DKey]],
   val nextfkey: Int,
-  val nextdkey: Int) {
+  val nextdkey: Int,
+  val runOnModify:Boolean) {
   
   def apply(fstr: String): Filter = filtKeys(FKey(fstr))
   
+  
+  def viewInput(f:FKey):Vector[DKey]={
+    funcToInputs(f)
+  }
+  def viewInput(f:String):Vector[DKey]={
+    viewInput(getFKey(f))
+  }
+  
+  def setInput(f:FKey,newInputs:Vector[DKey]):Graph={
+    new Graph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc,funcToInputs+(f->newInputs), nextfkey, nextdkey,runOnModify)
+  }
+  def setInput(f:String,newInputs:Vector[DKey]):Graph={
+    setInput(getFKey(f),newInputs)
+  }
+  
   def replace(fstr: String, f2: Filter): Graph = {
     var tmp = ClearDownstream(FKey(fstr))
+    
+    //needs to change datastores if more are necessary
+    
     new Graph(filtKeys.map { case (k, f) => if(k.key == fstr) k -> f2 else k -> f },
-        fKeys, tmp, dKeys, funcToData, dataToFunc, nextfkey, nextdkey)
+        fKeys, tmp, dKeys, funcToData, dataToFunc,funcToInputs, nextfkey, nextdkey,runOnModify)
   }
   
   def modify(fstr: String)(func: Filter => Filter):Graph = {
     var tmp = ClearDownstream(FKey(fstr))
     new Graph(filtKeys.map { case (k, f) => if(k.key == fstr) k -> func(f) else k -> f },
-        fKeys, tmp, dKeys, funcToData, dataToFunc, nextfkey, nextdkey)
+        fKeys, tmp, dKeys, funcToData, dataToFunc,funcToInputs, nextfkey, nextdkey,runOnModify)
   }
   
   def addFilter(filter:Filter, fName: String = "", dName: String = ""): Graph = {
     val (fkey, nextf) = if (fName=="") (FKey("filt"+nextfkey), nextfkey+1) else (FKey(fName),nextfkey)
     val (dkey, nextd) = if (dName=="") (DKey("data"+nextdkey), nextdkey+1) else (DKey(dName),nextdkey)
-    //TODO - This doesn't add a datastore for the filter
+
+    //TODO - This doesn't add a multiple datastore for the filters
+    
+    
     var tmp = filtKeys + (fkey -> filter)
-    new Graph(filtKeys + (fkey -> filter), fkey::fKeys, dataKeys+(dkey -> new DataStore() ), dkey::dKeys, funcToData + (fkey -> Vector.empty.+:(dkey)), dataToFunc+(dkey -> Vector.empty ), nextf, nextd)
+    new Graph(filtKeys + (fkey -> filter), fkey::fKeys, dataKeys+(dkey -> new DataStore() ), dkey::dKeys, funcToData + (fkey -> Vector.empty.+:(dkey)),
+        dataToFunc+(dkey -> Vector.empty ),funcToInputs+ (fkey -> Vector.empty.+:(dkey)), nextf, nextd,runOnModify)
   }
  
   def connectNodes(d: DKey, f: FKey): Graph = {
     // need to actually add f to dataToFunc(d)
     var tmp:Vector[FKey] = dataToFunc(d)
     tmp = tmp :+ f
+    
+    var tmpInputs = funcToInputs(f) :+ d
+    
     //for(i <- tmp) println(i.key)
-    new Graph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc + (d -> tmp ), nextfkey, nextdkey)
+    new Graph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc + (d -> tmp ),funcToInputs+(f->tmpInputs), nextfkey, nextdkey,runOnModify)
   }
   def connectNodes(d:String, f:String): Graph = {
     return connectNodes(getDKey(d),getFKey(f))
@@ -65,7 +92,10 @@ class Graph (
     // need to actually remove (f) from dataToFunc(d)
     var tmp:Vector[FKey] = Vector.empty
     for(i <- dataToFunc(d)) if(i.key != f.key) tmp = tmp :+ i
-    new Graph(filtKeys , fKeys, dataKeys, dKeys, funcToData, dataToFunc + (d -> tmp ), nextfkey, nextdkey)
+    
+    var tmpInputs = funcToInputs(f).filter(_ != d)
+    
+    new Graph(filtKeys , fKeys, dataKeys, dKeys, funcToData, dataToFunc + (d -> tmp ),funcToInputs+(f->tmpInputs), nextfkey, nextdkey,runOnModify)
   }
   def disconnectNodes(d:String, f:String): Graph = {
     return disconnectNodes(getDKey(d),getFKey(f))
@@ -84,7 +114,7 @@ class Graph (
     }
     
     // delete the actual node
-    new Graph(filtKeys-f, fKeys.filter(_!=f), tmpDataKeys, tmpdKeys, funcToData-f, tmpDataToFunc, nextfkey, nextdkey)
+    new Graph(filtKeys-f, fKeys.filter(_!=f), tmpDataKeys, tmpdKeys, funcToData-f, tmpDataToFunc,funcToInputs-f, nextfkey, nextdkey,runOnModify)
   }
   def removeNode(f: String): Graph = {
     var ret: FKey = null
@@ -98,8 +128,41 @@ class Graph (
   def resetDataStores(){
     var tmp =  Map[DKey, DataStore]()
     for(d <- dKeys) tmp = tmp +(d -> new DataStore())
-    new Graph(filtKeys, fKeys, tmp, dKeys, funcToData, dataToFunc, nextfkey, nextdkey)
+    new Graph(filtKeys, fKeys, tmp, dKeys, funcToData, dataToFunc,funcToInputs, nextfkey, nextdkey,runOnModify)
   }
+  
+  def getListToDo(fs:List[FKey]):List[FKey]={
+    var sorted:List[FKey] = List.empty
+    var f:List[FKey] = List.empty
+    for(i <- fs) f = f:+ i
+    var ftd:Map[FKey,Vector[DKey]] = Map.empty
+    for(i <- funcToData.keys) ftd = ftd + (i->funcToData(i))
+    var dtf:Map[DKey,Vector[FKey]] = Map.empty
+    for(i <- dataToFunc.keys) dtf = dtf + (i->dataToFunc(i))
+    while(!f.isEmpty){
+      for( d <- ftd(f(0)) ){
+        for( m <- dtf(d) ){
+          // remove edge
+          dtf = dtf + (d -> dtf(d).filter(_!=m))
+          // if there are no other incoming edges then insert into sorted
+          var t = true
+          
+          for(i <- dKeys){
+            if(dtf(i).contains(m)) t = false
+          }
+          
+          if(t){
+            sorted = sorted :+ m
+          }
+        }
+      }
+      f = f.tail
+    }
+    // if graph has edges then error cycle
+    
+    return sorted
+  }
+  
   
   def analyze(): Boolean = { 
     var ret = true
@@ -156,7 +219,9 @@ class Graph (
     return ret
   }
 
-  
+  def setRunOnModify(b:Boolean):Graph={
+    new Graph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc,funcToInputs, nextfkey, nextdkey,b)
+  }
   
   private def ClearDownstream(f:FKey):Map[DKey, DataStore]={
     var tmp:Map[DKey, DataStore] = dataKeys
@@ -179,7 +244,7 @@ class Graph (
   Future(DataStore)
 //  */
 
-  private def getDKey(s: String): DKey = {
+  protected def getDKey(s: String): DKey = {
     var ret: DKey = null
     for (i <- 0 until dKeys.length) {
       if (dKeys(i).key == s) ret = dKeys(i)
@@ -187,7 +252,7 @@ class Graph (
     return ret
   }
 
-  private def getFKey(s: String): FKey = {
+  protected def getFKey(s: String): FKey = {
     var ret: FKey = null
     for (i <- 0 until fKeys.length) {
       if (fKeys(i).key == s) ret = fKeys(i)
@@ -198,8 +263,8 @@ class Graph (
 }
 
 object Graph {
-  def apply(): Graph = {
-    new Graph( Map[FKey, Filter](), List[FKey](), Map[DKey, DataStore](), List[DKey](), Map[FKey, Vector[DKey]](), Map[DKey, Vector[FKey]](), 0, 0)
+  def apply(b: Boolean = true): Graph = {
+    new Graph( Map[FKey, Filter](), List[FKey](), Map[DKey, DataStore](), List[DKey](), Map[FKey, Vector[DKey]](), Map[DKey, Vector[FKey]](),Map[FKey, Vector[DKey]](), 0, 0,b)
   }
   
   
