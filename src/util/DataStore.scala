@@ -11,3 +11,10 @@ class DataStore() {
   def set(t:Vector[DataElement]){ if(out == null) out = t }
   def add(d:DataElement) { out = out :+ d }
 }
+
+object DataStore {
+  def apply(): DataStore = {
+    new DataStore( )
+  }
+  
+}

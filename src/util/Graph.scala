@@ -1,5 +1,9 @@
 package util
 
+import scala.ref.WeakReference
+import scala.concurrent.{Await, Future}
+import scala.concurrent.ExecutionContext.Implicits.global
+
 case class FKey(val key: String) {
   def equals(s: FKey): Boolean = {
     return key == s.key
@@ -21,14 +25,15 @@ case class DKey(val key: String) {
 class Graph (
   val filtKeys: Map[FKey, Filter],
   val fKeys: List[FKey],
-  val dataKeys: Map[DKey, DataStore],
+  val dataKeys: Map[DKey, Future[DataStore]],
   val dKeys: List[DKey],
   val funcToData: Map[FKey, Vector[DKey]],
   val dataToFunc: Map[DKey, Vector[FKey]],
   val funcToInputs: Map[FKey, Vector[DKey]],
   val nextfkey: Int,
   val nextdkey: Int,
-  val runOnModify:Boolean) {
+  val runOnModify:Boolean,
+  val parent:WeakReference[Graph]) {
   
   def apply(fstr: String): Filter = filtKeys(FKey(fstr))
   
@@ -41,7 +46,7 @@ class Graph (
   }
   
   def setInput(f:FKey,newInputs:Vector[DKey]):Graph={
-    new Graph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc,funcToInputs+(f->newInputs), nextfkey, nextdkey,runOnModify)
+    new Graph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc,funcToInputs+(f->newInputs), nextfkey, nextdkey,runOnModify,WeakReference(this))
   }
   def setInput(f:String,newInputs:Vector[DKey]):Graph={
     setInput(getFKey(f),newInputs)
@@ -53,13 +58,13 @@ class Graph (
     //needs to change datastores if more are necessary
     
     new Graph(filtKeys.map { case (k, f) => if(k.key == fstr) k -> f2 else k -> f },
-        fKeys, tmp, dKeys, funcToData, dataToFunc,funcToInputs, nextfkey, nextdkey,runOnModify)
+        fKeys, tmp, dKeys, funcToData, dataToFunc,funcToInputs, nextfkey, nextdkey,runOnModify,WeakReference(this))
   }
   
   def modify(fstr: String)(func: Filter => Filter):Graph = {
     var tmp = ClearDownstream(FKey(fstr))
     new Graph(filtKeys.map { case (k, f) => if(k.key == fstr) k -> func(f) else k -> f },
-        fKeys, tmp, dKeys, funcToData, dataToFunc,funcToInputs, nextfkey, nextdkey,runOnModify)
+        fKeys, tmp, dKeys, funcToData, dataToFunc,funcToInputs, nextfkey, nextdkey,runOnModify,WeakReference(this))
   }
   
   def addFilter(filter:Filter, fName: String = "", dName: String = ""): Graph = {
@@ -68,10 +73,9 @@ class Graph (
 
     //TODO - This doesn't add a multiple datastore for the filters
     
-    
     var tmp = filtKeys + (fkey -> filter)
-    new Graph(filtKeys + (fkey -> filter), fkey::fKeys, dataKeys+(dkey -> new DataStore() ), dkey::dKeys, funcToData + (fkey -> Vector.empty.+:(dkey)),
-        dataToFunc+(dkey -> Vector.empty ),funcToInputs+ (fkey -> Vector.empty.+:(dkey)), nextf, nextd,runOnModify)
+    new Graph(filtKeys + (fkey -> filter), fkey::fKeys, dataKeys+(dkey -> Future{DataStore()} ), dkey::dKeys, funcToData + (fkey -> Vector.empty.+:(dkey)),
+        dataToFunc+(dkey -> Vector.empty ),funcToInputs+ (fkey -> Vector.empty.+:(dkey)), nextf, nextd,runOnModify,WeakReference(this))
   }
  
   def connectNodes(d: DKey, f: FKey): Graph = {
@@ -82,7 +86,7 @@ class Graph (
     var tmpInputs = funcToInputs(f) :+ d
     
     //for(i <- tmp) println(i.key)
-    new Graph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc + (d -> tmp ),funcToInputs+(f->tmpInputs), nextfkey, nextdkey,runOnModify)
+    new Graph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc + (d -> tmp ),funcToInputs+(f->tmpInputs), nextfkey, nextdkey,runOnModify,WeakReference(this))
   }
   def connectNodes(d:String, f:String): Graph = {
     return connectNodes(getDKey(d),getFKey(f))
@@ -95,7 +99,7 @@ class Graph (
     
     var tmpInputs = funcToInputs(f).filter(_ != d)
     
-    new Graph(filtKeys , fKeys, dataKeys, dKeys, funcToData, dataToFunc + (d -> tmp ),funcToInputs+(f->tmpInputs), nextfkey, nextdkey,runOnModify)
+    new Graph(filtKeys , fKeys, dataKeys, dKeys, funcToData, dataToFunc + (d -> tmp ),funcToInputs+(f->tmpInputs), nextfkey, nextdkey,runOnModify,WeakReference(this))
   }
   def disconnectNodes(d:String, f:String): Graph = {
     return disconnectNodes(getDKey(d),getFKey(f))
@@ -114,7 +118,7 @@ class Graph (
     }
     
     // delete the actual node
-    new Graph(filtKeys-f, fKeys.filter(_!=f), tmpDataKeys, tmpdKeys, funcToData-f, tmpDataToFunc,funcToInputs-f, nextfkey, nextdkey,runOnModify)
+    new Graph(filtKeys-f, fKeys.filter(_!=f), tmpDataKeys, tmpdKeys, funcToData-f, tmpDataToFunc,funcToInputs-f, nextfkey, nextdkey,runOnModify,WeakReference(this))
   }
   def removeNode(f: String): Graph = {
     var ret: FKey = null
@@ -126,9 +130,9 @@ class Graph (
   }
   
   def resetDataStores(){
-    var tmp =  Map[DKey, DataStore]()
-    for(d <- dKeys) tmp = tmp +(d -> new DataStore())
-    new Graph(filtKeys, fKeys, tmp, dKeys, funcToData, dataToFunc,funcToInputs, nextfkey, nextdkey,runOnModify)
+    var tmp =  Map[DKey, Future[DataStore]]()
+    for(d <- dKeys) tmp = tmp +(d -> Future{new DataStore()})
+    new Graph(filtKeys, fKeys, tmp, dKeys, funcToData, dataToFunc,funcToInputs, nextfkey, nextdkey,runOnModify,WeakReference(this))
   }
   
   def getListToDo(fs:List[FKey]):List[FKey]={
@@ -220,11 +224,11 @@ class Graph (
   }
 
   def setRunOnModify(b:Boolean):Graph={
-    new Graph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc,funcToInputs, nextfkey, nextdkey,b)
+    new Graph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc,funcToInputs, nextfkey, nextdkey,b,parent)
   }
   
-  private def ClearDownstream(f:FKey):Map[DKey, DataStore]={
-    var tmp:Map[DKey, DataStore] = dataKeys
+  private def ClearDownstream(f:FKey):Map[DKey, Future[DataStore]]={
+    var tmp:Map[DKey, Future[DataStore]] = dataKeys
     
     var cur:List[FKey] = (f) :: List() 
     
@@ -244,6 +248,47 @@ class Graph (
   Future(DataStore)
 //  */
 
+  def getTopoSort(): List[FKey]={
+    var ret:List[FKey] = List.empty
+    
+    // get roots
+    var todo:List[FKey] = List.empty
+    // need to find roots
+    for(f <- fKeys){
+      var isRoot = true
+      for(d <- dKeys){
+        if(dataToFunc(d).contains(f)) isRoot = false
+      }
+      if(isRoot) todo = todo :+ f
+    }
+    
+    // List of edges
+    var edges:List[Pair[FKey,FKey]] = List.empty
+    for(f <- fKeys){
+      for(d <- funcToData(f)){
+        for(i <- dataToFunc(d)){
+          edges = edges :+ (f,i)
+        }
+      }
+    }
+    
+    while(!todo.isEmpty){
+      ret = ret :+ todo.head
+      // for each node with an edge from  roots.head
+      var curEdges = edges.filter(x => x._1 == todo.head)
+      for(i <- 0 until curEdges.length){
+        // remove the edge
+        edges = edges.filter(x => x != curEdges(i))
+        if(edges.filter(x=> x._2 == curEdges(i)._2).isEmpty){
+          todo = todo :+ curEdges(i)._2
+        }
+      }
+      todo = todo.tail
+    }
+    return ret
+  }
+  
+  
   protected def getDKey(s: String): DKey = {
     var ret: DKey = null
     for (i <- 0 until dKeys.length) {
@@ -264,7 +309,7 @@ class Graph (
 
 object Graph {
   def apply(b: Boolean = true): Graph = {
-    new Graph( Map[FKey, Filter](), List[FKey](), Map[DKey, DataStore](), List[DKey](), Map[FKey, Vector[DKey]](), Map[DKey, Vector[FKey]](),Map[FKey, Vector[DKey]](), 0, 0,b)
+    new Graph( Map[FKey, Filter](), List[FKey](), Map[DKey, Future[DataStore]](), List[DKey](), Map[FKey, Vector[DKey]](), Map[DKey, Vector[FKey]](),Map[FKey, Vector[DKey]](), 0, 0,b,null)
   }
   
   

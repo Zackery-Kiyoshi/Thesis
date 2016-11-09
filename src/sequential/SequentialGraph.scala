@@ -1,65 +1,66 @@
 package sequential
 
 import util._
-import scala.language.implicitConversions
-
-
-
+import scala.ref.WeakReference
+import scala.concurrent.{Await, Future}
+import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits.global
 
 
 class SequentialGraph private(
   override val filtKeys: Map[FKey, Filter],
   override val fKeys: List[FKey],
-  override val dataKeys: Map[DKey, DataStore],
+  override val dataKeys: Map[DKey, Future[DataStore]],
   override val dKeys: List[DKey],
   override val funcToData: Map[FKey, Vector[DKey]],
   override val dataToFunc: Map[DKey, Vector[FKey]],
   override val funcToInputs: Map[FKey, Vector[DKey]],
   override val nextfkey: Int,
   override val nextdkey: Int,
-  override val runOnModify:Boolean
-  ) extends Graph(filtKeys,fKeys,dataKeys,dKeys,funcToData,dataToFunc,funcToInputs,nextfkey,nextdkey,runOnModify){
+  override val runOnModify:Boolean,
+  override val parent:WeakReference[SequentialGraph]
+  ) extends Graph(filtKeys,fKeys,dataKeys,dKeys,funcToData,dataToFunc,funcToInputs,nextfkey,nextdkey,runOnModify,parent){
   
 //  private val runOnModify = true
   private var running = true
   
   
   override def setInput(f:FKey,newInputs:Vector[DKey]):SequentialGraph={
-    new SequentialGraph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc,funcToInputs+(f->newInputs), nextfkey, nextdkey,runOnModify)
+    new SequentialGraph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc,funcToInputs+(f->newInputs), nextfkey, nextdkey,runOnModify,WeakReference(this))
   }
   override def setInput(f:String,newInputs:Vector[DKey]):SequentialGraph={
     var ret = toSequentialGraph(super.setInput(f,newInputs))
-    ret.run( List.empty:+ super.getFKey(f))
+    if(runOnModify)ret.run( )
     return ret
   }
   
   override def replace(fstr: String, f2: Filter): SequentialGraph = {
     var ret = toSequentialGraph(super.replace(fstr,f2))
-    ret.run( List.empty:+ super.getFKey(fstr))
+    if(runOnModify)ret.run( )
     return ret
   }
   
   override def modify(fstr: String)(func: Filter => Filter):SequentialGraph = {
     var ret = toSequentialGraph(super.modify(fstr)(func))
-    ret.run( List.empty:+ super.getFKey(fstr))
+    if(runOnModify)ret.run( )
     return ret
   }
   
   override def addFilter(filter:Filter, fName: String = "", dName: String = ""): SequentialGraph = {
     var ret = toSequentialGraph(super.addFilter(filter, fName, dName))
-    ret.run( if (fName=="") List.empty:+(FKey("filt"+nextfkey)) else List.empty:+(FKey(fName)) )
+    if(runOnModify)ret.run( )
     return ret
   }
 
  
   override def connectNodes(d: DKey, f: FKey): SequentialGraph = {
     var ret = toSequentialGraph(super.connectNodes(d,f))
-    ret.run( List.empty:+ f)
+    if(runOnModify)ret.run()
     return ret
   }
   override def connectNodes(d:String, f:String): SequentialGraph = {
     var ret = toSequentialGraph(super.connectNodes(d,f)) 
-    ret.run( List.empty:+ super.getFKey(f))
+    //ret.run( List.empty:+ super.getFKey(f))
     return ret
   }
   
@@ -82,7 +83,7 @@ class SequentialGraph private(
   }
   
   private def toSequentialGraph(g:Graph):SequentialGraph={
-    new SequentialGraph(g.filtKeys,g.fKeys,g.dataKeys,g.dKeys,g.funcToData,g.dataToFunc,g.funcToInputs,g.nextfkey,g.nextdkey,runOnModify)
+    new SequentialGraph(g.filtKeys,g.fKeys,g.dataKeys,g.dKeys,g.funcToData,g.dataToFunc,g.funcToInputs,g.nextfkey,g.nextdkey,runOnModify,WeakReference(this))
   }
   
   
@@ -98,7 +99,7 @@ class SequentialGraph private(
   
 //  /*
   override def run(){
-    
+    //println("run")
     // analyze first to make sure there are no mistakes???
     if(!analyze() ){
       println("There is an error in the graph please fix before running again")
@@ -106,34 +107,8 @@ class SequentialGraph private(
     }
     running = true
     
-    var roots:List[FKey] = List()
-    // need to find roots
-    for(i <- 0 until fKeys.length){
-      //println(i + ":" + fKeys(i).key)
-      roots = roots :+ fKeys(i)
-    }
-    for(d <- 0 until dKeys.length){
-      // remove the
-      for(f <- fKeys){
-        if(dataToFunc(dKeys(d)).contains(f)){
-          var tmpRoots:List[FKey] = List()
-          for(k <- roots){
-            if(k != f) tmpRoots = tmpRoots :+ k
-          }
-          roots = tmpRoots
-        }
-      }
-    }
-    /*
-    println("Roots:")
-    for(i <- roots) println(" "+i.key)
-//    */
     
-    // needs to return a new graph
-    
-    run(roots)
-    
-    
+    run(super.getTopoSort())
     // need to run each loop
     
   }
@@ -143,7 +118,6 @@ class SequentialGraph private(
       running = runOnModify
       return this
     }
-    
     var newTodo:List[FKey] = List.empty 
     var curNode:Filter = null
     if(todo.isEmpty){
@@ -153,11 +127,9 @@ class SequentialGraph private(
       //println(todo(0).key)
       curNode = filtKeys(todo(0))
     }
-    
-    var tmpDataKeys:collection.mutable.Map[DKey, DataStore] = collection.mutable.Map(dataKeys.toSeq: _*)
-    
+    var tmpDataKeys:collection.mutable.Map[DKey, Future[DataStore]] = collection.mutable.Map(dataKeys.toSeq: _*)
     // need to get the correct input data
-    var data:Vector[DataStore] = Vector.empty  
+    var data:Vector[Future[DataStore]] = Vector.empty  
     for(d <- dKeys){
       if(dataToFunc(d).contains(todo(0))){
         data = data :+ dataKeys(d)
@@ -165,27 +137,23 @@ class SequentialGraph private(
     }
     //if(data.length >0)
       //println( data.length + ":" + data(0) )
-    var rezData:Vector[DataStore] = curNode.apply(data)  
+    var d:Future[Vector[DataStore]] = Future.sequence(data)
+    var rezData:Vector[DataStore] = curNode.apply(Await.result(d,5 second))  
     // in creation each need filter needs to know how many of each
     var i=0
-    
     //println(funcToData(todo(0)).length)
     //println("  " + rezData.length)
-    
     for(d<- funcToData(todo(0))){
       // update dataStores
       //for sinks
-      if(rezData.length >i){
-        tmpDataKeys(d) = rezData(i)
+      if(i < rezData.length){
+        Future{rezData(i)}
+        println("HERE " + Future{rezData(i)} + ";")
+        tmpDataKeys(d) = Future{rezData(i)}
         i+=1
       }
-      for(f <- dataToFunc(d)){
-        newTodo = newTodo :+ (f)
-      }
-
     }
-    
-    var n = new SequentialGraph(filtKeys,fKeys,Map(tmpDataKeys.toSeq: _*),dKeys,funcToData,dataToFunc,funcToInputs,nextfkey,nextdkey,runOnModify)
+    var n = new SequentialGraph(filtKeys,fKeys,Map(tmpDataKeys.toSeq: _*),dKeys,funcToData,dataToFunc,funcToInputs,nextfkey,nextdkey,runOnModify,WeakReference(this))
     n.run(newTodo)
   }
   
@@ -212,7 +180,7 @@ class SequentialGraph private(
 
 object SequentialGraph {
   def apply(b: Boolean = true): SequentialGraph = {
-    new SequentialGraph( Map[FKey, Filter](), List[FKey](), Map[DKey, DataStore](), List[DKey](), Map[FKey, Vector[DKey]](), Map[DKey, Vector[FKey]](), Map[FKey, Vector[DKey]](), 0, 0,b)
+    new SequentialGraph( Map[FKey, Filter](), List[FKey](), Map[DKey, Future[DataStore]](), List[DKey](), Map[FKey, Vector[DKey]](), Map[DKey, Vector[FKey]](), Map[FKey, Vector[DKey]](), 0, 0,b,null)
   }
   
 }
