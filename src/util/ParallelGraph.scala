@@ -4,25 +4,8 @@ import scala.ref.WeakReference
 import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 
-case class FKey(val key: String) {
-  def equals(s: FKey): Boolean = {
-    return key == s.key
-  }
-  def equals(s: String): Boolean = {
-    return key == s
-  }
-}
 
-case class DKey(val key: String) {
-  def equals(s: DKey): Boolean = {
-    return key == s.key
-  }
-  def equals(s: String): Boolean = {
-    return key == s
-  }
-}
-
-class Graph (
+class ParallelGraph (
   val filtKeys: Map[FKey, Filter],
   val fKeys: List[FKey],
   val dataKeys: Map[DKey, DataStore],
@@ -33,7 +16,7 @@ class Graph (
   val nextfkey: Int,
   val nextdkey: Int,
   val runOnModify:Boolean,
-  val parent:WeakReference[Graph]) {
+  val parent:WeakReference[ParallelGraph]) {
   
   def apply(fstr: String): Filter = filtKeys(FKey(fstr))
   
@@ -45,40 +28,40 @@ class Graph (
     viewInput(getFKey(f))
   }
   
-  def setInput(f:FKey,newInputs:Vector[DKey]):Graph={
-    new Graph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc,funcToInputs+(f->newInputs), nextfkey, nextdkey,runOnModify,WeakReference(this))
+  def setInput(f:FKey,newInputs:Vector[DKey]):ParallelGraph={
+    new ParallelGraph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc,funcToInputs+(f->newInputs), nextfkey, nextdkey,runOnModify,WeakReference(this))
   }
-  def setInput(f:String,newInputs:Vector[DKey]):Graph={
+  def setInput(f:String,newInputs:Vector[DKey]):ParallelGraph={
     setInput(getFKey(f),newInputs)
   }
   
-  def replace(fstr: String, f2: Filter): Graph = {
+  def replace(fstr: String, f2: Filter): ParallelGraph = {
     var tmp = ClearDownstream(FKey(fstr))
     
     //needs to change datastores if more are necessary
     
-    new Graph(filtKeys.map { case (k, f) => if(k.key == fstr) k -> f2 else k -> f },
+    new ParallelGraph(filtKeys.map { case (k, f) => if(k.key == fstr) k -> f2 else k -> f },
         fKeys, tmp, dKeys, funcToData, dataToFunc,funcToInputs, nextfkey, nextdkey,runOnModify,WeakReference(this))
   }
   
-  def modify(fstr: String)(func: Filter => Filter):Graph = {
+  def modify(fstr: String)(func: Filter => Filter):ParallelGraph = {
     var tmp = ClearDownstream(FKey(fstr))
-    new Graph(filtKeys.map { case (k, f) => if(k.key == fstr) k -> func(f) else k -> f },
+    new ParallelGraph(filtKeys.map { case (k, f) => if(k.key == fstr) k -> func(f) else k -> f },
         fKeys, tmp, dKeys, funcToData, dataToFunc,funcToInputs, nextfkey, nextdkey,runOnModify,WeakReference(this))
   }
   
-  def addFilter(filter:Filter, fName: String = "", dName: String = ""): Graph = {
+  def addFilter(filter:Filter, fName: String = "", dName: String = ""): ParallelGraph = {
     val (fkey, nextf) = if (fName=="") (FKey("filt"+nextfkey), nextfkey+1) else (FKey(fName),nextfkey)
     val (dkey, nextd) = if (dName=="") (DKey("data"+nextdkey), nextdkey+1) else (DKey(dName),nextdkey)
 
     //TODO - This doesn't add a multiple datastore for the filters
     
-    var tmp = filtKeys + (fkey -> filter)
-    new Graph(filtKeys + (fkey -> filter), fkey::fKeys, dataKeys+(dkey -> DataStore() ), dkey::dKeys, funcToData + (fkey -> Vector.empty.+:(dkey)),
+    val tmp = filtKeys + (fkey -> filter)
+    new ParallelGraph(filtKeys + (fkey -> filter), fkey::fKeys, dataKeys+(dkey -> DataStore() ), dkey::dKeys, funcToData + (fkey -> Vector.empty.+:(dkey)),
         dataToFunc+(dkey -> Vector.empty ),funcToInputs+ (fkey -> Vector.empty.+:(dkey)), nextf, nextd,runOnModify,WeakReference(this))
   }
  
-  def connectNodes(d: DKey, f: FKey): Graph = {
+  def connectNodes(d: DKey, f: FKey): ParallelGraph = {
     // need to actually add f to dataToFunc(d)
     var tmp:Vector[FKey] = dataToFunc(d)
     tmp = tmp :+ f
@@ -86,26 +69,26 @@ class Graph (
     var tmpInputs = funcToInputs(f) :+ d
     
     //for(i <- tmp) println(i.key)
-    new Graph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc + (d -> tmp ),funcToInputs+(f->tmpInputs), nextfkey, nextdkey,runOnModify,WeakReference(this))
+    new ParallelGraph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc + (d -> tmp ),funcToInputs+(f->tmpInputs), nextfkey, nextdkey,runOnModify,WeakReference(this))
   }
-  def connectNodes(d:String, f:String): Graph = {
+  def connectNodes(d:String, f:String): ParallelGraph = {
     return connectNodes(getDKey(d),getFKey(f))
   }
   
-  def disconnectNodes(d: DKey, f: FKey): Graph = {
+  def disconnectNodes(d: DKey, f: FKey): ParallelGraph = {
     // need to actually remove (f) from dataToFunc(d)
     var tmp:Vector[FKey] = Vector.empty
     for(i <- dataToFunc(d)) if(i.key != f.key) tmp = tmp :+ i
     
     var tmpInputs = funcToInputs(f).filter(_ != d)
     
-    new Graph(filtKeys , fKeys, dataKeys, dKeys, funcToData, dataToFunc + (d -> tmp ),funcToInputs+(f->tmpInputs), nextfkey, nextdkey,runOnModify,WeakReference(this))
+    new ParallelGraph(filtKeys , fKeys, dataKeys, dKeys, funcToData, dataToFunc + (d -> tmp ),funcToInputs+(f->tmpInputs), nextfkey, nextdkey,runOnModify,WeakReference(this))
   }
-  def disconnectNodes(d:String, f:String): Graph = {
+  def disconnectNodes(d:String, f:String): ParallelGraph = {
     return disconnectNodes(getDKey(d),getFKey(f))
   }
    
-  def removeNode(f: FKey): Graph = {
+  def removeNode(f: FKey): ParallelGraph = {
     // must delete associated DataNodes
     var d = funcToData(f)
     var tmpDataToFunc = dataToFunc
@@ -118,9 +101,9 @@ class Graph (
     }
     
     // delete the actual node
-    new Graph(filtKeys-f, fKeys.filter(_!=f), tmpDataKeys, tmpdKeys, funcToData-f, tmpDataToFunc,funcToInputs-f, nextfkey, nextdkey,runOnModify,WeakReference(this))
+    new ParallelGraph(filtKeys-f, fKeys.filter(_!=f), tmpDataKeys, tmpdKeys, funcToData-f, tmpDataToFunc,funcToInputs-f, nextfkey, nextdkey,runOnModify,WeakReference(this))
   }
-  def removeNode(f: String): Graph = {
+  def removeNode(f: String): ParallelGraph = {
     var ret: FKey = null
     // find the fkey
     for (i <- 0 until fKeys.length) {
@@ -132,7 +115,7 @@ class Graph (
   def resetDataStores(){
     var tmp =  Map[DKey, DataStore]()
     for(d <- dKeys) tmp = tmp +(d -> new DataStore())
-    new Graph(filtKeys, fKeys, tmp, dKeys, funcToData, dataToFunc,funcToInputs, nextfkey, nextdkey,runOnModify,WeakReference(this))
+    new ParallelGraph(filtKeys, fKeys, tmp, dKeys, funcToData, dataToFunc,funcToInputs, nextfkey, nextdkey,runOnModify,WeakReference(this))
   }
   
   def getListToDo(fs:List[FKey]):List[FKey]={
@@ -223,8 +206,8 @@ class Graph (
     return ret
   }
 
-  def setRunOnModify(b:Boolean):Graph={
-    new Graph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc,funcToInputs, nextfkey, nextdkey,b,parent)
+  def setRunOnModify(b:Boolean):ParallelGraph={
+    new ParallelGraph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc,funcToInputs, nextfkey, nextdkey,b,parent)
   }
   
   private def ClearDownstream(f:FKey):Map[DKey, DataStore]={
@@ -307,11 +290,10 @@ class Graph (
 
 }
 
-object Graph {
+object ParallelGraph {
   def apply(b: Boolean = true): Graph = {
     new Graph( Map[FKey, Filter](), List[FKey](), Map[DKey, DataStore](), List[DKey](), Map[FKey, Vector[DKey]](), Map[DKey, Vector[FKey]](),Map[FKey, Vector[DKey]](), 0, 0,b,null)
   }
-  
-  
-  
 }
+  
+  

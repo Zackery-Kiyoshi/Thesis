@@ -10,7 +10,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class SequentialGraph private(
   override val filtKeys: Map[FKey, Filter],
   override val fKeys: List[FKey],
-  override val dataKeys: Map[DKey, Future[DataStore]],
+  override val dataKeys: Map[DKey, DataStore],
   override val dKeys: List[DKey],
   override val funcToData: Map[FKey, Vector[DKey]],
   override val dataToFunc: Map[DKey, Vector[FKey]],
@@ -107,7 +107,6 @@ class SequentialGraph private(
     }
     running = true
     
-    
     run(super.getTopoSort())
     // need to run each loop
     
@@ -127,18 +126,15 @@ class SequentialGraph private(
       //println(todo(0).key)
       curNode = filtKeys(todo(0))
     }
-    var tmpDataKeys:collection.mutable.Map[DKey, Future[DataStore]] = collection.mutable.Map(dataKeys.toSeq: _*)
+    val tmpDataKeys:collection.mutable.Map[DKey, DataStore] = collection.mutable.Map(dataKeys.toSeq: _*)
     // need to get the correct input data
-    var data:Vector[Future[DataStore]] = Vector.empty  
-    for(d <- dKeys){
-      if(dataToFunc(d).contains(todo(0))){
-        data = data :+ dataKeys(d)
-      }
-    }
+    val data:Vector[DataStore] = (for(d <- dKeys; if(dataToFunc(d).contains(todo(0)))) yield {
+        dataKeys(d)
+    }).toVector
     //if(data.length >0)
       //println( data.length + ":" + data(0) )
-    var d:Future[Vector[DataStore]] = Future.sequence(data)
-    var rezData:Vector[DataStore] = curNode.apply(Await.result(d,5 second))  
+    //val d:Future[Vector[DataStore]] = Future.sequence(data)
+    val rezData:Vector[DataStore] = curNode.apply(data)  
     // in creation each need filter needs to know how many of each
     var i=0
     //println(funcToData(todo(0)).length)
@@ -147,9 +143,9 @@ class SequentialGraph private(
       // update dataStores
       //for sinks
       if(i < rezData.length){
-        Future{rezData(i)}
-        println("HERE " + Future{rezData(i)} + ";")
-        tmpDataKeys(d) = Future{rezData(i)}
+        //Future{rezData(i)}
+//        println("HERE " + Future{rezData(i)} + ";")
+        tmpDataKeys(d) = rezData(i)
         i+=1
       }
     }
@@ -180,7 +176,7 @@ class SequentialGraph private(
 
 object SequentialGraph {
   def apply(b: Boolean = true): SequentialGraph = {
-    new SequentialGraph( Map[FKey, Filter](), List[FKey](), Map[DKey, Future[DataStore]](), List[DKey](), Map[FKey, Vector[DKey]](), Map[DKey, Vector[FKey]](), Map[FKey, Vector[DKey]](), 0, 0,b,null)
+    new SequentialGraph( Map[FKey, Filter](), List[FKey](), Map[DKey, DataStore](), List[DKey](), Map[FKey, Vector[DKey]](), Map[DKey, Vector[FKey]](), Map[FKey, Vector[DKey]](), 0, 0,b,null)
   }
   
 }

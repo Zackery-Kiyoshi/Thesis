@@ -15,7 +15,7 @@ object Main {
     graph1 = graph1.addFilter(new PrintSink(), "ps1")
     
     graph1 = graph1.connectNodes("data0", "ps1")
-    println("HERE")
+    //println("HERE")
     //graph1.printConnections()
     
     //graph1.analyze()
