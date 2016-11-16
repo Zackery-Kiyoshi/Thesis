@@ -31,6 +31,7 @@ object DoubleFormula extends JavaTokenParsers {
         // Original Test
         //println( new DoubleFormula("y[1]+5*x[0]")(0,IndexedSeq(tmp1),null) )
         println( new DoubleFormula("x[1]+5*x[0]")(0,IndexedSeq(tmp1),null) )
+        //println( new DoubleFormula("x[i]+5*x[0]")(0,IndexedSeq(tmp1),Map(("i"->1))) )
         tmp1 = new DataStore()
         tmp1.set( Vector.empty :+ new DataElement(Vector(3.0,4.0)) )
         // Original Test

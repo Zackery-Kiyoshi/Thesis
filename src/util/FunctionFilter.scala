@@ -1,9 +1,11 @@
 package util
 
-class FunctionFilter(var fsts:String) extends Filter() {
+
+
+class FunctionFilter(val fsts:String, val m:Map[String,Double] = Map() ) extends Filter() {
 
   val t:String = "FunctionFilter"
-  var func:DoubleFormula = new DoubleFormula(fsts)
+  //val func:DoubleFormula = new DoubleFormula(fsts)
   
   override def apply(input: Vector[DataStore]): Vector[DataStore] = {
     var ret = Vector[DataStore]()
@@ -16,7 +18,7 @@ class FunctionFilter(var fsts:String) extends Filter() {
         var tmp = new Array[Double](input(i)(j).length)
         for (k <- 0 until input(i)(j).length) {
           // do it for i(j)(k)
-          tmp(k) = func(k,input,null)
+          tmp(k) = new DoubleFormula(fsts)(j,input,m+("i1-1"->input(i)(j)(k)))
         }
         var De = new DataElement(tmp.toVector)
         tmpDE = tmpDE :+ De 

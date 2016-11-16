@@ -2,11 +2,11 @@ package util
 
 import scala.collection.mutable.ArrayBuffer
 
-class LinearFitFilter() extends Filter() {
+class LinearFitFilter(val s:String = "-1") extends Filter() {
   
   val t:String = "LinearFitFilter"
   
-  private var fitFormula:DoubleFormula = new DoubleFormula("v[0]");
+  private var fitFormula:DoubleFormula = new DoubleFormula(s);
   private var terms:ArrayBuffer[DoubleFormula] = new ArrayBuffer();
   private var coefs:Array[Float]=new Array(0)
   
