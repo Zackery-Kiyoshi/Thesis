@@ -5,29 +5,17 @@ package util
 class FunctionFilter(val fsts:String, val m:Map[String,Double] = Map() ) extends Filter() {
 
   val t:String = "FunctionFilter"
-  //val func:DoubleFormula = new DoubleFormula(fsts)
+  val func:DoubleFormula = new DoubleFormula(fsts)
   
   override def apply(input: Vector[DataStore]): Vector[DataStore] = {
     var ret = Vector[DataStore]()
 
-    for (i <- 0 until input.length) {
-      //var tmp:DataStore = i
-      var tmpDE:Vector[DataElement] = Vector.empty[DataElement]
-      for (j <- 0 until input(i).length) {
-        //var tmp:DataElement = i(j)
-        var tmp = new Array[Double](input(i)(j).length)
-        for (k <- 0 until input(i)(j).length) {
-          // do it for i(j)(k)
-          tmp(k) = new DoubleFormula(fsts)(j,input,m+("i1-1"->input(i)(j)(k)))
-        }
-        var De = new DataElement(tmp.toVector)
-        tmpDE = tmpDE :+ De 
-      }
-      var t = new DataStore()
-      t.set(tmpDE)
-      ret = ret :+ t
+    // need to actually get the ranges
+    val r = DoubleFormula.safeRange(input ,func)
+    for(i<-r){
+      func(i,input,null)
     }
-
+    
     return ret;
   }
 

@@ -18,20 +18,14 @@ class ListSource (var start:Double, var end:Double, var dx:Double) extends Filte
   
   override def apply(inputData:Vector[DataStore]):Vector[DataStore]={
     var tmp:Vector[DataElement] = Vector.empty
-    tmp = tmp :+ new DataElement(arr.to[Vector])
     var retp:DataStore = new DataStore()
+    for(i <- arr){
+      tmp = tmp :+ new DataElement(Vector.empty :+ i)
+    }
     retp.set(tmp)
-    
-    var ret:Vector[DataStore] = Vector.empty
-    ret = ret :+ retp
-    return ret
+    return Vector.empty :+ retp
   }
   
-  def apply(){
-    arr =  Array.tabulate((end-start/dx).toInt)(_*dx + start)
-    //outputData = Vector(new DataElement( arr.to[Vector]))
-    //output.update();
-  }
   
 
 } 

@@ -42,7 +42,30 @@ object DoubleFormula extends JavaTokenParsers {
         // Original Test
         //println(new DoubleFormula("y[0][0][1]+5*x[0][0][0]")(0,IndexedSeq(tmp1),null))
         println(new DoubleFormula("x[0][0][1]+5*x[0][0][0]")(0,IndexedSeq(tmp1),null))
+        println("  multi-tests:")
+        tmp1 = new DataStore()
+        tmp1.set( Vector.empty :+ new DataElement(Vector(3.0)) :+ new DataElement(Vector(4.0)) )
+        var tmp2 = new DataStore()
+        tmp2.set( Vector.empty :+ new DataElement(Vector(5.0)) :+ new DataElement(Vector(6.0)) )
+        var tmp3 = new DataStore()
+        tmp3.set( Vector.empty :+ new DataElement(Vector(7.0)) :+ new DataElement(Vector(8.0)))
+        var data = Vector.empty :+tmp1:+tmp2:+tmp3
+        //println("HERE : " + data(2)(0)(0))
+        var df = new DoubleFormula("x[0][0]+x[1][0]+x[2][0]")
+        var r = safeRange(data ,df)
+        println(r.start +":"+r.end)
+        for(i <- r){
+          println(df(i,data,null))
+        }
         
+        data = Vector.empty :+tmp1:+tmp2
+        //println("HERE : " + data(2)(0)(0))
+        df = new DoubleFormula("x[0][0]+x[1][0]")
+        r = safeRange(data ,df)
+        println(r.start +":"+r.end)
+        for(i <- r){
+          println(df(i,data,null))
+        }
     }
     
     def safeRange(x:IOList,df:DoubleFormula*):Range = {

@@ -165,6 +165,14 @@ object Main {
     
     fib(6).run()
     
+    
+    // min/max (i) forevery i elements give the min/max
+    // sort filters
+    
+    // fix functionfilter
+    // union for graphs
+    
+    // read from file
   }
       
 }
