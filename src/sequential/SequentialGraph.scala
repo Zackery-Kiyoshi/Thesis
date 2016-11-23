@@ -162,6 +162,19 @@ class SequentialGraph private(
     
   }
   
+  def union(g:SequentialGraph):SequentialGraph={
+    val newfiltKeys: Map[FKey, Filter] = filtKeys ++ g.filtKeys.filter( p => !fKeys.contains(p._1) )
+    val newfKeys: List[FKey] = fKeys ++ g.fKeys.filter { x => !fKeys.contains(x) }
+    val newdataKeys: Map[DKey, DataStore] = dataKeys ++ g.dataKeys.filter( p => !dKeys.contains(p._1) )
+    val newdKeys: List[DKey] = dKeys ++ g.dKeys.filter { x => !dKeys.contains(x) }
+    val newfuncToData: Map[FKey, Vector[DKey]] = funcToData ++ g.funcToData.filter( p => !fKeys.contains(p._1) )
+    val newdataToFunc: Map[DKey, Vector[FKey]] = dataToFunc ++ g.dataToFunc.filter( p => !dKeys.contains(p._1) )
+    val newfuncToInputs: Map[FKey, Vector[DKey]] = funcToInputs ++ g.funcToInputs.filter( p => !fKeys.contains(p._1) )
+    val newnextfkey: Int = if(nextfkey > g.nextfkey) nextfkey else g.nextfkey;
+    val newnextdkey: Int = if(nextdkey > g.nextdkey) nextdkey else g.nextdkey;
+    return new SequentialGraph(newfiltKeys, newfKeys, newdataKeys, newdKeys, newfuncToData, newdataToFunc,newfuncToInputs, newnextfkey, newnextdkey,runOnModify,WeakReference(this))
+  }
+  
   override def setRunOnModify(b:Boolean):SequentialGraph={
     toSequentialGraph(super.setRunOnModify(b))
   }
