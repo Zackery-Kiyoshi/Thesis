@@ -4,7 +4,6 @@ import util._
 
 object Main {
   
-  
   def simpleListTest():Graph={
     
     var func1 = "(2+3)*3"
@@ -132,7 +131,7 @@ object Main {
     return graph1
   }
   
-  def fibRec(i:Int, g:SequentialGraph = SequentialGraph(false)):SequentialGraph={
+  def fibRec(i:Int, g:SequentialGraph = SequentialGraph(false), cur:Int = 0):SequentialGraph={
     // being able to combine graphs
     // no actually recursive yet
     var graph1 = g
@@ -154,25 +153,64 @@ object Main {
     return graph1
   }
   
+  def minmaxTest(){
+    var graph1 = SequentialGraph(false)
+    graph1 = graph1.addFilter(new ListSource(0,21,2), "ls1", "d1")
+    //graph1 = graph1.addFilter(new PrintSink(), "ps1").connectNodes("d1","ps1")
+    
+    graph1 = graph1.addFilter(new MinFilter( (x:DataElement,y:DataElement) => x(0) > y(0) ),"noImin","noIminD").connectNodes("d1", "noImin")
+    //graph1 = graph1.addFilter(new PrintSink(), "ps1").connectNodes("noIminD","ps1")
+    
+    graph1 = graph1.addFilter(new MinFilter( (x:DataElement,y:DataElement) => x(0) > y(0), 5 ),"5min","5minD").connectNodes("d1", "5min")
+    //graph1 = graph1.addFilter(new PrintSink(), "ps1").connectNodes("5minD","ps1")
+    
+    graph1 = graph1.addFilter(new MaxFilter( (x:DataElement,y:DataElement) => x(0) > y(0) ),"noImax","noImaxD").connectNodes("d1", "noImax")
+    graph1 = graph1.addFilter(new PrintSink(), "ps1").connectNodes("noImaxD","ps1")
+    
+    graph1 = graph1.addFilter(new MaxFilter( (x:DataElement,y:DataElement) => x(0) > y(0), 5 ),"5max","5maxD").connectNodes("d1", "5max")
+    graph1 = graph1.addFilter(new PrintSink(), "ps1").connectNodes("5maxD","ps1")
+    
+    graph1.run()
+    
+  }
+  
+  def sortTest(){
+    var graph1 = SequentialGraph(false)
+    graph1 = graph1.addFilter(new ListSource(0,21,2), "ls1", "d1")
+    //graph1 = graph1.addFilter(new PrintSink(), "ps1").connectNodes("d1","ps1")
+    graph1 = graph1.addFilter(new SortFilter( (x:DataElement,y:DataElement) => x(0) > y(0)), "sf1", "sfd").connectNodes("d1","sf1")
+    graph1 = graph1.addFilter(new PrintSink(), "ps2").connectNodes("sfd","ps2")
+   
+    graph1.run()
+  }
+  
+  def fileInputTest(){
+    var graph1 = SequentialGraph(false)
+    graph1 = graph1.addFilter(new FileSource("test.txt"), "fs1", "d1")
+    graph1 = graph1.addFilter(new PrintSink(), "ps1").connectNodes("d1","ps1")
+    
+    graph1.run()
+  }
+  
+  def simpleTest(){
+    
+    
+    
+  }
+  
   def main(args: Array[String]): Unit = {
     //testHelp()
     //simpleListTest()
     //simpleFuncTest()
-    
     //linearFiltTest()
-     
-    singFuncTest()
+    //singFuncTest()
+    //fib(6).run()
+    //minmaxTest()
+    //sortTest()
+    //fileInputTest()
     
-    fib(6).run()
     
     
-    // min/max (i) forevery i elements give the min/max
-    // sort filters
-    
-    // fix functionfilter
-    // union for graphs
-    
-    // read from file
   }
       
 }

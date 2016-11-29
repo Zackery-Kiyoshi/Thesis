@@ -17,8 +17,10 @@ class PrintSink () extends Filter() {
         //var tmp = new Array[Double](i(j).length)
         //println( "V[" +  + "]")
         for (k <- 0 until i(j).length) {
-          // do it for i(j)(k)
-          println( i(j)(k) )
+          if(k ==0) print("(")
+          print( i(j)(k) )
+          if(k != i(j).length-1) print(", ")
+          else println(")")
         }
         //var De = new DataElement(tmp.toVector)
         //tmpDE = tmpDE :+ De 

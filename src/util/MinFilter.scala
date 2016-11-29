@@ -1,7 +1,7 @@
 package util
 
 // com returns true if the first is larger than the second
-class MinFilter(val n:Int = 0, val com:(DataElement,DataElement)=>Boolean) extends Filter {
+class MinFilter(val com:(DataElement,DataElement)=>Boolean, val n:Int = 0) extends Filter {
   val t = "MinFilter"
   
   override def apply(input:Vector[DataStore]):Vector[DataStore] = {
@@ -23,7 +23,8 @@ class MinFilter(val n:Int = 0, val com:(DataElement,DataElement)=>Boolean) exten
         for( i <- 0 until in.length by n){
           var min:DataElement = in(i)
           for( j <- i+1 to i+n){
-            if(com(min,in(j)))min = in(j)
+            if(in.length < j)
+              if(com(min,in(j)))min = in(j)
           }
           v = v :+ min
         }

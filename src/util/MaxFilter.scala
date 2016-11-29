@@ -1,6 +1,6 @@
 package util
 
-class MaxFilter(val n:Int = 0, val com:(DataElement,DataElement)=>Boolean) extends Filter {
+class MaxFilter(val com:(DataElement,DataElement)=>Boolean,val n:Int = 0) extends Filter {
   val t = "MaxFilter"
   
   override def apply(input:Vector[DataStore]):Vector[DataStore] = {
@@ -22,7 +22,8 @@ class MaxFilter(val n:Int = 0, val com:(DataElement,DataElement)=>Boolean) exten
         for( i <- 0 until in.length by n){
           var max:DataElement = in(i)
           for( j <- i+1 to i+n){
-            if(com(in(j),max))max = in(j)
+            if(in.length < j)
+              if(com(in(j),max))max = in(j)
           }
           v = v :+ max
         }

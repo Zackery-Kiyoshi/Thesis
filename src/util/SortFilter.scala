@@ -1,31 +1,17 @@
 package util
 
-class SortFilter() extends Filter() {
+class SortFilter(val c:(DataElement,DataElement)=>Boolean) extends Filter() {
   
   val t = "SortFilter"
   
   var input = 0;
-  var c:(Double,Double)=>Boolean = (x:Double, y:Double)=> x<y
+  
   
   override def apply(input: Vector[DataStore]): Vector[DataStore] = {
     var ret = Vector[DataStore]()
-    for (i <- input) {
-      var tmpDE:Vector[DataElement] = Vector.empty[DataElement]
-      for (j <- 0 until i.length) {
-        //var tmp:DataElement = i(j)
-        var tmp = new Array[Double](i(j).length)
-        for (k <- 0 until i(j).length) {
-          // collect all the elements i(j)(k)
-          tmp(k) = i(j)(k)
-        }
-        if(c==null) tmp.sortWith(c)
-        else tmp.sortWith(_<_)
-        var De = new DataElement(tmp.toVector)
-        tmpDE = tmpDE :+ De 
-      }
-      var t = new DataStore()
-      t.set(tmpDE)
-      ret = ret :+ t
+    for (i <- 0 until input.length) {
+      ret = ret :+ new DataStore()
+      ret(i).set(input(i).getVect().sortWith(c))
     }
     return ret
   }

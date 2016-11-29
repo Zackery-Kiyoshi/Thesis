@@ -188,7 +188,7 @@ class SequentialGraph private(
 
 
 object SequentialGraph {
-  def apply(b: Boolean = true): SequentialGraph = {
+  def apply(b: Boolean = false): SequentialGraph = {
     new SequentialGraph( Map[FKey, Filter](), List[FKey](), Map[DKey, DataStore](), List[DKey](), Map[FKey, Vector[DKey]](), Map[DKey, Vector[FKey]](), Map[FKey, Vector[DKey]](), 0, 0,b,null)
   }
   
