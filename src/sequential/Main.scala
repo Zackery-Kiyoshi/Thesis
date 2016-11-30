@@ -192,11 +192,26 @@ object Main {
     graph1.run()
   }
   
-  def simpleTest(){
-    
-    
-    
+  def funcTest(){
+    var g1 = SequentialGraph()
+    g1 = g1.addFilter(new ListSource(0,11,1), "s1", "sd1")
+    g1 = g1.addFilter(new ListSource(10,21,1), "s2", "sd2")
+    g1 = g1.addFilter(new FunctionFilter("x[0][0]+x[1][0]"),"l","d").connectNodes("sd1","l").connectNodes("sd2","l")
+    g1 = g1.addFilter(new PrintSink(), "ps3").connectNodes("d","ps3")
+    g1.run()
   }
+  
+  def simpleTest(){
+    var g1 = SequentialGraph()
+    g1 = g1.addFilter(new ListSource(0,11,1), "s1", "sd1")
+    g1 = g1.addFilter(new SortFilter( (x:DataElement,y:DataElement) => x(0) > y(0)), "sfg", "sfgd").connectNodes("sd1","sfg")
+    g1 = g1.addFilter(new SortFilter( (x:DataElement,y:DataElement) => x(0) < y(0)), "sfl", "sfld").connectNodes("sd1","sfl")
+    g1 = g1.addFilter(new FunctionFilter("x[0][0]*x[1][0]"),"times", "td").connectNodes("sfgd","times").connectNodes("sfld","times")
+    g1 = g1.addFilter(new PrintSink(), "ps1").connectNodes("td","ps1")
+    g1.run()
+  }
+  
+  
   
   def main(args: Array[String]): Unit = {
     //testHelp()
@@ -208,6 +223,9 @@ object Main {
     //minmaxTest()
     //sortTest()
     //fileInputTest()
+    //funcTest()
+    
+    //simpleTest()
     
     
     

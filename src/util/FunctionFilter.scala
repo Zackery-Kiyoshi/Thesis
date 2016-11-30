@@ -8,15 +8,15 @@ class FunctionFilter(val fsts:String, val m:Map[String,Double] = Map() ) extends
   val func:DoubleFormula = new DoubleFormula(fsts)
   
   override def apply(input: Vector[DataStore]): Vector[DataStore] = {
-    var ret = Vector[DataStore]()
-
     // need to actually get the ranges
     val r = DoubleFormula.safeRange(input ,func)
+    var tmp:Vector[DataElement] = Vector.empty
     for(i<-r){
-      func(i,input,null)
+      tmp = tmp :+ new DataElement(Vector.empty :+ func(i,input,null))
     }
-    
-    return ret;
+    var ret =Vector.empty :+ new DataStore()
+    ret(0).set(tmp)
+    return ret
   }
 
   
