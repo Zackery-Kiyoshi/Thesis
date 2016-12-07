@@ -37,6 +37,10 @@ class Graph (
   
   def apply(fstr: String): Filter = filtKeys(FKey(fstr))
   
+  def collect[A<:Filter]:Map[FKey,A]={
+    filtKeys.collect{ case (key:FKey, a:A)=> key -> a }
+  }
+  
   
   def viewInput(f:FKey):Vector[DKey]={
     funcToInputs(f)

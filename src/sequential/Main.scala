@@ -5,21 +5,15 @@ import util._
 object Main {
   
   def simpleListTest():Graph={
-    
     var func1 = "(2+3)*3"
-    
     var graph1:SequentialGraph = SequentialGraph(false)
-    
     graph1 = graph1.addFilter(new ListSource(0,10,1), "ls1")
     graph1 = graph1.addFilter(new PrintSink(), "ps1")
-    
     graph1 = graph1.connectNodes("data0", "ps1")
     //println("HERE")
     //graph1.printConnections()
-    
     //graph1.analyze()
     graph1.run()
-    
     // making a change
 //    /*
     graph1 = graph1.replace("ls1",new ListSource(0,20,2))
@@ -211,6 +205,15 @@ object Main {
     g1.run()
   }
   
+  def simpleTestChain(){
+    SequentialGraph()
+    .addFilter(new ListSource(0,11,1), "s1", "sd1")
+    .addFilter(new SortFilter( (x:DataElement,y:DataElement) => x(0) > y(0)), "sfg", "sfgd").connectNodes("sd1","sfg")
+    .addFilter(new SortFilter( (x:DataElement,y:DataElement) => x(0) < y(0)), "sfl", "sfld").connectNodes("sd1","sfl")
+    .addFilter(new FunctionFilter("x[0][0]*x[1][0]"),"times", "td").connectNodes("sfgd","times").connectNodes("sfld","times")
+    .addFilter(new PrintSink(), "ps1").connectNodes("td","ps1")
+    .run()
+  }
   
   
   def main(args: Array[String]): Unit = {
@@ -227,7 +230,7 @@ object Main {
     
     //simpleTest()
     
-    
+    simpleTestChain
     
   }
       
