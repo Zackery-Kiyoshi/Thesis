@@ -155,13 +155,6 @@ class SequentialGraph private(
   
 //  */
   
-  // will stop this graph from running safely
-  def terminate():Unit={
-    //
-    running=false
-    
-  }
-  
   def union(g:SequentialGraph):SequentialGraph={
     val newfiltKeys: Map[FKey, Filter] = filtKeys ++ g.filtKeys.filter( p => !fKeys.contains(p._1) )
     val newfKeys: List[FKey] = fKeys ++ g.fKeys.filter { x => !fKeys.contains(x) }
