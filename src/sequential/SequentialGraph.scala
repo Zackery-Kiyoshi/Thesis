@@ -83,7 +83,7 @@ class SequentialGraph private(
   }
   
   private def toSequentialGraph(g:Graph):SequentialGraph={
-    new SequentialGraph(g.filtKeys,g.fKeys,g.dataKeys,g.dKeys,g.funcToData,g.dataToFunc,g.funcToInputs,g.nextfkey,g.nextdkey,runOnModify,WeakReference(this))
+    new SequentialGraph(g.filtKeys,g.fKeys,g.dataKeys,g.dKeys,g.funcToData,g.dataToFunc,g.funcToInputs,g.nextfkey,g.nextdkey,g.runOnModify,parent)
   }
   
   
@@ -138,7 +138,7 @@ class SequentialGraph private(
     // in creation each need filter needs to know how many of each
     var i=0
     //println(funcToData(todo(0)).length)
-    //println("  " + rezData.length)
+    //println("  " + rezData.len gth)
     for(d<- funcToData(todo(0))){
       // update dataStores
       //for sinks
