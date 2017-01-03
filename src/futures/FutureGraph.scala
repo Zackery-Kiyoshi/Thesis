@@ -97,17 +97,17 @@ class FutureGraph(
         // in creation each need filter needs to know how many of each
 
         // update output datastores
-        var i = 0
+        var j = 0
         //println(funcToData(todo(0)).length)
         //println("  " + rezData.len gth)
-        for (d <- funcToData(fKeys(i))) {
+        for (d <- funcToData(fKeys(j))) {
           // update dataStores
           //for sinks
-          if (i < rezData.length) {
+          if (j < rezData.length) {
             //Future{rezData(i)}
             //        println("HERE " + Future{rezData(i)} + ";")
-            tmpDataKeys(d) = Future { rezData(i) }
-            i += 1
+            tmpDataKeys(d) = Future { rezData(j) }
+            j += 1
           }
         }
       }
