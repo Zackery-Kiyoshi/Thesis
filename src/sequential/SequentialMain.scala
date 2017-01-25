@@ -2,7 +2,7 @@ package sequential
 
 import util._
 
-object Main {
+object SequentialMain {
   
   def simpleListTest():Graph={
     var func1 = "(2+3)*3"
@@ -218,7 +218,7 @@ object Main {
   
   def main(args: Array[String]): Unit = {
     //testHelp()
-    //simpleListTest()
+    simpleListTest()
     //simpleFuncTest()
     //linearFiltTest()
     //singFuncTest()
@@ -230,7 +230,7 @@ object Main {
     
     //simpleTest()
     
-    simpleTestChain
+    //simpleTestChain
     
   }
       

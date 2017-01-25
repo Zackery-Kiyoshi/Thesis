@@ -4,6 +4,7 @@ import scala.ref.WeakReference
 import scala.concurrent.{ Await, Future }
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
+import scala.collection.mutable.ListBuffer
 
 import util._
 
@@ -76,52 +77,63 @@ class FutureGraph(
     toFutureGraph(ret)
   }
 
-  def run(l: List[Int] = List.empty): Future[FutureGraph] = {
+  def run(l: Vector[Int] = Vector.empty): Future[FutureGraph] = {
     return Future {
-      var ret = copy()
       var tmp: List[Future[Unit]] = List.empty
-      var todo: List[Int] = if (l.length == 0) List.range(0, fKeys.length - 1) else l
-
-      for (i <- 0 until todo.length) {
-        val tmpDataKeys: collection.mutable.Map[DKey, Future[DataStore]] = collection.mutable.Map(dataKeys.toSeq: _*)
-        // need to get the correct input data
-        val data: Vector[Future[DataStore]] = (for (d <- dKeys; if (dataToFunc(d).contains(fKeys(i)))) yield {
-          dataKeys(d)
-        }).toVector
-        //if(data.length >0)
-        //println( data.length + ":" + data(0) )
-
-        // actual computation
-        val d: Vector[DataStore] = Await.result(Future.sequence(data), Int.MaxValue nanos)
-        val rezData: Vector[DataStore] = filtKeys(fKeys(i)).apply(d)
-        // in creation each need filter needs to know how many of each
-
-        // update output datastores
-        var j = 0
-        //println(funcToData(todo(0)).length)
-        //println("  " + rezData.len gth)
-        for (d <- funcToData(fKeys(j))) {
-          // update dataStores
-          //for sinks
-          if (j < rezData.length) {
-            //Future{rezData(i)}
-            //        println("HERE " + Future{rezData(i)} + ";")
-            tmpDataKeys(d) = Future { rezData(j) }
-            j += 1
-          }
-        }
+      var todo: Vector[Int] = if (l.length == 0) Vector.range(0, fKeys.length - 1) else l
+      
+      //todo.par.foreach { i => tmp = runNode(i) :: tmp }
+      println(fKeys.length)
+      for(i <- todo.length to 0){
+        println("HERE:" + i)
+        tmp = runNode(todo(i)) :: tmp
       }
-
+      
       val seq = Future.sequence(tmp)
-      Await.ready(seq, Int.MaxValue nanos)
-      ret
+      Await.ready(seq, Duration.Inf)
+      this
     }
   }
 
-  def run(i: Int) {
+  private def runNode(i: Int): Future[Unit] = {
+    Future {
+      println("" + fKeys(i))
+      val tmpDataKeys: collection.mutable.Map[DKey, Future[DataStore]] = collection.mutable.Map(dataKeys.toSeq: _*)
+      // need to get the correct input data
+      val data: Vector[DataStore] = (for (d <- dKeys; if (dataToFunc(d).contains(fKeys(i)))) yield {
+        var tm = Await.result(dataKeys(d), Duration.Inf)
+        while (tm.getVect() == null) {
+          Thread.sleep(1)
+          tm = Await.result(dataKeys(d), Duration.Inf)
+        }
+        tm
+      }).toVector
+
+      val rezData: Vector[DataStore] = filtKeys(fKeys(i)).apply(data)
+      // in creation each need filter needs to know how many of each
+      println("" + fKeys(i))
+      // update output datastores
+      var j = 0
+      //println(funcToData(todo(0)).length)
+      //println("  " + rezData.len gth)
+      for (d <- funcToData(fKeys(i))) {
+        // update dataStores
+        //for sinks
+        if (j < rezData.length) {
+          //Future{rezData(i)}
+          //        println("HERE " + Future{rezData(i)} + ";")
+          Await.result(dataKeys(dKeys(j)), Duration.Inf).set(rezData(j).getVect())
+          j += 1
+        }
+      }
+    }
+  }
+
+  override def run() {
     //val curNode = filtKeys(fKeys(i))
     // need to get inputs then Await for the results
-
+    val tmp = run(Vector.empty)
+    Await.result(tmp, Duration.Inf)
   }
 
   // don't need topoSort (parallelism deals with dependencies)
