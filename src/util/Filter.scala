@@ -18,9 +18,9 @@ abstract class Filter() {
     return ret;
   }
   
-  def update(changes:NodeChange){
-    
-  }
+//  def update(changes:NodeChange){
+//    
+//  }
   
   
 }

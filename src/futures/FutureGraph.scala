@@ -83,6 +83,7 @@ class FutureGraph(
 
     // for each FKey call make Fut
     for (i <- 0 until fKeys.length) {
+			println("Making future on "+i)
       makeFut(fKeys(i))
     }
 
@@ -90,18 +91,18 @@ class FutureGraph(
       if (futs.contains(f)) return futs(f)
       else {
         println("inMF:" + f + " " + funcToInputs(f).length)
-        var input: Vector[Future[DataStore]] = Vector.empty
-        val fs = funcToInputs(f).map(x => makeFut(x.key))
-        println()
-        for (d <- funcToInputs(f)) {
-          println(f + ""+ futs(d.key))
-          while( futs(d.key) == null) { println("T") }
+        funcToInputs(f).foreach(x => makeFut(x.key))
+        println("fs built")
+//        val input = for (d <- funcToInputs(f)) yield {
+//          println(f + "  "+ futs(d.key))
+//          while( futs(d.key) == null) { println("T") }
           
           //while(dataKeys(d) == Future{DataStore()}){ println("TEST") }
-          input = input :+ dataKeys(d)
-        }
+//          dataKeys(d)
+//        }
         
-        val output: Future[Vector[DataStore]] = Future.sequence(input).map(filtKeys(f).apply(_))
+//        val output: Future[Vector[DataStore]] = Future.sequence(fs).map(filtKeys(f).apply(_))
+				val output: Future[Vector[DataStore]] = Future.sequence(funcToInputs(f).map { case DKey(fkey, i) => futs(fkey).map(_(i)) }).map(filtKeys(f)(_))
         futs(f) = output
         println("end:" + f)
         // run on next???

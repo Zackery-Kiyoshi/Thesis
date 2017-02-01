@@ -19,7 +19,7 @@ class FunctionFilter(val fsts:String, val m:Map[String,Double] = Map() ) extends
     return ret
   }
 
-  
+/*  
   override def update(changes:NodeChange){
     
     for(c <- changes.changes){
@@ -40,7 +40,7 @@ class FunctionFilter(val fsts:String, val m:Map[String,Double] = Map() ) extends
     }
     
   }
-  
+  */
 }
 
   

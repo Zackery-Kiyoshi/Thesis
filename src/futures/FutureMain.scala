@@ -230,6 +230,8 @@ object FutureMain {
     
     //simpleTest()
     //simpleTestChain
+		println("Waiting for an input.")
+		io.StdIn.readLine
   }
       
 }
