@@ -11,6 +11,7 @@ class DataStore() {
   def set(t:Vector[DataElement]){ if(out == null) out = t }
   def add(d:DataElement) { out = out :+ d }
   def getVect():Vector[DataElement] = out
+  def isEmpty():Boolean = out == null
 }
 
 object DataStore {

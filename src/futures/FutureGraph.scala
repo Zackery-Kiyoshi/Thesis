@@ -77,63 +77,48 @@ class FutureGraph(
     toFutureGraph(ret)
   }
 
-  def run(l: Vector[Int] = Vector.empty): Future[FutureGraph] = {
-    return Future {
-      var tmp: List[Future[Unit]] = List.empty
-      var todo: Vector[Int] = if (l.length == 0) Vector.range(0, fKeys.length - 1) else l
-      
-      //todo.par.foreach { i => tmp = runNode(i) :: tmp }
-      println(fKeys.length)
-      for(i <- todo.length to 0){
-        println("HERE:" + i)
-        tmp = runNode(todo(i)) :: tmp
-      }
-      
-      val seq = Future.sequence(tmp)
-      Await.ready(seq, Duration.Inf)
-      this
+  // : Future[FutureGraph] =
+  def run(l: Vector[Int] = Vector.empty) {
+    val futs = scala.collection.mutable.Map[FKey, Future[Vector[DataStore]]]()
+
+    // for each FKey call make Fut
+    for (i <- 0 until fKeys.length) {
+      makeFut(fKeys(i))
     }
-  }
 
-  private def runNode(i: Int): Future[Unit] = {
-    Future {
-      println("" + fKeys(i))
-      val tmpDataKeys: collection.mutable.Map[DKey, Future[DataStore]] = collection.mutable.Map(dataKeys.toSeq: _*)
-      // need to get the correct input data
-      val data: Vector[DataStore] = (for (d <- dKeys; if (dataToFunc(d).contains(fKeys(i)))) yield {
-        var tm = Await.result(dataKeys(d), Duration.Inf)
-        while (tm.getVect() == null) {
-          Thread.sleep(1)
-          tm = Await.result(dataKeys(d), Duration.Inf)
+    def makeFut(f: FKey): Future[Vector[DataStore]] = {
+      if (futs.contains(f)) return futs(f)
+      else {
+        println("inMF:" + f + " " + funcToInputs(f).length)
+        var input: Vector[Future[DataStore]] = Vector.empty
+        val fs = funcToInputs(f).map(x => makeFut(x.key))
+        println()
+        for (d <- funcToInputs(f)) {
+          println(f + ""+ futs(d.key))
+          while( futs(d.key) == null) { println("T") }
+          
+          //while(dataKeys(d) == Future{DataStore()}){ println("TEST") }
+          input = input :+ dataKeys(d)
         }
-        tm
-      }).toVector
-
-      val rezData: Vector[DataStore] = filtKeys(fKeys(i)).apply(data)
-      // in creation each need filter needs to know how many of each
-      println("" + fKeys(i))
-      // update output datastores
-      var j = 0
-      //println(funcToData(todo(0)).length)
-      //println("  " + rezData.len gth)
-      for (d <- funcToData(fKeys(i))) {
-        // update dataStores
-        //for sinks
-        if (j < rezData.length) {
-          //Future{rezData(i)}
-          //        println("HERE " + Future{rezData(i)} + ";")
-          Await.result(dataKeys(dKeys(j)), Duration.Inf).set(rezData(j).getVect())
-          j += 1
-        }
+        
+        val output: Future[Vector[DataStore]] = Future.sequence(input).map(filtKeys(f).apply(_))
+        futs(f) = output
+        println("end:" + f)
+        // run on next???
+        
+        
+        
+        return output
       }
     }
+
   }
 
   override def run() {
     //val curNode = filtKeys(fKeys(i))
     // need to get inputs then Await for the results
     val tmp = run(Vector.empty)
-    Await.result(tmp, Duration.Inf)
+    //Await.result(tmp, Duration.Inf)
   }
 
   // don't need topoSort (parallelism deals with dependencies)

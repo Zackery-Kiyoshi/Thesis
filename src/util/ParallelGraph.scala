@@ -52,13 +52,13 @@ class ParallelGraph (
   
   def addFilter(filter:Filter, fName: String = "", dName: String = ""): ParallelGraph = {
     val (fkey, nextf) = if (fName=="") (FKey("filt"+nextfkey), nextfkey+1) else (FKey(fName),nextfkey)
-    val (dkey, nextd) = if (dName=="") (DKey("data"+nextdkey), nextdkey+1) else (DKey(dName),nextdkey)
+    val (dkey, nextd) = (DKey(fkey,0), nextdkey)
 
     //TODO - This doesn't add a multiple datastore for the filters
     
     val tmp = filtKeys + (fkey -> filter)
     new ParallelGraph(filtKeys + (fkey -> filter), fkey::fKeys, dataKeys+(dkey -> Future{ DataStore() } ), dkey::dKeys, funcToData + (fkey -> Vector.empty.+:(dkey)),
-        dataToFunc+(dkey -> Vector.empty ),funcToInputs+ (fkey -> Vector.empty.+:(dkey)), nextf, nextd,runOnModify,WeakReference(this))
+        dataToFunc+(dkey -> Vector.empty ),funcToInputs+ (fkey -> Vector.empty), nextf, nextd,runOnModify,WeakReference(this))
   }
  
   def connectNodes(d: DKey, f: FKey): ParallelGraph = {
@@ -288,7 +288,8 @@ class ParallelGraph (
   protected def getDKey(s: String): DKey = {
     var ret: DKey = null
     for (i <- 0 until dKeys.length) {
-      if (dKeys(i).key == s) ret = dKeys(i)
+      //println(dKeys(i))
+      if (dKeys(i).key.key == s) ret = dKeys(i)
     }
     return ret
   }

@@ -9,7 +9,7 @@ object FutureMain {
     var graph1:FutureGraph = FutureGraph(false)
     graph1 = graph1.addFilter(new ListSource(0,10,1), "ls1")
     graph1 = graph1.addFilter(new PrintSink(), "ps1")
-    graph1 = graph1.connectNodes("data0", "ps1")
+    graph1 = graph1.connectNodes("ls1", "ps1")
     //println("HERE")
     //graph1.printConnections()
     //graph1.analyze()

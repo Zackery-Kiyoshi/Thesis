@@ -10,7 +10,7 @@ class PrintSink () extends Filter() {
   
   override def apply(input: Vector[DataStore]): Vector[DataStore] = {
     var ret = Vector[DataStore]()
-
+    println("PrintSink {")
     for (i <- input) {
       //var tmpDE:Vector[DataElement] = Vector.empty[DataElement]
       for (j <- 0 until i.length) {
@@ -18,10 +18,11 @@ class PrintSink () extends Filter() {
         //println( "V[" +  + "]")
         for (k <- 0 until i(j).length) {
           if(k ==0) print("(")
+          else  print(", ")
           print( i(j)(k) )
-          if(k != i(j).length-1) print(", ")
-          else println(")")
+          //if(k == i(j).length-1)
         }
+        println(")")
         //var De = new DataElement(tmp.toVector)
         //tmpDE = tmpDE :+ De 
       }
@@ -29,6 +30,7 @@ class PrintSink () extends Filter() {
       //t.set(tmpDE)
       //ret = ret :+ t
     }
+    println("}")
 
     return ret;
   }
