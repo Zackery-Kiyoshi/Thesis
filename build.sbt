@@ -1,11 +1,12 @@
 
- /*
-lazy val util = (project in file("util")).
-  enablePlugins(sbteclipse-plugin)
+
+/*
+lazy val root = (project in file(".")).
+  enablePlugins(sbteclipse)
 
 
 // */
-
+sbtPlugin := true
 name := "ZackThesis"
 
 version := "1.0"
