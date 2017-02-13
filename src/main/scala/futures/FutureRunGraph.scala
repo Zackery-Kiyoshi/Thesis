@@ -19,7 +19,7 @@ class FutureRunGraph(
     override val nextfkey: Int,
     override val nextdkey: Int,
     override val runOnModify: Boolean,
-    override val parent: WeakReference[FutureGraph],
+    override val parent: WeakReference[FutureRunGraph],
     val futs: scala.collection.mutable.Map[FKey, Future[Vector[DataStore]]]) extends ParallelGraph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc, funcToInputs, nextfkey, nextdkey, runOnModify, parent) {
 
   override def setInput(f: FKey, newInputs: Vector[DKey]): FutureGraph = {
@@ -140,11 +140,9 @@ class FutureRunGraph(
   }
 
 
-  def ClearDownstreamFuts(f:FKey):Map[FKey, Future[Vector[DataStore]]]={
-    var tmp = futs.copy()
-    
+  def ClearDownstreamFuts(f:FKey):scala.collection.mutable.Map[FKey, Future[Vector[DataStore]]]={
+    var tmp = futs
     var cur:List[FKey] = (f) :: List() 
-    
     while(cur.length != 0){
       for( i <- funcToData(cur(0))){
         cur = cur ::: dataToFunc(i).toList
@@ -165,9 +163,9 @@ class FutureRunGraph(
 
 }
 
-object FutureGraph {
+object FutureRunGraph {
   def apply(b: Boolean = false): FutureGraph = {
-    new FutureGraph(Map[FKey, Filter](), List[FKey](), Map[DKey, Future[DataStore]](), List[DKey](), Map[FKey, Vector[DKey]](), Map[DKey, Vector[FKey]](), Map[FKey, Vector[DKey]](), 0, 0, b, null)
+    new FutureRunGraph(Map[FKey, Filter](), List[FKey](), Map[DKey, Future[DataStore]](), List[DKey](), Map[FKey, Vector[DKey]](), Map[DKey, Vector[FKey]](), Map[FKey, Vector[DKey]](), 0, 0, b, null,Map[FKey, Future[Vector[DataStore]]]())
   }
 }
 
