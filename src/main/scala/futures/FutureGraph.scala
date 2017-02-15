@@ -19,10 +19,12 @@ class FutureGraph(
     override val nextfkey: Int,
     override val nextdkey: Int,
     override val runOnModify: Boolean,
-    override val parent: WeakReference[FutureGraph]) extends ParallelGraph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc, funcToInputs, nextfkey, nextdkey, runOnModify, parent) {
+    override val parent: WeakReference[FutureGraph],
+    val futs: scala.collection.mutable.Map[FKey, Future[Vector[DataStore]]]
+    ) extends ParallelGraph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc, funcToInputs, nextfkey, nextdkey, runOnModify, parent) {
 
   override def setInput(f: FKey, newInputs: Vector[DKey]): FutureGraph = {
-    new FutureGraph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc, funcToInputs + (f -> newInputs), nextfkey, nextdkey, runOnModify, WeakReference(this))
+    new FutureGraph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc, funcToInputs + (f -> newInputs), nextfkey, nextdkey, runOnModify, WeakReference(this),futs)
   }
   override def setInput(f: String, newInputs: Vector[DKey]): FutureGraph = {
     var ret = toFutureGraph(super.setInput(f, newInputs))
@@ -78,20 +80,13 @@ class FutureGraph(
   }
 
   // : Future[FutureGraph] =
-  def run(l: Vector[Int] = Vector.empty) {
-    val futs = scala.collection.mutable.Map[FKey, Future[Vector[DataStore]]]()
-
-    // for each FKey call make Fut
-    for (i <- 0 until fKeys.length) {
-			println("Making future on "+i)
-      makeFut(fKeys(i))
-    }
-
-    def makeFut(f: FKey): Future[Vector[DataStore]] = {
+  def makeFuts():scala.collection.mutable.Map[FKey, Future[Vector[DataStore]]]= {
+    
+    def mFut(f: FKey): Future[Vector[DataStore]] = {
       if (futs.contains(f)) return futs(f)
       else {
         println("inMF:" + f + " " + funcToInputs(f).length)
-        funcToInputs(f).foreach(x => makeFut(x.key))
+        funcToInputs(f).foreach(x => mFut(x.key))
         println("fs built")
 //        val input = for (d <- funcToInputs(f)) yield {
 //          println(f + "  "+ futs(d.key))
@@ -112,14 +107,18 @@ class FutureGraph(
         return output
       }
     }
-
+    
+    val futs = scala.collection.mutable.Map[FKey, Future[Vector[DataStore]]]()
+    // for each FKey call make Fut
+    for (i <- 0 until fKeys.length) {
+			println("Making future on "+i)
+      mFut(fKeys(i))
+    }
+    return futs;
   }
 
-  override def run() {
-    //val curNode = filtKeys(fKeys(i))
-    // need to get inputs then Await for the results
-    val tmp = run(Vector.empty)
-    //Await.result(tmp, Duration.Inf)
+  def run():FutureRunGraph= {
+    return new FutureRunGraph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc, funcToInputs, nextfkey, nextdkey, runOnModify, WeakReference(this),makeFuts())
   }
 
   // don't need topoSort (parallelism deals with dependencies)
@@ -134,22 +133,23 @@ class FutureGraph(
     val newfuncToInputs: Map[FKey, Vector[DKey]] = funcToInputs ++ g.funcToInputs.filter(p => !fKeys.contains(p._1))
     val newnextfkey: Int = if (nextfkey > g.nextfkey) nextfkey else g.nextfkey;
     val newnextdkey: Int = if (nextdkey > g.nextdkey) nextdkey else g.nextdkey;
-    return new FutureGraph(newfiltKeys, newfKeys, newdataKeys, newdKeys, newfuncToData, newdataToFunc, newfuncToInputs, newnextfkey, newnextdkey, runOnModify, WeakReference(this))
+    val newFuts = futs ++ g.futs.filter(p => !fKeys.contains(p._1))
+    return new FutureGraph(newfiltKeys, newfKeys, newdataKeys, newdKeys, newfuncToData, newdataToFunc, newfuncToInputs, newnextfkey, newnextdkey, runOnModify, WeakReference(this),newFuts)
   }
 
   def copy(): FutureGraph = {
-    return new FutureGraph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc, funcToInputs, nextfkey, nextdkey, runOnModify, parent)
+    return new FutureGraph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc, funcToInputs, nextfkey, nextdkey, runOnModify, parent,futs)
   }
 
   private def toFutureGraph(g: ParallelGraph): FutureGraph = {
-    return new FutureGraph(g.filtKeys, g.fKeys, g.dataKeys, g.dKeys, g.funcToData, g.dataToFunc, g.funcToInputs, g.nextfkey, g.nextdkey, g.runOnModify, parent)
+    return new FutureGraph(g.filtKeys, g.fKeys, g.dataKeys, g.dKeys, g.funcToData, g.dataToFunc, g.funcToInputs, g.nextfkey, g.nextdkey, g.runOnModify, parent,futs)
   }
 
 }
 
 object FutureGraph {
   def apply(b: Boolean = false): FutureGraph = {
-    new FutureGraph(Map[FKey, Filter](), List[FKey](), Map[DKey, Future[DataStore]](), List[DKey](), Map[FKey, Vector[DKey]](), Map[DKey, Vector[FKey]](), Map[FKey, Vector[DKey]](), 0, 0, b, null)
+    new FutureGraph(Map[FKey, Filter](), List[FKey](), Map[DKey, Future[DataStore]](), List[DKey](), Map[FKey, Vector[DKey]](), Map[DKey, Vector[FKey]](), Map[FKey, Vector[DKey]](), 0, 0, b, null,scala.collection.mutable.Map[FKey, Future[Vector[DataStore]]]())
   }
 }
 
