@@ -284,7 +284,7 @@ class Graph (
     }
     
     // List of edges
-    var edges:List[Pair[FKey,FKey]] = List.empty
+    var edges:List[(FKey,FKey)] = List.empty
     for(f <- fKeys){
       for(d <- funcToData(f)){
         for(i <- dataToFunc(d)){
