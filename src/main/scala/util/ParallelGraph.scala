@@ -28,15 +28,15 @@ abstract class ParallelGraph (
     viewInput(getFKey(f))
   }
   
-  def setInput[G <: ParallelGraph](f:FKey,newInputs:Vector[DKey]):G
+  def setInput(f:FKey,newInputs:Vector[DKey]):ParallelGraph
   def setInputHelper(f:FKey,newInputs:Vector[DKey]):Map[FKey, Vector[DKey]]={
     return funcToInputs+(f->newInputs)
   }
-  def setInput[G <: ParallelGraph](f:String,newInputs:Vector[DKey]):G={
+  def setInput(f:String,newInputs:Vector[DKey]):ParallelGraph={
     setInput(getFKey(f),newInputs)
   }
   
-  def replace[G <: ParallelGraph](fstr: String, f2: Filter): G
+  def replace(fstr: String, f2: Filter): ParallelGraph
   def replaceHelper(fstr: String, f2: Filter): (Map[FKey, Filter],Map[DKey, Future[DataStore]]) = {
     var tmp = ClearDownstream(FKey(fstr))
     
@@ -45,14 +45,14 @@ abstract class ParallelGraph (
     return (filtKeys.map { case (k, f) => if(k.key == fstr) k -> f2 else k -> f },tmp)
   }
   
-  def modify[G <: ParallelGraph](fstr: String)(func: Filter => Filter):G
+  def modify(fstr: String)(func: Filter => Filter):ParallelGraph
   def modifyHelper(fstr: String)(func: Filter => Filter):(Map[FKey, Filter],Map[DKey, Future[DataStore]]) = {
     var tmp = ClearDownstream(FKey(fstr))
     return (filtKeys.map { case (k, f) => if(k.key == fstr) k -> func(f) else k -> f }, tmp)
   }
   
-  def addFilter[G <: ParallelGraph](filter:Filter, fName: String):G
-  def addFilter[G <: ParallelGraph](filter:Filter):G
+  def addFilter(filter:Filter, fName: String):ParallelGraph
+  def addFilter(filter:Filter):ParallelGraph
   def addFilterHelper(filter:Filter, fName: String = ""): ( Map[FKey, Filter], List[FKey],Map[DKey, Future[DataStore]],List[DKey],Map[FKey, Vector[DKey]],Map[DKey, Vector[FKey]],Map[FKey, Vector[DKey]],Int,Int ) = {
     val (fkey, nextf) = if (fName=="") (FKey("filt"+nextfkey), nextfkey+1) else (FKey(fName),nextfkey)
     val (dkey, nextd) = (DKey(fkey,0), nextdkey)
@@ -65,7 +65,7 @@ abstract class ParallelGraph (
   }
  
   
-  def connectNodes[G <: ParallelGraph](d: DKey, f: FKey): G
+  def connectNodes(d: DKey, f: FKey): ParallelGraph
   def connectNodesHelper(d: DKey, f: FKey): (Map[DKey, Vector[FKey]],Map[FKey, Vector[DKey]]) = {
     // need to actually add f to dataToFunc(d)
     var tmp:Vector[FKey] = dataToFunc(d)
@@ -74,11 +74,11 @@ abstract class ParallelGraph (
     //for(i <- tmp) println(i.key)
     return (dataToFunc + (d -> tmp ),funcToInputs+(f->tmpInputs))
   }
-  def connectNodes[G <: ParallelGraph](d:String, f:String): G = {
+  def connectNodes(d:String, f:String): ParallelGraph = {
     return connectNodes(getDKey(d),getFKey(f))
   }
   
-  def disconnectNodes[G <: ParallelGraph](d: DKey, f: FKey):G
+  def disconnectNodes(d: DKey, f: FKey):ParallelGraph
   def disconnectNodesHelper(d: DKey, f: FKey): ( Map[DKey, Vector[FKey]],Map[FKey, Vector[DKey]] ) = {
     // need to actually remove (f) from dataToFunc(d)
     var tmp:Vector[FKey] = Vector.empty
@@ -88,11 +88,11 @@ abstract class ParallelGraph (
     
     return (dataToFunc + (d -> tmp ),funcToInputs+(f->tmpInputs))
   }
-  def disconnectNodes[G <: ParallelGraph](d:String, f:String): ParallelGraph = {
+  def disconnectNodes(d:String, f:String): ParallelGraph = {
     return disconnectNodes(getDKey(d),getFKey(f))
   }
    
-  def removeNode[G <: ParallelGraph](f: FKey):G
+  def removeNode(f: FKey):ParallelGraph
   def removeNodeHelper(f: FKey): ( Map[FKey, Filter], List[FKey],Map[DKey, Future[DataStore]],List[DKey],Map[FKey, Vector[DKey]],Map[DKey, Vector[FKey]],Map[FKey, Vector[DKey]] ) = {
     // must delete associated DataNodes
     var d = funcToData(f)
@@ -108,7 +108,7 @@ abstract class ParallelGraph (
     // delete the actual node
     return (filtKeys-f, fKeys.filter(_!=f), tmpDataKeys, tmpdKeys, funcToData-f, tmpDataToFunc,funcToInputs-f)
   }
-  def removeNode[G <: ParallelGraph](f: String): G = {
+  def removeNode(f: String): ParallelGraph = {
     var ret: FKey = null
     // find the fkey
     for (i <- 0 until fKeys.length) {
@@ -163,7 +163,7 @@ abstract class ParallelGraph (
     return ret
   }
 
-  def run[G <: ParallelGraph]():G
+  def run():ParallelGraph
   
   def printNodes(): String = { /* {Key, NodeType } */
     var ret = ""
@@ -209,7 +209,7 @@ abstract class ParallelGraph (
     return ret
   }
   
-  def union[G <: ParallelGraph](g:G):G /*={
+  def union(g:ParallelGraph):ParallelGraph /*={
     val newfiltKeys: Map[FKey, Filter] = filtKeys ++ g.filtKeys.filter( p => !fKeys.contains(p._1) )
     val newfKeys: List[FKey] = fKeys ++ g.fKeys.filter { x => !fKeys.contains(x) }
     val newdataKeys: Map[DKey, Future[DataStore]] = dataKeys ++ g.dataKeys.filter( p => !dKeys.contains(p._1) )
@@ -222,7 +222,7 @@ abstract class ParallelGraph (
     return new ParallelGraph(newfiltKeys, newfKeys, newdataKeys, newdKeys, newfuncToData, newdataToFunc,newfuncToInputs, newnextfkey, newnextdkey,runOnModify,WeakReference(this))
   } */
 
-  def setRunOnModify[G <: ParallelGraph](b:Boolean):G
+  def setRunOnModify(b:Boolean):ParallelGraph
   
   private def ClearDownstream(f:FKey):Map[DKey, Future[DataStore]]={
     var tmp:Map[DKey, Future[DataStore]] = dataKeys

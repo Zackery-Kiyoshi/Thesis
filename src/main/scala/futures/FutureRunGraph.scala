@@ -64,7 +64,7 @@ class FutureRunGraph(
   
   // don't need topoSort (parallelism deals with dependencies)
 
-  def union(g: FutureRunGraph): FutureRunGraph = {
+  override def union(g: FutureRunGraph): FutureRunGraph = {
     val newfiltKeys: Map[FKey, Filter] = filtKeys ++ g.filtKeys.filter(p => !fKeys.contains(p._1))
     val newfKeys: List[FKey] = fKeys ++ g.fKeys.filter { x => !fKeys.contains(x) }
     val newdataKeys: Map[DKey, Future[DataStore]] = dataKeys ++ g.dataKeys.filter(p => !dKeys.contains(p._1))

@@ -24,53 +24,53 @@ class FutureGraph(
     ) extends ParallelGraph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc, funcToInputs, nextfkey, nextdkey, runOnModify, parent) {
 
   //new FutureGraph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc, funcToInputs, nextfkey, nextdkey, runOnModify, WeakReference(this),futs)
-  def setInput(f: FKey, newInputs: Vector[DKey]): FutureGraph = {
+  override def setInput(f: FKey, newInputs: Vector[DKey]): FutureGraph = {
     new FutureGraph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc, funcToInputs + (f -> newInputs), nextfkey, nextdkey, runOnModify, WeakReference(this),futs)
   }
-  def setInput(f: String, newInputs: Vector[DKey]): FutureGraph = {
+  override def setInput(f: String, newInputs: Vector[DKey]): FutureGraph = {
     setInput(getFKey(f), newInputs)
   }
 
-  def replace(fstr: String, f2: Filter): FutureGraph = {
+  override def replace(fstr: String, f2: Filter): FutureGraph = {
     var ret = replaceHelper(fstr, f2)
     new FutureGraph(ret._1, fKeys, ret._2, dKeys, funcToData, dataToFunc, funcToInputs, nextfkey, nextdkey, runOnModify, WeakReference(this),futs)
   }
 
-  def modify(fstr: String)(func: Filter => Filter): FutureGraph = {
+  override def modify(fstr: String)(func: Filter => Filter): FutureGraph = {
     var ret = modifyHelper(fstr)(func)
     new FutureGraph(ret._1, fKeys, ret._2, dKeys, funcToData, dataToFunc, funcToInputs, nextfkey, nextdkey, runOnModify, WeakReference(this),futs)
   }
 
-  def addFilter(filter: Filter, fName: String): FutureGraph = {
+  override def addFilter(filter: Filter, fName: String): FutureGraph = {
     var ret = addFilterHelper(filter, fName)
     new FutureGraph(ret._1, ret._2, ret._3, ret._4, ret._5, ret._6, ret._7, ret._8, ret._9, runOnModify, WeakReference(this),futs)
   }
-  def addFilter(filter: Filter): FutureGraph = {
+  override def addFilter(filter: Filter): FutureGraph = {
     var ret = addFilterHelper(filter, "")
     new FutureGraph(ret._1, ret._2, ret._3, ret._4, ret._5, ret._6, ret._7, ret._8, ret._9, runOnModify, WeakReference(this),futs)
   }
 
-  def connectNodes(d: DKey, f: FKey): FutureGraph = {
+  override def connectNodes(d: DKey, f: FKey): FutureGraph = {
     var ret = connectNodesHelper(d, f)
     new FutureGraph(filtKeys, fKeys, dataKeys, dKeys, funcToData, ret._1, ret._2, nextfkey, nextdkey, runOnModify, WeakReference(this),futs)
   }
-  def connectNodes(d: String, f: String): FutureGraph = {
+  override def connectNodes(d: String, f: String): FutureGraph = {
     connectNodes(getDKey(d),getFKey(f))
   }
 
-  def disconnectNodes(d: DKey, f: FKey): FutureGraph = {
+  override def disconnectNodes(d: DKey, f: FKey): FutureGraph = {
     var ret = disconnectNodesHelper(d,f)
     new FutureGraph(filtKeys, fKeys, dataKeys, dKeys, funcToData, ret._1, ret._2, nextfkey, nextdkey, runOnModify, WeakReference(this),futs)
   }
-  override def disconnectNodes[G <: ParallelGraph](d: String, f: String): FutureGraph = {
+  override def disconnectNodes(d: String, f: String): FutureGraph = {
     disconnectNodes(getDKey(d),getFKey(f))
   }
 
-  def removeNode(f: FKey): FutureGraph = {
+  override def removeNode(f: FKey): FutureGraph = {
     var ret = removeNodeHelper(f)
     new FutureGraph(ret._1, ret._2, ret._3, ret._4, ret._5, ret._6, ret._7, nextfkey, nextdkey, runOnModify, WeakReference(this),futs)
   }
-  def removeNode(f: String): FutureGraph = {
+  override def removeNode(f: String): FutureGraph = {
     removeNode(getFKey(f))
   }
 
@@ -118,7 +118,21 @@ class FutureGraph(
 
   // don't need topoSort (parallelism deals with dependencies)
 
-  def union[G <: ParallelGraph](g: FutureGraph): FutureGraph = {
+  
+  override def union(g:ParallelGraph):FutureGraph={
+    val newfiltKeys: Map[FKey, Filter] = filtKeys ++ g.filtKeys.filter(p => !fKeys.contains(p._1))
+    val newfKeys: List[FKey] = fKeys ++ g.fKeys.filter { x => !fKeys.contains(x) }
+    val newdataKeys: Map[DKey, Future[DataStore]] = dataKeys ++ g.dataKeys.filter(p => !dKeys.contains(p._1))
+    val newdKeys: List[DKey] = dKeys ++ g.dKeys.filter { x => !dKeys.contains(x) }
+    val newfuncToData: Map[FKey, Vector[DKey]] = funcToData ++ g.funcToData.filter(p => !fKeys.contains(p._1))
+    val newdataToFunc: Map[DKey, Vector[FKey]] = dataToFunc ++ g.dataToFunc.filter(p => !dKeys.contains(p._1))
+    val newfuncToInputs: Map[FKey, Vector[DKey]] = funcToInputs ++ g.funcToInputs.filter(p => !fKeys.contains(p._1))
+    val newnextfkey: Int = if (nextfkey > g.nextfkey) nextfkey else g.nextfkey;
+    val newnextdkey: Int = if (nextdkey > g.nextdkey) nextdkey else g.nextdkey;
+    return new FutureGraph(newfiltKeys, newfKeys, newdataKeys, newdKeys, newfuncToData, newdataToFunc, newfuncToInputs, newnextfkey, newnextdkey, runOnModify, WeakReference(this),futs)
+  }
+  
+  def union(g: FutureGraph): FutureGraph = {
     val newfiltKeys: Map[FKey, Filter] = filtKeys ++ g.filtKeys.filter(p => !fKeys.contains(p._1))
     val newfKeys: List[FKey] = fKeys ++ g.fKeys.filter { x => !fKeys.contains(x) }
     val newdataKeys: Map[DKey, Future[DataStore]] = dataKeys ++ g.dataKeys.filter(p => !dKeys.contains(p._1))
@@ -131,7 +145,7 @@ class FutureGraph(
     val newFuts = futs ++ g.futs.filter(p => !fKeys.contains(p._1))
     return new FutureGraph(newfiltKeys, newfKeys, newdataKeys, newdKeys, newfuncToData, newdataToFunc, newfuncToInputs, newnextfkey, newnextdkey, runOnModify, WeakReference(this),newFuts)
   }
-  def union[G <: ParallelGraph](g: FutureRunGraph): FutureGraph = {
+  def union(g: FutureRunGraph): FutureGraph = {
     val newfiltKeys: Map[FKey, Filter] = filtKeys ++ g.filtKeys.filter(p => !fKeys.contains(p._1))
     val newfKeys: List[FKey] = fKeys ++ g.fKeys.filter { x => !fKeys.contains(x) }
     val newdataKeys: Map[DKey, Future[DataStore]] = dataKeys ++ g.dataKeys.filter(p => !dKeys.contains(p._1))
@@ -146,9 +160,11 @@ class FutureGraph(
   }
 
   def copy(): FutureGraph = {
-    return new FutureGraph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc, funcToInputs, nextfkey, nextdkey, runOnModify, parent,futs)
+    new FutureGraph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc, funcToInputs, nextfkey, nextdkey, runOnModify, parent,futs)
   }
-
+  def setRunOnModify(b: Boolean):FutureGraph={
+    new FutureGraph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc, funcToInputs, nextfkey, nextdkey, b, parent,futs)
+  }
 
 }
 

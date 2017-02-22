@@ -19,7 +19,7 @@ resolvers += "Sonatype OSS Snapshots" at
 libraryDependencies += "com.storm-enroute" %% "scalameter" % "0.7"
 
 testFrameworks += new TestFramework("org.scalameter.ScalaMeterFramework")
-
+logBuffered := false
 parallelExecution in Test := false
 
 
