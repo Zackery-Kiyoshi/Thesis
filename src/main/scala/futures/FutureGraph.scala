@@ -80,9 +80,9 @@ class FutureGraph(
     def mFut(f: FKey): Future[Vector[DataStore]] = {
       if (futs.contains(f)) return futs(f)
       else {
-        println("inMF:" + f + " " + funcToInputs(f).length)
+        //println("inMF:" + f + " " + funcToInputs(f).length)
         funcToInputs(f).foreach(x => mFut(x.key))
-        println("fs built")
+        //println("fs built")
 //        val input = for (d <- funcToInputs(f)) yield {
 //          println(f + "  "+ futs(d.key))
 //          while( futs(d.key) == null) { println("T") }
@@ -94,7 +94,7 @@ class FutureGraph(
 //        val output: Future[Vector[DataStore]] = Future.sequence(fs).map(filtKeys(f).apply(_))
 				val output: Future[Vector[DataStore]] = Future.sequence(funcToInputs(f).map { case DKey(fkey, i) => futs(fkey).map(_(i)) }).map(filtKeys(f)(_))
         futs(f) = output
-        println("end:" + f)
+        //println("end:" + f)
         // run on next???
         
         
@@ -106,13 +106,14 @@ class FutureGraph(
     //val futs = scala.collection.mutable.Map[FKey, Future[Vector[DataStore]]]()
     // for each FKey call make Fut
     for (i <- 0 until fKeys.length) {
-			println("Making future on "+i)
+			//println("Making future on "+i)
       mFut(fKeys(i))
     }
     return futs;
   }
 
   def run():FutureRunGraph= {
+    println("Run (fut)")
     return new FutureRunGraph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc, funcToInputs, nextfkey, nextdkey, runOnModify, WeakReference(this),makeFuts())
   }
 

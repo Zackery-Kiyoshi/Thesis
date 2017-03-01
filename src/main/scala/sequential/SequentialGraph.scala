@@ -99,7 +99,7 @@ class SequentialGraph private(
   
 //  /*
   override def run(){
-    //println("run")
+    println("Run (seq)")
     // analyze first to make sure there are no mistakes???
     if(!analyze() ){
       println("There is an error in the graph please fix before running again")
