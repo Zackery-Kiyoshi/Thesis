@@ -1,7 +1,7 @@
 package util
 
 class KMeans(val k: Int) extends Filter {
-  val t = "FileSource"
+  val t = "KMeans"
 
   override def apply(input: Vector[DataStore]): Vector[DataStore] = {
 

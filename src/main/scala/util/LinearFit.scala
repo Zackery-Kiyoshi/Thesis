@@ -1,7 +1,7 @@
 package util
 
 class LinearFit(val n:Int = 0) extends Filter {
-  val t = "FileSource"
+  val t = "LinearFit"
 
   override def apply(input: Vector[DataStore]): Vector[DataStore] = {
     var a = 0.0
@@ -17,7 +17,6 @@ class LinearFit(val n:Int = 0) extends Filter {
         y += i(j)(1)
       }
     }
-    
     
     var ds = new DataStore()
     ds.set(Vector(new DataElement(Vector(a,b))))
