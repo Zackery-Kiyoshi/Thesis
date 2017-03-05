@@ -5,7 +5,7 @@ import org.scalameter.picklers.Implicits._
 import sequential.SequentialGraph
 import util._
 
-class SmallTestSeq extends Bench.OfflineRegressionReport {
+trait SmallTestSeq extends Bench.OfflineRegressionReport {
   
   override lazy val executor = SeparateJvmsExecutor(
     new Executor.Warmer.Default,

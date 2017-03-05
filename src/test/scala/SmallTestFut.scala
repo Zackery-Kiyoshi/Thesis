@@ -5,7 +5,7 @@ import org.scalameter.picklers.Implicits._
 import futures.FutureGraph
 import util._
 
-class SmallTestFut extends Bench.OfflineRegressionReport {
+trait SmallTestFut extends Bench.OfflineRegressionReport {
   
   override lazy val executor = SeparateJvmsExecutor(
     new Executor.Warmer.Default,
