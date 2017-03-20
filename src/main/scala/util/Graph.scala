@@ -96,8 +96,8 @@ class Graph (
     //for(i <- tmp) println(i.key)
     new Graph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc + (d -> tmp ),funcToInputs+(f->tmpInputs), nextfkey, nextdkey,runOnModify,WeakReference(this))
   }
-  def connectNodes(d:String, f:String): Graph = {
-    return connectNodes(getDKey(d),getFKey(f))
+  def connectNodes(d:String, f:String, idx:Int=0): Graph = {
+    return connectNodes(getDKey(d,idx),getFKey(f))
   }
   
   def disconnectNodes(d: DKey, f: FKey): Graph = {
@@ -109,8 +109,8 @@ class Graph (
     
     new Graph(filtKeys , fKeys, dataKeys, dKeys, funcToData, dataToFunc + (d -> tmp ),funcToInputs+(f->tmpInputs), nextfkey, nextdkey,runOnModify,WeakReference(this))
   }
-  def disconnectNodes(d:String, f:String): Graph = {
-    return disconnectNodes(getDKey(d),getFKey(f))
+  def disconnectNodes(d:String, f:String, idx:Int=0): Graph = {
+    return disconnectNodes(getDKey(d,idx),getFKey(f))
   }
    
   def removeNode(f: FKey): Graph = {
@@ -310,15 +310,15 @@ class Graph (
   }
   
   
-  protected def getDKey(s: String): DKey = {
+  def getDKey(s: String, idx:Int): DKey = {
     var ret: DKey = null
     for (i <- 0 until dKeys.length) {
-      if (dKeys(i).key.key == s) ret = dKeys(i)
+      if (dKeys(i).key.key == s && dKeys(i).idx == idx) ret = dKeys(i)
     }
     return ret
   }
-
-  protected def getFKey(s: String): FKey = {
+//protected
+   def getFKey(s: String): FKey = {
     var ret: FKey = null
     for (i <- 0 until fKeys.length) {
       if (fKeys(i).key == s) ret = fKeys(i)

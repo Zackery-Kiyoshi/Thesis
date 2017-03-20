@@ -54,16 +54,16 @@ class FutureGraph(
     var ret = connectNodesHelper(d, f)
     new FutureGraph(filtKeys, fKeys, dataKeys, dKeys, funcToData, ret._1, ret._2, nextfkey, nextdkey, runOnModify, WeakReference(this),futs)
   }
-  override def connectNodes(d: String, f: String): FutureGraph = {
-    connectNodes(getDKey(d),getFKey(f))
+  override def connectNodes(d: String, f: String,idx:Int=0): FutureGraph = {
+    connectNodes(getDKey(d,idx),getFKey(f))
   }
 
   override def disconnectNodes(d: DKey, f: FKey): FutureGraph = {
     var ret = disconnectNodesHelper(d,f)
     new FutureGraph(filtKeys, fKeys, dataKeys, dKeys, funcToData, ret._1, ret._2, nextfkey, nextdkey, runOnModify, WeakReference(this),futs)
   }
-  override def disconnectNodes(d: String, f: String): FutureGraph = {
-    disconnectNodes(getDKey(d),getFKey(f))
+  override def disconnectNodes(d: String, f: String,idx:Int=0): FutureGraph = {
+    disconnectNodes(getDKey(d,idx),getFKey(f))
   }
 
   override def removeNode(f: FKey): FutureGraph = {

@@ -21,7 +21,6 @@ trait SmallTestFut extends Bench.OfflineRegressionReport {
   
   performance of "Future Graph" in {
     measure method "construction" in {
-      
         g = g.addFilter(new ListSource(0,100000,2), "ls2")
         g = g.addFilter(new ListSource(0,100000,3), "ls3")
         g = g.addFilter(new ListSource(0,100000,4), "ls4")
@@ -29,7 +28,7 @@ trait SmallTestFut extends Bench.OfflineRegressionReport {
         g = g.addFilter(new ListSource(0,100000,1), "ls1").addFilter(new FunctionFilter("x[0][0][0]*x[0][0][0]"), "fs1").connectNodes("ls1", "fs1")
         
         g = g.addFilter(new FunctionFilter("x[0][0][0]*x[0][0][0]"), "fs2").connectNodes("ls2", "fs2")
-        
+        g = g.addFilter(new ListSource(0,100000,1), "ls1")
     }
     
     measure method "run" in {

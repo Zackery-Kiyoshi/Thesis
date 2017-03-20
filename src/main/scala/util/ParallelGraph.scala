@@ -74,8 +74,8 @@ abstract class ParallelGraph (
     //for(i <- tmp) println(i.key)
     return (dataToFunc + (d -> tmp ),funcToInputs+(f->tmpInputs))
   }
-  def connectNodes(d:String, f:String): ParallelGraph = {
-    return connectNodes(getDKey(d),getFKey(f))
+  def connectNodes(d:String, f:String,idx:Int=0): ParallelGraph = {
+    return connectNodes(getDKey(d,idx),getFKey(f))
   }
   
   def disconnectNodes(d: DKey, f: FKey):ParallelGraph
@@ -88,8 +88,8 @@ abstract class ParallelGraph (
     
     return (dataToFunc + (d -> tmp ),funcToInputs+(f->tmpInputs))
   }
-  def disconnectNodes(d:String, f:String): ParallelGraph = {
-    return disconnectNodes(getDKey(d),getFKey(f))
+  def disconnectNodes(d:String, f:String,idx:Int=0): ParallelGraph = {
+    return disconnectNodes(getDKey(d,idx),getFKey(f))
   }
    
   def removeNode(f: FKey):ParallelGraph
@@ -286,11 +286,11 @@ abstract class ParallelGraph (
   }
   
   
-  protected def getDKey(s: String): DKey = {
+  protected def getDKey(s: String,idx:Int): DKey = {
     var ret: DKey = null
     for (i <- 0 until dKeys.length) {
       //println(dKeys(i))
-      if (dKeys(i).key.key == s) ret = dKeys(i)
+      if (dKeys(i).key.key == s && dKeys(i).idx ==idx) ret = dKeys(i)
     }
     return ret
   }

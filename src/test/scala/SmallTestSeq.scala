@@ -16,10 +16,11 @@ trait SmallTestSeq extends Bench.OfflineRegressionReport {
   override lazy val reporter = new LoggingReporter[Double]
   override lazy val persistor = Persistor.None
   
-  var g = SequentialGraph() 
+  
   
   
   performance of "Sequential Graph" in {
+    var g = SequentialGraph() 
     measure method "construction" in {
       
         g = g.addFilter(new ListSource(0,100000,2), "ls2")
