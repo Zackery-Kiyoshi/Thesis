@@ -26,7 +26,7 @@ case class DKey(val key:FKey, idx:Integer) {
   }
 }
 
-class Graph (
+abstract class Graph (
   val filtKeys: Map[FKey, Filter],
   val fKeys: List[FKey],
   val dataKeys: Map[DKey, DataStore],
@@ -53,67 +53,72 @@ class Graph (
     viewInput(getFKey(f))
   }
   
-  def setInput(f:FKey,newInputs:Vector[DKey]):Graph={
-    new Graph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc,funcToInputs+(f->newInputs), nextfkey, nextdkey,runOnModify,WeakReference(this))
+  def setInput(f:FKey,newInputs:Vector[DKey]):Graph
+  def setInputHelper(f:FKey,newInputs:Vector[DKey]):Map[FKey, Vector[DKey]]={
+    return funcToInputs+(f->newInputs)
   }
   def setInput(f:String,newInputs:Vector[DKey]):Graph={
     setInput(getFKey(f),newInputs)
   }
   
-  def replace(fstr: String, f2: Filter): Graph = {
+  def replace(fstr: String, f2: Filter): Graph
+  def replaceHelper(fstr: String, f2: Filter): (Map[FKey, Filter],Map[DKey, DataStore]) = {
     var tmp = ClearDownstream(FKey(fstr))
     
     //needs to change datastores if more are necessary
     
-    new Graph(filtKeys.map { case (k, f) => if(k.key == fstr) k -> f2 else k -> f },
-        fKeys, tmp, dKeys, funcToData, dataToFunc,funcToInputs, nextfkey, nextdkey,runOnModify,WeakReference(this))
+    return (filtKeys.map { case (k, f) => if(k.key == fstr) k -> f2 else k -> f },tmp)
   }
   
-  def modify(fstr: String)(func: Filter => Filter):Graph = {
+  def modify(fstr: String)(func: Filter => Filter):Graph
+  def modifyHelper(fstr: String)(func: Filter => Filter):(Map[FKey, Filter],Map[DKey, DataStore]) = {
     var tmp = ClearDownstream(FKey(fstr))
-    new Graph(filtKeys.map { case (k, f) => if(k.key == fstr) k -> func(f) else k -> f },
-        fKeys, tmp, dKeys, funcToData, dataToFunc,funcToInputs, nextfkey, nextdkey,runOnModify,WeakReference(this))
+    return (filtKeys.map { case (k, f) => if(k.key == fstr) k -> func(f) else k -> f }, tmp)
   }
   
-  def addFilter(filter:Filter, fName: String = "", dName: String = ""): Graph = {
+  def addFilter(filter:Filter, fName: String):Graph
+  def addFilter(filter:Filter):Graph
+  def addFilterHelper(filter:Filter, fName: String = ""): ( Map[FKey, Filter], List[FKey],Map[DKey, DataStore],List[DKey],Map[FKey, Vector[DKey]],Map[DKey, Vector[FKey]],Map[FKey, Vector[DKey]],Int,Int ) = {
     val (fkey, nextf) = if (fName=="") (FKey("filt"+nextfkey), nextfkey+1) else (FKey(fName),nextfkey)
     val (dkey, nextd) = (DKey(fkey,0), nextdkey)
 
     //TODO - This doesn't add a multiple datastore for the filters
     
-    var tmp = filtKeys + (fkey -> filter)
-    new Graph(filtKeys + (fkey -> filter), fkey::fKeys, dataKeys+(dkey -> DataStore() ), dkey::dKeys, funcToData + (fkey -> Vector.empty.+:(dkey)),
-        dataToFunc+(dkey -> Vector.empty ),funcToInputs+ (fkey -> Vector.empty), nextf, nextd,runOnModify,WeakReference(this))
+    val tmp = filtKeys + (fkey -> filter)
+    return (filtKeys + (fkey -> filter), fkey::fKeys, dataKeys+(dkey -> DataStore() ), dkey::dKeys, funcToData + (fkey -> Vector.empty.+:(dkey)),
+        dataToFunc+(dkey -> Vector.empty ),funcToInputs+ (fkey -> Vector.empty),nextf,nextd)
   }
  
-  def connectNodes(d: DKey, f: FKey): Graph = {
+  
+  def connectNodes(d: DKey, f: FKey): Graph
+  def connectNodesHelper(d: DKey, f: FKey): (Map[DKey, Vector[FKey]],Map[FKey, Vector[DKey]]) = {
     // need to actually add f to dataToFunc(d)
     var tmp:Vector[FKey] = dataToFunc(d)
     tmp = tmp :+ f
-    
     var tmpInputs = funcToInputs(f) :+ d
-    
     //for(i <- tmp) println(i.key)
-    new Graph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc + (d -> tmp ),funcToInputs+(f->tmpInputs), nextfkey, nextdkey,runOnModify,WeakReference(this))
+    return (dataToFunc + (d -> tmp ),funcToInputs+(f->tmpInputs))
   }
   def connectNodes(d:String, f:String): Graph = {
     return connectNodes(getDKey(d),getFKey(f))
   }
   
-  def disconnectNodes(d: DKey, f: FKey): Graph = {
+  def disconnectNodes(d: DKey, f: FKey):Graph
+  def disconnectNodesHelper(d: DKey, f: FKey): ( Map[DKey, Vector[FKey]],Map[FKey, Vector[DKey]] ) = {
     // need to actually remove (f) from dataToFunc(d)
     var tmp:Vector[FKey] = Vector.empty
     for(i <- dataToFunc(d)) if(i.key != f.key) tmp = tmp :+ i
     
     var tmpInputs = funcToInputs(f).filter(_ != d)
     
-    new Graph(filtKeys , fKeys, dataKeys, dKeys, funcToData, dataToFunc + (d -> tmp ),funcToInputs+(f->tmpInputs), nextfkey, nextdkey,runOnModify,WeakReference(this))
+    return (dataToFunc + (d -> tmp ),funcToInputs+(f->tmpInputs))
   }
   def disconnectNodes(d:String, f:String): Graph = {
     return disconnectNodes(getDKey(d),getFKey(f))
   }
    
-  def removeNode(f: FKey): Graph = {
+  def removeNode(f: FKey):Graph
+  def removeNodeHelper(f: FKey): ( Map[FKey, Filter], List[FKey],Map[DKey, DataStore],List[DKey],Map[FKey, Vector[DKey]],Map[DKey, Vector[FKey]],Map[FKey, Vector[DKey]] ) = {
     // must delete associated DataNodes
     var d = funcToData(f)
     var tmpDataToFunc = dataToFunc
@@ -126,7 +131,7 @@ class Graph (
     }
     
     // delete the actual node
-    new Graph(filtKeys-f, fKeys.filter(_!=f), tmpDataKeys, tmpdKeys, funcToData-f, tmpDataToFunc,funcToInputs-f, nextfkey, nextdkey,runOnModify,WeakReference(this))
+    return (filtKeys-f, fKeys.filter(_!=f), tmpDataKeys, tmpdKeys, funcToData-f, tmpDataToFunc,funcToInputs-f)
   }
   def removeNode(f: String): Graph = {
     var ret: FKey = null
@@ -137,24 +142,12 @@ class Graph (
     return removeNode(ret)
   }
   
-  def union(g:Graph):Graph={
-    val newfiltKeys: Map[FKey, Filter] = filtKeys ++ g.filtKeys.filter( p => !fKeys.contains(p._1) )
-    val newfKeys: List[FKey] = fKeys ++ g.fKeys.filter { x => !fKeys.contains(x) }
-    val newdataKeys: Map[DKey, DataStore] = dataKeys ++ g.dataKeys.filter( p => !dKeys.contains(p._1) )
-    val newdKeys: List[DKey] = dKeys ++ g.dKeys.filter { x => !dKeys.contains(x) }
-    val newfuncToData: Map[FKey, Vector[DKey]] = funcToData ++ g.funcToData.filter( p => !fKeys.contains(p._1) )
-    val newdataToFunc: Map[DKey, Vector[FKey]] = dataToFunc ++ g.dataToFunc.filter( p => !dKeys.contains(p._1) )
-    val newfuncToInputs: Map[FKey, Vector[DKey]] = funcToInputs ++ g.funcToInputs.filter( p => !fKeys.contains(p._1) )
-    val newnextfkey: Int = if(nextfkey > g.nextfkey) nextfkey else g.nextfkey;
-    val newnextdkey: Int = if(nextdkey > g.nextdkey) nextdkey else g.nextdkey;
-    return new Graph(newfiltKeys, newfKeys, newdataKeys, newdKeys, newfuncToData, newdataToFunc,newfuncToInputs, newnextfkey, newnextdkey,runOnModify,WeakReference(this))
+  def resetDataStores():Map[DKey, Future[DataStore]]={
+    var tmp =  Map[DKey, Future[DataStore]]()
+    for(d <- dKeys) tmp = tmp +(d -> Future{DataStore()})
+    return tmp
   }
   
-  def resetDataStores(){
-    var tmp =  Map[DKey, DataStore]()
-    for(d <- dKeys) tmp = tmp +(d -> new DataStore())
-    new Graph(filtKeys, fKeys, tmp, dKeys, funcToData, dataToFunc,funcToInputs, nextfkey, nextdkey,runOnModify,WeakReference(this))
-  }
   
   def getListToDo(fs:List[FKey]):List[FKey]={
     var sorted:List[FKey] = List.empty
@@ -196,9 +189,7 @@ class Graph (
     return ret
   }
 
-  def run():Unit={
-    println("run not inplimented")
-  }
+  def run():Graph
   
   def printNodes(): String = { /* {Key, NodeType } */
     var ret = ""
@@ -244,9 +235,7 @@ class Graph (
     return ret
   }
 
-  def setRunOnModify(b:Boolean):Graph={
-    new Graph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc,funcToInputs, nextfkey, nextdkey,b,parent)
-  }
+  //def setRunOnModify(b:Boolean):Graph
   
   private def ClearDownstream(f:FKey):Map[DKey, DataStore]={
     var tmp:Map[DKey, DataStore] = dataKeys
@@ -326,13 +315,4 @@ class Graph (
     return ret
   }
 
-}
-
-object Graph {
-  def apply(b: Boolean = true): Graph = {
-    new Graph( Map[FKey, Filter](), List[FKey](), Map[DKey, DataStore](), List[DKey](), Map[FKey, Vector[DKey]](), Map[DKey, Vector[FKey]](),Map[FKey, Vector[DKey]](), 0, 0,b,null)
-  }
-  
-  
-  
 }

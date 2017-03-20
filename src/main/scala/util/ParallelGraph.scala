@@ -222,7 +222,7 @@ abstract class ParallelGraph (
     return new ParallelGraph(newfiltKeys, newfKeys, newdataKeys, newdKeys, newfuncToData, newdataToFunc,newfuncToInputs, newnextfkey, newnextdkey,runOnModify,WeakReference(this))
   } */
 
-  def setRunOnModify(b:Boolean):ParallelGraph
+  //def setRunOnModify(b:Boolean):ParallelGraph
   
   private def ClearDownstream(f:FKey):Map[DKey, Future[DataStore]]={
     var tmp:Map[DKey, Future[DataStore]] = dataKeys

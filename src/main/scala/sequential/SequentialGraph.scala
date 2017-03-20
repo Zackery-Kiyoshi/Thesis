@@ -7,7 +7,7 @@ import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 
-class SequentialGraph private(
+class SequentialGraph (
   override val filtKeys: Map[FKey, Filter],
   override val fKeys: List[FKey],
   override val dataKeys: Map[DKey, DataStore],
@@ -29,63 +29,54 @@ class SequentialGraph private(
     new SequentialGraph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc,funcToInputs+(f->newInputs), nextfkey, nextdkey,runOnModify,WeakReference(this))
   }
   override def setInput(f:String,newInputs:Vector[DKey]):SequentialGraph={
-    var ret = toSequentialGraph(super.setInput(f,newInputs))
-    if(runOnModify)ret.run( )
-    return ret
+    var ret = setInputHelper(getFKey(f),newInputs)
+    return new SequentialGraph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc, ret, nextfkey, nextdkey, runOnModify, WeakReference(this))
   }
   
   override def replace(fstr: String, f2: Filter): SequentialGraph = {
-    var ret = toSequentialGraph(super.replace(fstr,f2))
-    if(runOnModify)ret.run( )
-    return ret
+    var ret = replaceHelper(fstr,f2)
+    return new SequentialGraph(ret._1, fKeys, ret._2, dKeys, funcToData, dataToFunc, funcToInputs, nextfkey, nextdkey, runOnModify, WeakReference(this))
   }
   
   override def modify(fstr: String)(func: Filter => Filter):SequentialGraph = {
-    var ret = toSequentialGraph(super.modify(fstr)(func))
-    if(runOnModify)ret.run( )
-    return ret
+    var ret = modifyHelper(fstr)(func)
+    return new SequentialGraph(ret._1, fKeys, ret._2, dKeys, funcToData, dataToFunc, funcToInputs, nextfkey, nextdkey, runOnModify, WeakReference(this))
   }
   
-  override def addFilter(filter:Filter, fName: String = "", dName: String = ""): SequentialGraph = {
-    var ret = toSequentialGraph(super.addFilter(filter, fName, dName))
-    if(runOnModify)ret.run( )
-    return ret
+  override def addFilter(filter:Filter, fName: String = ""): SequentialGraph = {
+    var ret = addFilterHelper(filter, fName)
+    
+    return new SequentialGraph(ret._1, ret._2, ret._3, ret._4, ret._5, ret._6, ret._7, ret._8, ret._9, runOnModify, WeakReference(this))
   }
 
+  override def addFilter(filter:Filter): SequentialGraph = {
+    addFilter(filter, "")
+  }
  
   override def connectNodes(d: DKey, f: FKey): SequentialGraph = {
-    var ret = toSequentialGraph(super.connectNodes(d,f))
-    if(runOnModify)ret.run()
-    return ret
+    var ret = connectNodesHelper(d,f)
+    return new SequentialGraph(filtKeys, fKeys, dataKeys, dKeys, funcToData, ret._1, ret._2, nextfkey, nextdkey, runOnModify, WeakReference(this))
   }
   override def connectNodes(d:String, f:String): SequentialGraph = {
-    var ret = toSequentialGraph(super.connectNodes(d,f)) 
+    connectNodes(getDKey(d),getFKey(f))
     //ret.run( List.empty:+ super.getFKey(f))
-    return ret
   }
   
   override def disconnectNodes(d: DKey, f: FKey): SequentialGraph = {
-    var ret = super.disconnectNodes(d,f)
-    toSequentialGraph(ret)
+    var ret = disconnectNodesHelper(d,f)
+    return new SequentialGraph(filtKeys, fKeys, dataKeys, dKeys, funcToData, ret._1, ret._2, nextfkey, nextdkey, runOnModify, WeakReference(this))
   }
   override def disconnectNodes(d:String, f:String): SequentialGraph = {
-    var ret = super.disconnectNodes(d,f)
-    toSequentialGraph(ret)
+    disconnectNodes(getDKey(d),getFKey(f))
   }
   
   override def removeNode(f: FKey): SequentialGraph = {
-    var ret = super.removeNode(f)
-    toSequentialGraph(ret)
+    var ret = removeNodeHelper(f)
+    return new SequentialGraph(ret._1, ret._2, ret._3, ret._4, ret._5, ret._6, ret._7, nextfkey, nextdkey, runOnModify, WeakReference(this))
   }
   override def removeNode(f: String): SequentialGraph = {
-    var ret = super.removeNode(f)
-    toSequentialGraph(ret)
+    removeNode(getFKey(f))
   }
-  
-  private def toSequentialGraph(g:Graph):SequentialGraph={
-    new SequentialGraph(g.filtKeys,g.fKeys,g.dataKeys,g.dKeys,g.funcToData,g.dataToFunc,g.funcToInputs,g.nextfkey,g.nextdkey,g.runOnModify,parent)
-  }
-  
   
   // does this need to be overwritten or could it happen when connecting a node/modifying a node???
   // also does it really need to be parallized???
@@ -98,18 +89,18 @@ class SequentialGraph private(
   
   
 //  /*
-  override def run(){
+  override def run():SequentialRunGraph={
     println("Run (seq)")
     // analyze first to make sure there are no mistakes???
     if(!analyze() ){
       println("There is an error in the graph please fix before running again")
-      return
+      return null
     }
     running = true
     
-    run(super.getTopoSort())
+    var ret = run(super.getTopoSort())
     // need to run each loop
-    
+    return new SequentialRunGraph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc, funcToInputs, nextfkey, nextdkey, false, WeakReference(this))
   }
   
   def run(todo:List[FKey]):SequentialGraph={
@@ -168,8 +159,8 @@ class SequentialGraph private(
     return new SequentialGraph(newfiltKeys, newfKeys, newdataKeys, newdKeys, newfuncToData, newdataToFunc,newfuncToInputs, newnextfkey, newnextdkey,runOnModify,WeakReference(this))
   }
   
-  override def setRunOnModify(b:Boolean):SequentialGraph={
-    toSequentialGraph(super.setRunOnModify(b))
+  def setRunOnModify(b:Boolean):SequentialGraph={
+    new SequentialGraph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc, funcToInputs, nextfkey, nextdkey, b, parent)
   }
   
 }

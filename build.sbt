@@ -18,6 +18,10 @@ resolvers += "Sonatype OSS Snapshots" at
 
 libraryDependencies += "com.storm-enroute" %% "scalameter" % "0.7"
 
+libraryDependencies += "com.typesafe.akka" %% "akka-stream" % "2.4.17"
+libraryDependencies += "com.typesafe.akka" %% "akka-stream-testkit" % "2.4.17"
+
+
 testFrameworks += new TestFramework("org.scalameter.ScalaMeterFramework")
 logBuffered := false
 parallelExecution in Test := false
