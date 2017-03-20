@@ -99,9 +99,7 @@ class FutureRunGraph(
 }
 
 object FutureRunGraph {
-  def apply(b: Boolean = false): FutureGraph = {
-    new FutureRunGraph(Map[FKey, Filter](), List[FKey](), Map[DKey, Future[DataStore]](), List[DKey](), Map[FKey, Vector[DKey]](), Map[DKey, Vector[FKey]](), Map[FKey, Vector[DKey]](), 0, 0, b, null,scala.collection.mutable.Map[FKey, Future[Vector[DataStore]]]())
-  }
+  
   
 }
 
