@@ -17,8 +17,9 @@ class StreamRunGraph (
     override val nextfkey: Int,
     override val nextdkey: Int,
     override val runOnModify: Boolean,
-    override val parent: WeakReference[StreamGraph]
-    ) extends StreamGraph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc, funcToInputs, nextfkey, nextdkey, runOnModify, parent) {
+    override val parent: WeakReference[StreamGraph],
+    override val futs: scala.collection.mutable.Map[FKey, Vector[DataStore]]
+    ) extends StreamGraph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc, funcToInputs, nextfkey, nextdkey, runOnModify, parent,futs) {
   
   
   override def run():StreamRunGraph={
@@ -35,7 +36,7 @@ class StreamRunGraph (
     val newfuncToInputs: Map[FKey, Vector[DKey]] = funcToInputs ++ g.funcToInputs.filter(p => !fKeys.contains(p._1))
     val newnextfkey: Int = if (nextfkey > g.nextfkey) nextfkey else g.nextfkey;
     val newnextdkey: Int = if (nextdkey > g.nextdkey) nextdkey else g.nextdkey;
-    return new StreamGraph(newfiltKeys, newfKeys, newdataKeys, newdKeys, newfuncToData, newdataToFunc, newfuncToInputs, newnextfkey, newnextdkey, runOnModify, WeakReference(this))
+    return new StreamGraph(newfiltKeys, newfKeys, newdataKeys, newdKeys, newfuncToData, newdataToFunc, newfuncToInputs, newnextfkey, newnextdkey, runOnModify, WeakReference(this),futs)
   }
   
   def getData(f:FKey):Vector[DataStore]={

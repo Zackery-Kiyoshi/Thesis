@@ -59,7 +59,7 @@ class SequentialGraph (
   }
 
   override def connectNodes(d:String, f:String,idx:Int=0): SequentialGraph = {
-    var ret = toSequentialGraph(super.connectNodes(d,f,idx)) 
+    connectNodes(getDKey(d,idx),getFKey(f)) 
     //ret.run( List.empty:+ super.getFKey(f))
   }
   
@@ -69,8 +69,7 @@ class SequentialGraph (
   }
 
   override def disconnectNodes(d:String, f:String,idx:Int=0): SequentialGraph = {
-    var ret = super.disconnectNodes(d,f,idx)
-    toSequentialGraph(ret)
+    disconnectNodes(getDKey(d,idx),getFKey(f))
   }
   
   override def removeNode(f: FKey): SequentialGraph = {
