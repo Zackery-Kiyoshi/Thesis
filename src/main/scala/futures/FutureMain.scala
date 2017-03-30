@@ -6,7 +6,7 @@ object FutureMain {
   
   def simpleListTest():ParallelGraph={
     var func1 = "(2+3)*3"
-    var graph1:FutureGraph = FutureGraph(false)
+    var graph1:FutureGraph = FutureGraph(2,false)
     graph1 = graph1.addFilter(new ListSource(0,10,1), "ls1")
     graph1 = graph1.addFilter(new PrintSink(), "ps1")
     graph1 = graph1.connectNodes("ls1", "ps1")
@@ -55,7 +55,7 @@ object FutureMain {
   }
   
   def singFuncTest(){
-    var graph1:FutureGraph = FutureGraph(false)
+    var graph1:FutureGraph = FutureGraph(2,false)
     
     graph1 = graph1.addFilter(new ListSource(1,2,1), "ls1")
     graph1 = graph1.addFilter(new ListSource(10,11,1), "ls10")
@@ -80,7 +80,7 @@ object FutureMain {
   
   
   def linearFiltTest(){
-    var graph1:FutureGraph = FutureGraph(false)
+    var graph1:FutureGraph = FutureGraph(2,false)
     
     graph1 = graph1.addFilter(new ListSource(0,10,1), "ls1")
     graph1 = graph1.addFilter(new ListSource(0,10,1), "ls2")
@@ -106,7 +106,7 @@ object FutureMain {
   }
   
   def fib(i:Int):FutureGraph={
-    var graph1:FutureGraph = FutureGraph(false)
+    var graph1:FutureGraph = FutureGraph(2,false)
     for(j <- 0 to i){
       if(j==1){
         graph1 = graph1.addFilter(new ListSource(1,2,1), "l1")
@@ -125,7 +125,7 @@ object FutureMain {
     return graph1
   }
   
-  def fibRec(i:Int, g:FutureGraph = FutureGraph(false), cur:Int = 0):FutureGraph={
+  def fibRec(i:Int, g:FutureGraph = FutureGraph(2,false), cur:Int = 0):FutureGraph={
     // being able to combine graphs
     // no actually recursive yet
     var graph1 = g
@@ -148,7 +148,7 @@ object FutureMain {
   }
   
   def minmaxTest(){
-    var graph1 = FutureGraph(false)
+    var graph1 = FutureGraph(2,false)
     graph1 = graph1.addFilter(new ListSource(0,21,2), "ls1")
     //graph1 = graph1.addFilter(new PrintSink(), "ps1").connectNodes("d1","ps1")
     
@@ -169,7 +169,7 @@ object FutureMain {
   }
   
   def sortTest(){
-    var graph1 = FutureGraph(false)
+    var graph1 = FutureGraph(2,false)
     graph1 = graph1.addFilter(new ListSource(0,21,2), "ls1")
     //graph1 = graph1.addFilter(new PrintSink(), "ps1").connectNodes("d1","ps1")
     graph1 = graph1.addFilter(new SortFilter( (x:DataElement,y:DataElement) => x(0) > y(0)), "sf1").connectNodes("d1","sf1")
@@ -179,7 +179,7 @@ object FutureMain {
   }
   
   def fileInputTest(){
-    var graph1 = FutureGraph(false)
+    var graph1 = FutureGraph(2,false)
     graph1 = graph1.addFilter(new FileSource("test.txt"), "fs1")
     graph1 = graph1.addFilter(new PrintSink(), "ps1").connectNodes("d1","ps1")
     

@@ -20,8 +20,9 @@ class FutureRunGraph(
     override val nextdkey: Int,
     override val runOnModify: Boolean,
     override val parent: WeakReference[FutureGraph],
-    override val futs: scala.collection.mutable.Map[FKey, Future[Vector[DataStore]]]
-    ) extends FutureGraph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc, funcToInputs, nextfkey, nextdkey, runOnModify, parent,futs) {
+    override val futs: scala.collection.mutable.Map[FKey, Future[Vector[DataStore]]],
+    override val numThreads:Int
+    ) extends FutureGraph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc, funcToInputs, nextfkey, nextdkey, runOnModify, parent,futs,numThreads) {
 
   /*
   // : Future[FutureGraph] =
@@ -72,10 +73,11 @@ class FutureRunGraph(
     val newfuncToData: Map[FKey, Vector[DKey]] = funcToData ++ g.funcToData.filter(p => !fKeys.contains(p._1))
     val newdataToFunc: Map[DKey, Vector[FKey]] = dataToFunc ++ g.dataToFunc.filter(p => !dKeys.contains(p._1))
     val newfuncToInputs: Map[FKey, Vector[DKey]] = funcToInputs ++ g.funcToInputs.filter(p => !fKeys.contains(p._1))
-    val newnextfkey: Int = if (nextfkey > g.nextfkey) nextfkey else g.nextfkey;
-    val newnextdkey: Int = if (nextdkey > g.nextdkey) nextdkey else g.nextdkey;
+    val newnextfkey: Int = if (nextfkey > g.nextfkey) nextfkey else g.nextfkey
+    val newnextdkey: Int = if (nextdkey > g.nextdkey) nextdkey else g.nextdkey
     val newFuts = futs ++ g.futs.filter(p => !fKeys.contains(p._1))
-    return new FutureRunGraph(newfiltKeys, newfKeys, newdataKeys, newdKeys, newfuncToData, newdataToFunc, newfuncToInputs, newnextfkey, newnextdkey, runOnModify, WeakReference(this),newFuts)
+    val newnumThreads: Int = if (numThreads < g.numThreads) numThreads else g.numThreads
+    return new FutureRunGraph(newfiltKeys, newfKeys, newdataKeys, newdKeys, newfuncToData, newdataToFunc, newfuncToInputs, newnextfkey, newnextdkey, runOnModify, WeakReference(this),newFuts,newnumThreads)
   }
 
 
@@ -93,7 +95,7 @@ class FutureRunGraph(
   }
 
   override def copy(): FutureRunGraph = {
-    return new FutureRunGraph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc, funcToInputs, nextfkey, nextdkey, runOnModify, parent,futs)
+    return new FutureRunGraph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc, funcToInputs, nextfkey, nextdkey, runOnModify, parent,futs,numThreads)
   }
 
 }

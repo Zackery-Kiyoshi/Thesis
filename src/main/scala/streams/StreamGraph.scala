@@ -125,35 +125,43 @@ class StreamGraph(
        
       for (i <- getTopoSort()) {
         // if fKey(i) is source connect to in
-        var tmpin: UniformFanInShape[Vector[DataStore], Vector[DataStore]] = builder.add(Merge[Vector[DataStore]](funcToInputs(i).length+1))
+        var tmpin: UniformFanInShape[Vector[DataStore], Vector[DataStore]] = builder.add(Merge[Vector[DataStore]](  if( funcToInputs(i).length != 0) funcToInputs(i).length else 1))
         if (funcToInputs(i).isEmpty) {
           // out should be the datastore
           in ~> tmpin
         } else {
           // collect input datastores and connect to filts(i)
           for (j <- funcToInputs(i)) {
-            println(i)
-            print(j + ":")
-            println(outputs(j.key).outlets.length)
+//            println(i)
+//            print(j + ":")
+//            println(outputs(j.key).outlets.length)
             outputs(j.key) ~> tmpin
+            outbools(j.key) -= 1 
           }
 
         }
         if (funcToData(i).isEmpty) {
+          println("HERE:" + i)
           outputs(i) ~> out
-        } else {
+          outbools(i) -= 1
+        }
+        /*
+         else {
           // need to connect outputs
           for (j <- funcToData(i)) {
             outputs(i) ~> filts(i)
           }
         }
+        */
         // connect the store
         outputs(i) ~> stores(i)
-
+        outbools(i) -= 1
         tmpin ~> filts(i) ~> outputs(i)
 
       }
-
+      for( i <- outbools){
+        println( i )
+      }
       ClosedShape
     })
     
