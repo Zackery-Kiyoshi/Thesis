@@ -174,7 +174,7 @@ class FutureGraph(
 }
 
 object FutureGraph {
-  def apply(n:Int=1, b: Boolean = false): FutureGraph = {
+  def apply(n:Int=2, b: Boolean = false): FutureGraph = {
     new FutureGraph(Map[FKey, Filter](), List[FKey](), Map[DKey, Future[DataStore]](), List[DKey](), Map[FKey, Vector[DKey]](), Map[DKey, Vector[FKey]](), Map[FKey, Vector[DKey]](), 0, 0, b, null,scala.collection.mutable.Map[FKey, Future[Vector[DataStore]]](),if(n<1) 1 else n)
   }
   
