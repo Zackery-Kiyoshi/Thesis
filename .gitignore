@@ -1,5 +1,6 @@
 *.class
 *.log
+sbt-extras-master
 
 # sbt specific
 .cache
