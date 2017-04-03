@@ -27,7 +27,10 @@ class LargerTest extends org.scalameter.api.Bench.OfflineRegressionReport {
   override lazy val measurer = new org.scalameter.api.Measurer.Default
   override lazy val reporter = new LoggingReporter[Double]
   override lazy val persistor = org.scalameter.api.Persistor.None
+  
+  println( "Heap size:" + Runtime.getRuntime().maxMemory() )
 
+  
   var g = SequentialGraph()
   var time = standardConfig measure {
     g = g.addFilter(new LewisBinReader("CartAndRad.100.bin"),"ls1")
