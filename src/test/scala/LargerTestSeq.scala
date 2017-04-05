@@ -13,7 +13,7 @@ import futures.FutureGraph
 import util._
 import java.io._
 
-class LargerTest extends org.scalameter.api.Bench.OfflineRegressionReport {
+class LargerTestSeq extends org.scalameter.api.Bench.OfflineRegressionReport {
 
   val standardConfig = config(
     Key.exec.minWarmupRuns -> 20,

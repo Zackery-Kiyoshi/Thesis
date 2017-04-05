@@ -111,7 +111,7 @@ class FutureGraph(
 			//println("Making future on "+i)
       mFut(fKeys(i))
     }
-    return futs;
+    return futs
   }
 
   def run():FutureRunGraph= {

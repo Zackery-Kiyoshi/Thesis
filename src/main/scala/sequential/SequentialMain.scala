@@ -220,7 +220,7 @@ object SequentialMain {
     //testHelp()
     simpleListTest()
     //simpleFuncTest()
-    //linearFiltTest()
+    linearFiltTest()
     //singFuncTest()
     //fib(6).run()
     //minmaxTest()

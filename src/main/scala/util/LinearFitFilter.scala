@@ -14,22 +14,28 @@ class LinearFitFilter(val s:String = "-1") extends Filter() {
   override def apply(input: Vector[DataStore]): Vector[DataStore] = {
     var ret = Vector[DataStore]()
     
-    var regression:OLSMultipleLinearRegression = new OLSMultipleLinearRegression();
+    var regression:OLSMultipleLinearRegression = new OLSMultipleLinearRegression()
     var y:Array[Double] = Array.empty
     var ytmp:List[Double]= List.empty
-    var x:Array[Array[Double]] = Array.tabulate(6)(x => Array.tabulate(6)(y => input(x)(y)(1)))
+    var x:Array[Array[Double]] = Array.empty
     var xtmp:List[Double] = List.empty
     for(i <- 0 until input.length){
       // datastore
       for(j <- 0 until input(i).length){
         //dataelement
+        //println(i +":"+input(i)(j).length)
+        
         ytmp :+ input(i)(j)(1)
         xtmp :+ input(i)(j)(0)
       }
     }
     y = ytmp.toArray
-    x = Array.tabulate(xtmp.length)(x=> Array(xtmp(x)))
-    regression.newSampleData(y, x);
+    x = Array.tabulate(xtmp.length)(x=> {
+      var t = Array[Double](xtmp.length)
+      t(0) = t(x)
+      t
+      })
+    regression.newSampleData(y, x)
     
     var beta = regression.estimateRegressionParameters(); 
     

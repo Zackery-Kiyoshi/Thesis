@@ -127,9 +127,9 @@ class Test1Fut extends Bench.OfflineRegressionReport {
 //    */
     //g=g.connectNodes("ls1","ps1")
     
-    
+    var gRun:futures.FutureRunGraph = null
     measure method "run" in{
-      g.run()
+      gRun = g.run()
     }
     
   }
