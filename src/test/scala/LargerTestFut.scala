@@ -102,7 +102,7 @@ class LargerTestFut extends org.scalameter.api.Bench.OfflineRegressionReport {
 
     g = g.addFilter(new LinearFitFilter("x[0][0][0]"), "lf").connectNodes("ls1", "lf")
 
-    g = g.addFilter(new PrintSink(), "ps1").connectNodes("f1","ps1")
+    g = g.addFilter(new PrintSink(), "ps1")//.connectNodes("f1","ps1")
   var time = standardConfig measure {
     g.run()
   }

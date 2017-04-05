@@ -3,47 +3,48 @@ package util
 import scala.collection.mutable.ArrayBuffer
 import org.apache.commons.math3.stat.regression._
 
-class LinearFitFilter(val s:String = "-1") extends Filter() {
-  
-  val t:String = "LinearFitFilter"
-  
-  private var fitFormula:DoubleFormula = new DoubleFormula(s);
-  private var terms:ArrayBuffer[DoubleFormula] = new ArrayBuffer();
-  private var coefs:Array[Float]=new Array(0)
-  
+class LinearFitFilter(val s: String = "-1") extends Filter() {
+
+  val t: String = "LinearFitFilter"
+
+  private var fitFormula: DoubleFormula = new DoubleFormula(s);
+  private var terms: ArrayBuffer[DoubleFormula] = new ArrayBuffer();
+  private var coefs: Array[Float] = new Array(0)
+
   override def apply(input: Vector[DataStore]): Vector[DataStore] = {
     var ret = Vector[DataStore]()
-    
-    var regression:OLSMultipleLinearRegression = new OLSMultipleLinearRegression()
-    var y:Array[Double] = Array.empty
-    var ytmp:List[Double]= List.empty
-    var x:Array[Array[Double]] = Array.empty
-    var xtmp:List[Double] = List.empty
-    for(i <- 0 until input.length){
+
+    var y: Array[Double] = Array.empty
+    var ytmp: List[Double] = List.empty
+
+    var xtmp: List[Double] = List.empty
+    for (i <- 0 until input.length) {
       // datastore
-      for(j <- 0 until input(i).length){
+      for (j <- 0 until input(i).length) {
         //dataelement
         //println(i +":"+input(i)(j).length)
-        
+
         ytmp :+ input(i)(j)(1)
         xtmp :+ input(i)(j)(0)
       }
     }
     y = ytmp.toArray
-    x = Array.tabulate(xtmp.length)(x=> {
+    var x: Array[Array[Double]] = Array.tabulate(xtmp.length)(x => Array(xtmp.length))
+    x = Array.tabulate(xtmp.length)(x => {
       var t = Array[Double](xtmp.length)
-      t(0) = t(x)
+      t(x) = xtmp(x)
       t
-      })
+    })
+
+    var regression: OLSMultipleLinearRegression = new OLSMultipleLinearRegression()
     regression.newSampleData(y, x)
-    
-    var beta = regression.estimateRegressionParameters(); 
-    
+
+    var beta = regression.estimateRegressionParameters()
+
     var ds = new DataStore()
-    ds.set(Vector.tabulate(beta.length)(x=> new DataElement(Vector(beta(x)))))
+    ds.set(Vector.tabulate(beta.length)(x => new DataElement(Vector(beta(x)))))
     return Vector(ds)
-    
-    
+
     /*
     for(s <-0 until input.length ) {
 //       /*
@@ -104,57 +105,57 @@ class LinearFitFilter(val s:String = "-1") extends Filter() {
         */
     return ret
   }
-  
-  def LUPDecompose(a:Array[Array[Double]]):Array[Int]= {
-        var n:Int = a.length
-        var pi:Array[Int] = new Array(n)
-        for(i <- 0 until n) {
-            pi(i)=i
-        }
-        for(k <- 0 until n) {
-            var p:Double =0
-            var kp:Int = -1
-            for(i <- k until n) {
-                if(Math.abs(a(i)(k))>p) {
-                    p=Math.abs(a(i)(k))
-                    kp=i
-                }
-            }
-            if(p==0) throw new IllegalArgumentException("Singular matrix for linear fit.")
-            var tmp:Int =pi(kp)
-            pi(kp)=pi(k)
-            pi(k) = tmp
-            var tmp2:Array[Double]=a(kp)
-            a(kp)=a(k)
-            a(k)=tmp2
-            for(i <- k+1 until n) {
-                a(i)(k)/=a(k)(k)
-                for(j <- k+1 until n) {
-                    a(i)(j) -= a(i)(k)*a(k)(j)
-                }
-            }
-        }
-        return pi;
+
+  def LUPDecompose(a: Array[Array[Double]]): Array[Int] = {
+    var n: Int = a.length
+    var pi: Array[Int] = new Array(n)
+    for (i <- 0 until n) {
+      pi(i) = i
     }
-  
-  def LUPSolve(lu:Array[Array[Double]], p:Array[Int],b:Array[Double]):Array[Double]= {
-        var n:Int=lu.length
-        var x:Array[Double] = new Array(n)
-        var y:Array[Double] = new Array(n)
-        for(i <- 0 until n) {
-            y(i)=b(p(i))
-            for(j <- 0 until i) {
-                y(i)-=lu(i)(j)*y(j)
-            }
+    for (k <- 0 until n) {
+      var p: Double = 0
+      var kp: Int = -1
+      for (i <- k until n) {
+        if (Math.abs(a(i)(k)) > p) {
+          p = Math.abs(a(i)(k))
+          kp = i
         }
-        for(i <- n-1 to 0 by -1) {
-            x(i)=y(i)
-            for(j <- i+1 until n) x(i)-=lu(i)(j)*x(j)
-            x(i)/=lu(i)(i);
+      }
+      if (p == 0) throw new IllegalArgumentException("Singular matrix for linear fit.")
+      var tmp: Int = pi(kp)
+      pi(kp) = pi(k)
+      pi(k) = tmp
+      var tmp2: Array[Double] = a(kp)
+      a(kp) = a(k)
+      a(k) = tmp2
+      for (i <- k + 1 until n) {
+        a(i)(k) /= a(k)(k)
+        for (j <- k + 1 until n) {
+          a(i)(j) -= a(i)(k) * a(k)(j)
         }
-        return x;
+      }
     }
-  
+    return pi;
+  }
+
+  def LUPSolve(lu: Array[Array[Double]], p: Array[Int], b: Array[Double]): Array[Double] = {
+    var n: Int = lu.length
+    var x: Array[Double] = new Array(n)
+    var y: Array[Double] = new Array(n)
+    for (i <- 0 until n) {
+      y(i) = b(p(i))
+      for (j <- 0 until i) {
+        y(i) -= lu(i)(j) * y(j)
+      }
+    }
+    for (i <- n - 1 to 0 by -1) {
+      x(i) = y(i)
+      for (j <- i + 1 until n) x(i) -= lu(i)(j) * x(j)
+      x(i) /= lu(i)(i);
+    }
+    return x;
+  }
+
 }
 
 /*
@@ -259,8 +260,7 @@ protected void redoAllElements() {
 */
 
 object LinearFitFilter {
-    def main(args:Array[String]) {
-        
-        
-    }
+  def main(args: Array[String]) {
+
+  }
 }

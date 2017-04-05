@@ -78,7 +78,6 @@ class FutureGraph(
 
   // : Future[FutureGraph] =
   def makeFuts():scala.collection.mutable.Map[FKey, Future[Vector[DataStore]]]= {
-    
     def mFut(f: FKey): Future[Vector[DataStore]] = {
       if (futs.contains(f)) return futs(f)
       else {
@@ -111,6 +110,9 @@ class FutureGraph(
 			//println("Making future on "+i)
       mFut(fKeys(i))
     }
+    var tmp = getTopoSort()
+    
+    Await.result(futs(tmp(tmp.length-1)), Duration.Inf)
     return futs
   }
 
