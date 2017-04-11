@@ -24,15 +24,15 @@ class LinearFitFilter(val s: String = "-1") extends Filter() {
         //dataelement
         //println(i +":"+input(i)(j).length)
 
-        ytmp :+ input(i)(j)(1)
-        xtmp :+ input(i)(j)(0)
+        ytmp = ytmp :+ input(i)(j)(1)
+        xtmp = xtmp :+ input(i)(j)(0)
       }
     }
     y = ytmp.toArray
     var x: Array[Array[Double]] = Array.tabulate(xtmp.length)(x => Array(xtmp.length))
     x = Array.tabulate(xtmp.length)(x => {
-      var t = Array[Double](xtmp.length)
-      t(x) = xtmp(x)
+      var t:Array[Double] = new Array[Double](xtmp.length)
+      t(0) = xtmp(x)
       t
     })
 

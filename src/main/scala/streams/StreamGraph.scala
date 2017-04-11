@@ -145,14 +145,6 @@ class StreamGraph(
           outputs(i) ~> out
           outbools(i) -= 1
         }
-        /*
-         else {
-          // need to connect outputs
-          for (j <- funcToData(i)) {
-            outputs(i) ~> filts(i)
-          }
-        }
-        */
         // connect the store
         outputs(i) ~> stores(i)
         outbools(i) -= 1

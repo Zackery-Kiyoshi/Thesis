@@ -5,7 +5,6 @@ val buildSettings = Defaults.defaultSettings ++ Seq(
    javaOptions += "-Xmx15G"
 )
 
-fork in run := ture
 
 version := "1.0"
 
