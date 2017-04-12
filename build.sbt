@@ -1,10 +1,16 @@
 sbtPlugin := true
 name := "ZackThesis"
 
+fork := true
+fork in test := true
+//fork in (Test,run) := true
+
 val buildSettings = Defaults.defaultSettings ++ Seq(
    javaOptions += "-Xmx15G"
 )
 
+javaOptions += "-Xmx15G"
+javaOptions in test += "-Xmx8G"
 
 version := "1.0"
 
