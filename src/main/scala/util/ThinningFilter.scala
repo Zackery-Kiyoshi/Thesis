@@ -7,7 +7,7 @@ class ThinningFilter(var thinFactor: Int = 10) extends Filter() {
   val t: String = "ThinningFilter"
 
   var useGroups: Boolean = false
-  private var groupFormula = new DoubleFormula("v[0]");
+  private var groupFormula = new DoubleFormula("x[0]");
   private var inputTmp: Vector[DataStore] = null
 
   override def apply(input: Vector[DataStore]): Vector[DataStore] = {
