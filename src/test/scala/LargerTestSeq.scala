@@ -32,7 +32,8 @@ class LargerTestSeq extends org.scalameter.api.Bench.OfflineRegressionReport {
 
   var g = SequentialGraph()
   var time = standardConfig measure {
-    g = g.addFilter(new LewisBinReader("CartAndRad.100.bin"), "ls1")
+    g = g.addFilter(new LewisBinReader("CartAndRad.100.bin"), "source")
+    g = g.addFilter(new ThinningFilter(2), "ls1").connectNodes("source","ls1")
     var x = -1.5 * math.pow(10, -5) + 0.09375
     g = g.addFilter(new FilterBy((d: DataElement) => { d(0) < x }), "f1").connectNodes("ls1", "f1")
     x += 0.09375

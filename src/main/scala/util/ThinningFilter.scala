@@ -3,51 +3,32 @@ package util
 import scala.collection.mutable.ArrayBuffer
 import scala.util.control.Breaks._
 
-class ThinningFilter() extends Filter() {
-  
-  val t:String = "ThinningFilter"
-  
-  var thinFactor:Int = 10
-	var useGroups:Boolean = false
+class ThinningFilter(var thinFactor: Int = 10) extends Filter() {
+  val t: String = "ThinningFilter"
 
+  var useGroups: Boolean = false
   private var groupFormula = new DoubleFormula("v[0]");
-  
-  private var inputTmp:Vector[DataStore] = null
-  
+  private var inputTmp: Vector[DataStore] = null
+
   override def apply(input: Vector[DataStore]): Vector[DataStore] = {
     var ret = Vector[DataStore]()
     inputTmp = input
     for (i <- input) {
-      var tmpDE:Vector[DataElement] = Vector.empty[DataElement]
-      for (j <- 0 until i.length) {
+      var tmpDE: Vector[DataElement] = Vector.empty[DataElement]
+      for (j <- 0 until i.length by thinFactor) {
         //var tmp:DataElement = i(j)
-        var tmp:Vector[Double] = Vector.empty
-        for (k <- 0 until i(j).length) {
-          //need to thin
-          // collect all the elements i(j)(k)
-          
-          tmp = tmp :+ i(j)(k)
-          
-        }
-
-        var De = new DataElement(tmp)
-        tmpDE = tmpDE :+ De 
+        tmpDE = tmpDE :+ i(j)
       }
       var t = new DataStore()
       t.set(tmpDE)
       ret = ret :+ t
     }
-    
-    
-    for(s <- 0 until input.length){
-      
-      
-       val ss:Int=0
-    		if(useGroups) {
-    		  
-    		  // grouped by a function return using the groups with the same numbers rather than element count
-    		  
-    		  /*
+
+    for (s <- 0 until input.length) {
+      val ss: Int = 0
+      if (useGroups) {
+        // grouped by a function return using the groups with the same numbers rather than element count
+        /*
     			ThreadHandler.instance().loadWaitTask(this,new Runnable() {
     				@Override
                     public void run() {
@@ -100,33 +81,28 @@ class ThinningFilter() extends Filter() {
           	ret(s).addAll(vects(i))
           }
 //          */
-    		}
-      
-      
+      }
+
     }
-    
-    
-    
+
     return ret
   }
-  
-  
-  private def doGroupSelection(startIndex:Int, maxIndex:Int, sortFormula:DoubleFormula, stream:Int):Int= {
-//		/*
+
+  private def doGroupSelection(startIndex: Int, maxIndex: Int, sortFormula: DoubleFormula, stream: Int): Int = {
+    //		/*
     //var v:Double = sortFormula(this,stream,startIndex)
-    var v:Double = sortFormula(startIndex,inputTmp,null)
-		var i:Int=0
-		breakable {for(i <- startIndex+1 until maxIndex){
-		  if( !(sortFormula(i,inputTmp,null)==v) ) break
-		}}
-		return i;
-	//	*/
+    var v: Double = sortFormula(startIndex, inputTmp, null)
+    var i: Int = 0
+    breakable {
+      for (i <- startIndex + 1 until maxIndex) {
+        if (!(sortFormula(i, inputTmp, null) == v)) break
+      }
+    }
+    return i;
+    //	*/
     return 0
-	}
-  
-  
-  
-  
+  }
+
 }
 
 /*
@@ -190,7 +166,6 @@ protected void redoAllElements() {
     		}
 		}
 	}
-    
 	/**
 	 * Returns the elements after the group that begins at startIndex.
 	 * @param startIndex The index to start the group at.
