@@ -2,13 +2,13 @@ package util
 
 import java.io._
 
-class LewisBinReader(val filename:String) extends Filter {
+class LewisBinReader(val filename:String, val m:Int = 1) extends Filter {
   val t = "LinearFit"
 
   override def apply(input: Vector[DataStore]): Vector[DataStore] = {
     var dis = new DataInputStream( new BufferedInputStream( new FileInputStream(new File(filename)) ))
-    var n = java.lang.Integer.reverseBytes( dis.readInt() )
-    //n = 20
+    var n = java.lang.Integer.reverseBytes( dis.readInt() ) 
+    n /= m
     var a:Array[Double] = Array.fill(n*7)(0.0)
     for(i <- 0 until n*7-1){
       a(i) = java.lang.Double.longBitsToDouble(java.lang.Long.reverseBytes(dis.readLong()))

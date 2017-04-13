@@ -24,6 +24,9 @@ class StreamGraph(
     override val parent: WeakReference[StreamGraph],
     val futs: scala.collection.mutable.Map[FKey, Vector[DataStore]]) extends ParallelGraph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc, funcToInputs, nextfkey, nextdkey, runOnModify, parent) {
 
+  private var print = false
+  def setPrints(b:Boolean){print=b}
+  
   override def setInput(f: FKey, newInputs: Vector[DKey]): StreamGraph = {
     new StreamGraph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc, funcToInputs + (f -> newInputs), nextfkey, nextdkey, runOnModify, WeakReference(this), futs)
   }

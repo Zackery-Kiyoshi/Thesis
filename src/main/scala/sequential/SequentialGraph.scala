@@ -23,7 +23,8 @@ class SequentialGraph (
   
 //  private val runOnModify = true
   private var running = true
-  
+  private var print = false
+  def setPrints(b:Boolean){print=b}
   
   override def setInput(f:FKey,newInputs:Vector[DKey]):SequentialGraph={
     new SequentialGraph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc,funcToInputs+(f->newInputs), nextfkey, nextdkey,runOnModify,WeakReference(this))
@@ -127,8 +128,10 @@ class SequentialGraph (
     //if(data.length >0)
       //println( data.length + ":" + data(0) )
     //val d:Future[Vector[DataStore]] = Future.sequence(data)
+    if(print) println("Start:"+todo(0))
     val rezData:Vector[DataStore] = curNode.apply(data)  
     // in creation each need filter needs to know how many of each
+    if(print) println("end:"+todo(0))
     var i=0
     //println(funcToData(todo(0)).length)
     //println("  " + rezData.len gth)

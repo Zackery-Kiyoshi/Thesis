@@ -23,8 +23,12 @@ class FutureGraph(
     val futs: scala.collection.mutable.Map[FKey, Future[Vector[DataStore]]],
     val numThreads:Int
     ) extends ParallelGraph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc, funcToInputs, nextfkey, nextdkey, runOnModify, parent) {
+  
   implicit val ec = scala.concurrent.ExecutionContext.fromExecutorService(java.util.concurrent.Executors.newWorkStealingPool(numThreads))
 
+  private var print = false
+  def setPrints(b:Boolean){print=b}
+  
   //new FutureGraph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc, funcToInputs, nextfkey, nextdkey, runOnModify, WeakReference(this),futs)
   override def setInput(f: FKey, newInputs: Vector[DKey]): FutureGraph = {
     new FutureGraph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc, funcToInputs + (f -> newInputs), nextfkey, nextdkey, runOnModify, WeakReference(this),futs,numThreads)
@@ -83,6 +87,10 @@ class FutureGraph(
       else {
         //println("inMF:" + f + " " + funcToInputs(f).length)
         funcToInputs(f).foreach(x => mFut(x.key))
+        
+//        var input = for(i <- funcToInputs(f)) yield Await.result(mFut(i.key),Duration.Inf)(i.idx)
+//        filtKeys(f).apply(input)
+        
         //println("fs built")
 //        val input = for (d <- funcToInputs(f)) yield {
 //          println(f + "  "+ futs(d.key))
@@ -93,7 +101,7 @@ class FutureGraph(
 //        }
         
 //        val output: Future[Vector[DataStore]] = Future.sequence(fs).map(filtKeys(f).apply(_))
-				val output: Future[Vector[DataStore]] = Future.sequence(funcToInputs(f).map { case DKey(fkey, i) => futs(fkey).map(_(i)) }).map(filtKeys(f)(_))
+				val output: Future[Vector[DataStore]] = Future.sequence(funcToInputs(f).map { case DKey(fkey, i) => futs(fkey).map(_(i)) }).map( {if(print)println(f);filtKeys(f)(_) })
         futs(f) = output
         //println("end:" + f)
         // run on next???
