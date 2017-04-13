@@ -11,10 +11,11 @@ object Test1Seq {
   def main(args: Array[String]): Unit = {
 
     val standardConfig = config(
-      Key.exec.minWarmupRuns -> 20,
-      Key.exec.maxWarmupRuns -> 40,
-      Key.exec.benchRuns -> 25,
-      Key.verbose -> false) withWarmer (new org.scalameter.Warmer.Default)
+      Key.exec.minWarmupRuns -> 1,
+      Key.exec.maxWarmupRuns -> 2,
+      Key.exec.benchRuns -> 10,
+      Key.verbose -> true
+      ) withWarmer (new org.scalameter.Warmer.Default)
 
     println("Heap size:" + Runtime.getRuntime().maxMemory())
 
