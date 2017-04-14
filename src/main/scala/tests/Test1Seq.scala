@@ -14,7 +14,7 @@ object Test1Seq {
       Key.exec.minWarmupRuns -> 1,
       Key.exec.maxWarmupRuns -> 1,
       Key.exec.benchRuns -> 5,
-      Key.verbose -> true
+      Key.verbose -> false
       ) withWarmer (new org.scalameter.Warmer.Default)
 
     println("Heap size:" + Runtime.getRuntime().maxMemory())
