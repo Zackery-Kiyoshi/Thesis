@@ -12,7 +12,7 @@ object preTest1Seq {
 
     println("Heap size:" + Runtime.getRuntime().maxMemory())
 
-    var g = SequentialGraph()
+    var g = SequentialGraph(true)
     g.setPrints(true)
     var timeInitial = System.nanoTime()
     g = g.addFilter(new LewisBinReader("CartAndRad.100.bin"), "source")

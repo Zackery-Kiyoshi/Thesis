@@ -19,7 +19,7 @@ class SequentialGraph (
   override val nextdkey: Int,
   override val runOnModify:Boolean,
   override val parent:WeakReference[SequentialGraph],
-  val print:Boolean=false
+  val print:Boolean
   ) extends Graph(filtKeys,fKeys,dataKeys,dKeys,funcToData,dataToFunc,funcToInputs,nextfkey,nextdkey,runOnModify,parent){
   
 //  private val runOnModify = true
@@ -95,7 +95,7 @@ class SequentialGraph (
   
 //  /*
   override def run():SequentialRunGraph={
-    println("Run (seq)")
+    if(print)println("Run (seq)")
     // analyze first to make sure there are no mistakes???
     if(!analyze() ){
       println("There is an error in the graph please fix before running again")
@@ -105,7 +105,7 @@ class SequentialGraph (
     
     var ret = run(super.getTopoSort())
     // need to run each loop
-    return new SequentialRunGraph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc, funcToInputs, nextfkey, nextdkey, false, WeakReference(this))
+    return new SequentialRunGraph(ret.filtKeys, ret.fKeys, ret.dataKeys, ret.dKeys, ret.funcToData, ret.dataToFunc, ret.funcToInputs, ret.nextfkey, ret.nextdkey, false, WeakReference(this),print)
   }
   
   def run(todo:List[FKey]):SequentialGraph={
@@ -180,7 +180,7 @@ class SequentialGraph (
 
 object SequentialGraph {
   def apply(b: Boolean = false): SequentialGraph = {
-    new SequentialGraph( Map[FKey, Filter](), List[FKey](), Map[DKey, DataStore](), List[DKey](), Map[FKey, Vector[DKey]](), Map[DKey, Vector[FKey]](), Map[FKey, Vector[DKey]](), 0, 0,b,null)
+    new SequentialGraph( Map[FKey, Filter](), List[FKey](), Map[DKey, DataStore](), List[DKey](), Map[FKey, Vector[DKey]](), Map[DKey, Vector[FKey]](), Map[FKey, Vector[DKey]](), 0, 0,false,null,b)
   }
   
 }

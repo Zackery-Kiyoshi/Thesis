@@ -14,8 +14,9 @@ class SequentialRunGraph (
   override val nextfkey: Int,
   override val nextdkey: Int,
   override val runOnModify:Boolean,
-  override val parent:WeakReference[SequentialGraph]
-  ) extends SequentialGraph(filtKeys,fKeys,dataKeys,dKeys,funcToData,dataToFunc,funcToInputs,nextfkey,nextdkey,runOnModify,parent)
+  override val parent:WeakReference[SequentialGraph],
+  override val print:Boolean
+  ) extends SequentialGraph(filtKeys,fKeys,dataKeys,dKeys,funcToData,dataToFunc,funcToInputs,nextfkey,nextdkey,runOnModify,parent,print)
   //extends SequentialGraph(filtKeys,fKeys,dataKeys,dKeys,funcToData,dataToFunc,funcToInputs,nextfkey,nextdkey,runOnModify,parent)
   {
 //  private val runOnModify = true
