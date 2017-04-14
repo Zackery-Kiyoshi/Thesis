@@ -13,7 +13,7 @@ object Test1Seq {
     val standardConfig = config(
       Key.exec.minWarmupRuns -> 1,
       Key.exec.maxWarmupRuns -> 1,
-      Key.exec.benchRuns -> 5,
+      Key.exec.benchRuns -> 1,
       Key.verbose -> false
       ) withWarmer (new org.scalameter.Warmer.Default)
 
