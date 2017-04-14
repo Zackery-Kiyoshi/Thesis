@@ -13,6 +13,7 @@ class LewisBinReader(val filename:String, val m:Int = 1) extends Filter {
     for(i <- 0 until n*7-1){
       a(i) = java.lang.Double.longBitsToDouble(java.lang.Long.reverseBytes(dis.readLong()))
     }
+    dis.close()
     var ret:Vector[DataElement] = Vector.empty
     for(i <- 0 until n){
       var tmp:Vector[Double] = Vector( a(i*7), a(i*7+1), a(i*7+2), a(i*7+3), a(i*7+4), a(i*7+5), a(n*6+i) )
