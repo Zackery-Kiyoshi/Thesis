@@ -14,9 +14,9 @@ object preTest1Seq {
 
     var g = SequentialGraph(true)
     g.setPrints(true)
-    var timeInitial = System.nanoTime()
+    var timeInitial = System.nanoTime()  
     g = g.addFilter(new LewisBinReader("CartAndRad.100.bin"), "source")
-    g = g.addFilter(new ThinningFilter(20), "ls1").connectNodes("source", "ls1")
+    g = g.addFilter(new ThinningFilter(1000), "ls1").connectNodes("source", "ls1")
     var x = -1.5 * math.pow(10, -5) + 0.09375
     g = g.addFilter(new FilterBy((d: DataElement) => { d(0) < x }), "f1").connectNodes("ls1", "f1")
     x += 0.09375

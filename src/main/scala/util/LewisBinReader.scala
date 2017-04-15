@@ -9,6 +9,7 @@ class LewisBinReader(val filename:String, val m:Int = 1) extends Filter {
     var dis = new DataInputStream( new BufferedInputStream( new FileInputStream(new File(filename)) ))
     var n = java.lang.Integer.reverseBytes( dis.readInt() ) 
     n /= m
+    println(n)
     var a:Array[Double] = Array.fill(n*7)(0.0)
     for(i <- 0 until n*7-1){
       a(i) = java.lang.Double.longBitsToDouble(java.lang.Long.reverseBytes(dis.readLong()))
