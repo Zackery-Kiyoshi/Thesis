@@ -87,7 +87,7 @@ object preTest1Seq {
 
     //g = g.addFilter(new LinearFitFilter("x[0][0][0]"), "lf").connectNodes("ls1", "lf")
     
-    g = g.addFilter(new FunctionFilter("x[0][0][0]"), "a1").connectNodes("f1","a1").connectNodes("f2","a1")
+    g = g.addFilter(new FunctionFilter("x[0][0]"), "a1").connectNodes("f1","a1").connectNodes("f2","a1")
     
     /*
     g = g.addFilter(new FunctionFilter("x[0][0][0]*x[1][0][0]"), "a1").connectNodes("f1","a1").connectNodes("f2","a1")
