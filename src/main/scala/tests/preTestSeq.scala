@@ -87,7 +87,7 @@ object preTest1Seq {
 
     //g = g.addFilter(new LinearFitFilter("x[0][0][0]"), "lf").connectNodes("ls1", "lf")
     
-    g = g.addFilter(new FunctionFilter("x[0][0][0]*x[1][0][0]"), "a1").connectNodes("f1","a1").connectNodes("f2","a1")
+    //g = g.addFilter(new FunctionFilter("x[0][0][0]*x[1][0][0]"), "a1").connectNodes("f1","a1").connectNodes("f2","a1")
     g = g.addFilter(new FunctionFilter("x[0][0][0]*x[1][0][0]"), "a2").connectNodes("f3","a2").connectNodes("f4","a2")
     g = g.addFilter(new FunctionFilter("x[0][0][0]*x[1][0][0]"), "a3").connectNodes("f5","a3").connectNodes("f6","a3")
     g = g.addFilter(new FunctionFilter("x[0][0][0]*x[1][0][0]"), "a4").connectNodes("f7","a4").connectNodes("f8","a4")
@@ -104,7 +104,7 @@ object preTest1Seq {
     g = g.addFilter(new FunctionFilter("x[0][0][0]*x[1][0][0]"), "a15").connectNodes("f29","a15").connectNodes("f30","a15")
     g = g.addFilter(new FunctionFilter("x[0][0][0]*x[1][0][0]"), "a16").connectNodes("f31","a16").connectNodes("f32","a16")
 
-    g = g.addFilter(new FunctionFilter("x[0][0][0]*x[1][0][0]"), "b1").connectNodes("a1","b1").connectNodes("a2","b1")
+    //g = g.addFilter(new FunctionFilter("x[0][0][0]*x[1][0][0]"), "b1").connectNodes("a1","b1").connectNodes("a2","b1")
     g = g.addFilter(new FunctionFilter("x[0][0][0]*x[1][0][0]"), "b2").connectNodes("a3","b2").connectNodes("a4","b2")
     g = g.addFilter(new FunctionFilter("x[0][0][0]*x[1][0][0]"), "b3").connectNodes("a5","b3").connectNodes("a6","b3")
     g = g.addFilter(new FunctionFilter("x[0][0][0]*x[1][0][0]"), "b4").connectNodes("a7","b4").connectNodes("a8","b4")
