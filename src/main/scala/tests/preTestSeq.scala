@@ -87,7 +87,10 @@ object preTest1Seq {
 
     //g = g.addFilter(new LinearFitFilter("x[0][0][0]"), "lf").connectNodes("ls1", "lf")
     
-    //g = g.addFilter(new FunctionFilter("x[0][0][0]*x[1][0][0]"), "a1").connectNodes("f1","a1").connectNodes("f2","a1")
+    g = g.addFilter(new FunctionFilter("x[0][0][0]"), "a1").connectNodes("f1","a1").connectNodes("f2","a1")
+    
+    /*
+    g = g.addFilter(new FunctionFilter("x[0][0][0]*x[1][0][0]"), "a1").connectNodes("f1","a1").connectNodes("f2","a1")
     g = g.addFilter(new FunctionFilter("x[0][0][0]*x[1][0][0]"), "a2").connectNodes("f3","a2").connectNodes("f4","a2")
     g = g.addFilter(new FunctionFilter("x[0][0][0]*x[1][0][0]"), "a3").connectNodes("f5","a3").connectNodes("f6","a3")
     g = g.addFilter(new FunctionFilter("x[0][0][0]*x[1][0][0]"), "a4").connectNodes("f7","a4").connectNodes("f8","a4")
@@ -113,7 +116,7 @@ object preTest1Seq {
     g = g.addFilter(new FunctionFilter("x[0][0][0]*x[1][0][0]"), "b7").connectNodes("a13","b7").connectNodes("a14","b7")
     g = g.addFilter(new FunctionFilter("x[0][0][0]*x[1][0][0]"), "b8").connectNodes("a15","b8").connectNodes("a16","b8")
     
-    g = g.addFilter(new LinearFitFilter("x[0][0][0]"), "lf").connectNodes("b1", "lf")
+    //g = g.addFilter(new LinearFitFilter("x[0][0][0]"), "lf").connectNodes("b1", "lf")
     g = g.connectNodes("b2", "lf")
     g = g.connectNodes("b3", "lf")
     g = g.connectNodes("b4", "lf")
@@ -121,7 +124,7 @@ object preTest1Seq {
     g = g.connectNodes("b6", "lf")
     g = g.connectNodes("b7", "lf")
     g = g.connectNodes("b8", "lf")
-    
+    */
     g = g.addFilter(new PrintSink(), "ps1")
     var time1 = System.nanoTime()
     println("construction time:" + (time1 - timeInitial))
