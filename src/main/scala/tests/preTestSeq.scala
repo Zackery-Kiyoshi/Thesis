@@ -15,7 +15,7 @@ object preTest1Seq {
     var g = SequentialGraph(true)
     g.setPrints(true)
     var timeInitial = System.nanoTime()  
-    g = g.addFilter(new LewisBinReader("CartAndRad.100.bin",324), "ls1")
+    g = g.addFilter(new LewisBinReader("CartAndRad.100.bin"), "ls1")
     /*
     g = g.addFilter(new LewisBinReader("CartAndRad.100.bin",5), "source")
     g = g.addFilter(new ThinningFilter(60), "ls1").connectNodes("source", "ls1")
