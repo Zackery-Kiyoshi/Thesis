@@ -29,7 +29,7 @@ class LinearFitFilter(val s: String = "-1") extends Filter() {
       }
     }
     y = ytmp.toArray
-    var x: Array[Array[Double]] = Array.tabulate(xtmp.length)(x => Array(xtmp.length))
+    var x: Array[Array[Double]] = Array.tabulate(xtmp.length)(x => Array(1))
     x = Array.tabulate(xtmp.length)(x => {
       var t:Array[Double] = new Array[Double](xtmp.length)
       t(0) = xtmp(x)

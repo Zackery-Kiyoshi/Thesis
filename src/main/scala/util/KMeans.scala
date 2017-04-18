@@ -12,7 +12,7 @@ class KMeans(val k: Int) extends Filter {
         if (d < (i(j)).length) d = (i(j)).length
       }
     }
-
+    d -=1
     // create k random points
 
     var ctrs: Array[DataElement] = new Array(k)

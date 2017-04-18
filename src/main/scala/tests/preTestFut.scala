@@ -7,15 +7,16 @@ import futures.FutureGraph
 import util._
 import java.io._
 
-object preTest1Seq {
+object preTest1Fut {
   def main(args: Array[String]): Unit = {
 
     println("Heap size:" + Runtime.getRuntime().maxMemory())
 
-    var g = SequentialGraph(true)
+    var g = FutureGraph(5,true)
     g.setPrints(true)
-    var timeInitial = System.nanoTime()  
-    g = g.addFilter(new LewisBinReader("CartAndRad.100.bin"), "ls1")
+    var timeInitial = System.nanoTime()
+    g = g.addFilter(new csvFileSource("nba2015historical_projections.csv"), "ls1")
+    //g = g.addFilter(new LewisBinReader("CartAndRad.100.bin"), "ls1")
     /*
     g = g.addFilter(new LewisBinReader("CartAndRad.100.bin",5), "source")
     g = g.addFilter(new ThinningFilter(60), "ls1").connectNodes("source", "ls1")
@@ -87,7 +88,7 @@ object preTest1Seq {
 
     //g = g.addFilter(new LinearFitFilter("x[0][0][0]"), "lf").connectNodes("ls1", "lf")
     
-    g = g.addFilter(new FunctionFilter("x[0][0]"), "a1").connectNodes("f1","a1").connectNodes("f2","a1")
+    g = g.addFilter(new FunctionFilter("x[0][0][0]+x[1][0][0]"), "a1").connectNodes("ls1","a1").connectNodes("ls1","a1")
     
     /*
     g = g.addFilter(new FunctionFilter("x[0][0][0]*x[1][0][0]"), "a1").connectNodes("f1","a1").connectNodes("f2","a1")
@@ -125,7 +126,7 @@ object preTest1Seq {
     g = g.connectNodes("b7", "lf")
     g = g.connectNodes("b8", "lf")
     */
-    g = g.addFilter(new PrintSink(), "ps1")
+    g = g.addFilter(new PrintSink(), "ps1")//.connectNodes("a1","ps1")
     var time1 = System.nanoTime()
     println("construction time:" + (time1 - timeInitial))
     timeInitial = System.nanoTime()

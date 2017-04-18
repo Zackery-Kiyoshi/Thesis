@@ -9,7 +9,9 @@ class FunctionFilter(val fsts:String, val m:Map[String,Double] = Map() ) extends
   
   override def apply(input: Vector[DataStore]): Vector[DataStore] = {
     // need to actually get the ranges
-    val r = DoubleFormula.safeRange(input ,func)
+    var r:Range = null
+    if(input(0).length == 0) r = Range(0,0)
+    else r = DoubleFormula.safeRange(input ,func)
     var tmp:Vector[DataElement] = Vector.empty
     for(i<-r){
       tmp = tmp :+ new DataElement(Vector.empty :+ func(i,input,null))
