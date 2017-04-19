@@ -11,9 +11,9 @@ object TestBirths1Seq {
   def main(args: Array[String]): Unit = {
 
     val standardConfig = config(
-      Key.exec.minWarmupRuns -> 1,
-      Key.exec.maxWarmupRuns -> 1,
-      Key.exec.benchRuns -> 1,
+      Key.exec.minWarmupRuns -> 5,
+      Key.exec.maxWarmupRuns -> 10,
+      Key.exec.benchRuns -> 50,
       Key.verbose -> false
       ) withWarmer (new org.scalameter.Warmer.Default)
     
