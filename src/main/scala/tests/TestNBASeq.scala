@@ -19,8 +19,7 @@ object TestNBASeq {
     
     println("Heap size:" + Runtime.getRuntime().maxMemory())
 
-    var g = SequentialGraph(true)
-    g.setPrints(true)
+    var g = SequentialGraph(false)
     var timeInitial = System.nanoTime()
     g = g.addFilter(new csvFileSource("nba2015historical_projections.csv"), "ls1")
 
@@ -37,7 +36,7 @@ object TestNBASeq {
     //g= g.addFilter(new PrintSink(),"p3").connectNodes("f1.3","p3")
     
     var x = start + dx
-    g = g.addFilter(new FilterBy((d: DataElement) => { d(4) < 6443.0 + 253.03125 }), "f1").connectNodes("ls1", "f1")
+    g = g.addFilter(new FilterBy((d: DataElement) => { d(idx) < start + dx }), "f1").connectNodes("ls1", "f1")
     x += dx
     g = g.addFilter(new FilterBy((d: DataElement) => { d(idx) >= x && d(idx) < x + dx }), "f2").connectNodes("ls1", "f2")
     x += dx
@@ -165,8 +164,11 @@ object TestNBASeq {
     var time1 = System.nanoTime()
     println("construction time:" + (time1 - timeInitial))
     timeInitial = System.nanoTime()
-    g.run()
+    var time = standardConfig measure {
+      g.run()
+    }
     time1 = System.nanoTime()
-    println("run time:" + (time1 - timeInitial))
+    println("test run time:" + (time1 - timeInitial))
+    println("run time:" + time)
   }
 }
