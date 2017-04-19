@@ -12,6 +12,18 @@ class DataStore() {
   def add(d:DataElement) { out = out :+ d }
   def getVect():Vector[DataElement] = out
   def isEmpty():Boolean = out == null
+  override def equals(d:Any):Boolean = {
+    d match {
+      case d: DataStore =>{
+        if(out.length != d.length) return false
+        for(i <- 0 until d.length){
+          if(out(i) != d(i)) return false
+        }
+        true
+      }
+    case _ => false
+    }
+  }
 }
 
 object DataStore {
