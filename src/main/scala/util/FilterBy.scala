@@ -7,7 +7,7 @@ class FilterBy(val com:(DataElement)=>Boolean) extends Filter {
     var v:Vector[DataElement] = Vector.empty
     for(in <- input){
       for( j <- 0 until in.length){
-        if(in.length < j)
+        if(in.length > j)
           if(com(in(j))) v = v :+ in(j)
       }
     }

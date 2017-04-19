@@ -1,5 +1,7 @@
 package util
 
+import scala.util.Random
+
 class KMeans(val k: Int) extends Filter {
   val t = "KMeans"
 
@@ -14,34 +16,38 @@ class KMeans(val k: Int) extends Filter {
     }
     d -=1
     // create k random points
-
+    val r = scala.util.Random
     var ctrs: Array[DataElement] = new Array(k)
     var preCtrs: Array[DataElement] = new Array(k)
     for (i <- 0 until k) {
-      ctrs(i) = new DataElement(Vector.fill(d)(0.0))
+      ctrs(i) = new DataElement(Vector.tabulate(d)( x => r.nextDouble))
     }
-
+    if(input(0).length == 0) return Vector[DataStore](new DataStore())
     // actual algorithm
     do {
+      println(">>>>>>>>>START")
       preCtrs = ctrs.filter(e => true)
       for (i <- 0 until k) {
         var closest: List[DataElement] = List.empty
+        var t: List[Double] = List.empty
+        
         for (a <- input) {
-          closest = a.getVect().filter(e => {
-            var t: List[Double] = List.tabulate(d) { x:  Int => if (x < e.length) ctrs(i)(x) - e(x) else 0.0 }
+          for( z <- 0 until a.length ){
+            t = List.tabulate(d) { x:  Int => if (x < a(z).length) Math.abs(ctrs(i)(x) - a(z)(x)) else 0.0 }
             var ret = true
             for(j <- 0 until i){
               for(l <- 0 until d){
-                if(t(l) > ctrs(j)(l) - e(l)) ret = ret && false
+                if(t(l) > Math.abs(ctrs(j)(l) - a(z)(l) )) ret = false
               }
             }
             for(j<-i+1 until k){
               for(l <- 0 until d){
-                if(t(l) > ctrs(j)(l) - e(l)) ret = ret && false
+                if(t(l) > Math.abs(ctrs(j)(l) - a(z)(l) )) ret = false
               }
             }
-            ret
-          }).toList ::: closest
+            if(ret) closest = a(z) :: closest
+            
+          }
         }
         ctrs(i) = new DataElement(Vector.tabulate(d) { x: Int =>
           {
@@ -50,6 +56,11 @@ class KMeans(val k: Int) extends Filter {
             tmp/closest.length
           }
         })
+      }
+      for(i <- ctrs){
+        print(i +"+")
+        for(j <- 0 until i.length) print(i(j) +",")
+        println
       }
     } while (preCtrs != ctrs)
     var ret = new DataStore()

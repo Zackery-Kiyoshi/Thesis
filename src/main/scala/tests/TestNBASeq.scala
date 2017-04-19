@@ -126,7 +126,7 @@ object TestNBASeq {
     g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0][0]"), "b7").connectNodes("a13","b7").connectNodes("a14","b7")
     g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0][0]"), "b8").connectNodes("a15","b8").connectNodes("a16","b8")
     
-    g = g.addFilter(new KMeans(5),"k1").connectNodes("ls1","k1")
+    g = g.addFilter(new KMeans(5),"k1").connectNodes("f1","k1")
     
     /*
     //g = g.addFilter(new LinearFitFilter("x[0][0][0]"), "lf").connectNodes("b1", "lf")
