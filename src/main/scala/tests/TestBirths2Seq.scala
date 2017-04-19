@@ -161,7 +161,7 @@ object TestBirths2Seq {
 //     */
 //     */
     
-    g = g.addFilter(new PrintSink(), "ps1")
+    //g = g.addFilter(new PrintSink(), "ps1")
     var time1 = System.nanoTime()
     println("construction time:" + (time1 - timeInitial))
     timeInitial = System.nanoTime()
