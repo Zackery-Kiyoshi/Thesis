@@ -24,6 +24,7 @@ class KMeans(val k: Int) extends Filter {
     }
     if(input(0).length == 0) return Vector[DataStore](new DataStore())
     // actual algorithm
+      var keepGoing = true
     do {
       println(">>>>>>>>>START")
       preCtrs = ctrs.filter(e => true)
@@ -57,12 +58,28 @@ class KMeans(val k: Int) extends Filter {
           }
         })
       }
-      for(i <- ctrs){
-        print(i +"+")
-        for(j <- 0 until i.length) print(i(j) +",")
-        println
+      for(i <- 0 until ctrs.length){
+        println(i +":")
+        for(j <- 0 until ctrs(i).length) print(preCtrs(i)(j) +",")
+        println()
+        for(j <- 0 until ctrs(i).length) print(ctrs(i)(j) +",")
+        println()
+        
+        for(j <- 0 until ctrs(i).length)
+          println( Math.abs(ctrs(i)(j) - preCtrs(i)(j)) < 0.005)
       }
-    } while (preCtrs != ctrs)
+
+
+      for(i <- 0 until ctrs.length){
+        for(j <- 0 until ctrs(i).length){
+          if( Math.abs(ctrs(i)(j) - preCtrs(i)(j)) < 0.005){
+            keepGoing = false
+            println(">>" + i)
+          }
+        }
+      }
+
+    } while (keepGoing)
     var ret = new DataStore()
     ret.set(ctrs.toVector)
     return Vector[DataStore](ret)
