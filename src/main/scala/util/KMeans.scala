@@ -26,7 +26,7 @@ class KMeans(val k: Int) extends Filter {
     // actual algorithm
       var keepGoing = true
     do {
-      println(">>>>>>>>>START")
+      //println(">>>>>>>>>START")
       preCtrs = ctrs.filter(e => true)
       for (i <- 0 until k) {
         var closest: List[DataElement] = List.empty
@@ -58,6 +58,7 @@ class KMeans(val k: Int) extends Filter {
           }
         })
       }
+      /*
       for(i <- 0 until ctrs.length){
         println(i +":")
         for(j <- 0 until ctrs(i).length) print(preCtrs(i)(j) +",")
@@ -68,13 +69,13 @@ class KMeans(val k: Int) extends Filter {
         for(j <- 0 until ctrs(i).length)
           println( Math.abs(ctrs(i)(j) - preCtrs(i)(j)) < 0.005)
       }
-
+			*/
 
       for(i <- 0 until ctrs.length){
         for(j <- 0 until ctrs(i).length){
           if( Math.abs(ctrs(i)(j) - preCtrs(i)(j)) < 0.005){
             keepGoing = false
-            println(">>" + i)
+//            println(">>" + i)
           }
         }
       }

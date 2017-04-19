@@ -10,9 +10,16 @@ import java.io._
 object TestBirths1Seq {
   def main(args: Array[String]): Unit = {
 
+    val standardConfig = config(
+      Key.exec.minWarmupRuns -> 1,
+      Key.exec.maxWarmupRuns -> 1,
+      Key.exec.benchRuns -> 1,
+      Key.verbose -> false
+      ) withWarmer (new org.scalameter.Warmer.Default)
+    
     println("Heap size:" + Runtime.getRuntime().maxMemory())
     
-    var g = SequentialGraph(true)
+    var g = SequentialGraph(false)
     g.setPrints(true)
     var timeInitial = System.nanoTime()
     g = g.addFilter(new csvFileSource("US_births_1994-2003_CDC_NCHS.csv"), "ls1")
@@ -21,9 +28,9 @@ object TestBirths1Seq {
     var dx = 14540.0-6443.0 / 32
     var start = 6443.0
     g = g.addFilter(new MinFilter( (d1:DataElement, d2:DataElement)=>d1(idx)>d2(idx)  ),"min").connectNodes("ls1","min")
-    g = g.addFilter(new PrintSink(), "pMin").connectNodes("min", "pMin")
+    //g = g.addFilter(new PrintSink(), "pMin").connectNodes("min", "pMin")
     g = g.addFilter(new MaxFilter( (d1:DataElement, d2:DataElement)=>d1(idx)>d2(idx)  ),"max").connectNodes("ls1","max")
-    g = g.addFilter(new PrintSink(), "pMax").connectNodes("max", "pMax")
+    //g = g.addFilter(new PrintSink(), "pMax").connectNodes("max", "pMax")
 //    /*
     
     g = g.addFilter(new FilterBy((d: DataElement) => { d(3) == 1}), "f1.3").connectNodes("ls1", "f1.3")
@@ -125,12 +132,22 @@ object TestBirths1Seq {
     g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0]["+idx+"]"), "b7").connectNodes("a13","b7").connectNodes("a14","b7")
     g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0]["+idx+"]"), "b8").connectNodes("a15","b8").connectNodes("a16","b8")
     
-    g = g.addFilter(new PrintSink(), "pf1").connectNodes("f1","pf1")
-    g = g.addFilter(new KMeans(2),"k1").connectNodes("f1","k1")
-    g = g.addFilter(new KMeans(3),"k2").connectNodes("f2","k2")
-    g = g.addFilter(new KMeans(4),"k3").connectNodes("f3","k3")
-    g = g.addFilter(new KMeans(5),"k4").connectNodes("f4","k4")
-    //g = g.addFilter(new KMeans(5),"k5").connectNodes("ls1","k5")
+    //g = g.addFilter(new PrintSink(), "pf1").connectNodes("f1","pf1")
+    g = g.addFilter(new KMeans(2),"k1").connectNodes("f1","k1").connectNodes("ls1","k1")
+    g = g.addFilter(new KMeans(3),"k2").connectNodes("f2","k2").connectNodes("ls1","k2")
+    g = g.addFilter(new KMeans(4),"k3").connectNodes("f3","k3").connectNodes("ls1","k3")
+    g = g.addFilter(new KMeans(5),"k4").connectNodes("f4","k4").connectNodes("ls1","k4")
+    g = g.addFilter(new KMeans(5),"k5").connectNodes("ls1","k5")
+    
+    
+    g = g.addFilter(new KMeans(6),"km1").connectNodes("ls1","km1").connectNodes("b1","km1")
+    g = g.addFilter(new KMeans(6),"km2").connectNodes("ls1","km2").connectNodes("b1","km2")
+    g = g.addFilter(new KMeans(6),"km3").connectNodes("ls1","km3").connectNodes("b1","km3")
+    g = g.addFilter(new KMeans(6),"km4").connectNodes("ls1","km4").connectNodes("b1","km4")
+    g = g.addFilter(new KMeans(6),"km5").connectNodes("ls1","km5").connectNodes("b1","km5")
+    g = g.addFilter(new KMeans(6),"km6").connectNodes("ls1","km6").connectNodes("b1","km6")
+    g = g.addFilter(new KMeans(6),"km7").connectNodes("ls1","km7").connectNodes("b1","km7")
+    g = g.addFilter(new KMeans(6),"km8").connectNodes("ls1","km8").connectNodes("b1","km8")
     
     /*
     //g = g.addFilter(new LinearFitFilter("x[0][0][0]"), "lf").connectNodes("b1", "lf")
@@ -147,7 +164,7 @@ object TestBirths1Seq {
 //     */
 //     */
     
-    g = g.addFilter(new PrintSink(), "ps1").connectNodes("f1","ps1")
+    //g = g.addFilter(new PrintSink(), "ps1").connectNodes("f1","ps1")
     var time1 = System.nanoTime()
     println("construction time:" + (time1 - timeInitial))
     timeInitial = System.nanoTime()

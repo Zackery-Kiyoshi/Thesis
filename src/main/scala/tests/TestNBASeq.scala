@@ -10,6 +10,13 @@ import java.io._
 object TestNBASeq {
   def main(args: Array[String]): Unit = {
 
+    val standardConfig = config(
+      Key.exec.minWarmupRuns -> 1,
+      Key.exec.maxWarmupRuns -> 1,
+      Key.exec.benchRuns -> 1,
+      Key.verbose -> false
+      ) withWarmer (new org.scalameter.Warmer.Default)
+    
     println("Heap size:" + Runtime.getRuntime().maxMemory())
 
     var g = SequentialGraph(true)
@@ -20,18 +27,17 @@ object TestNBASeq {
     var idx = 6
     var dx =  0.655715297-0.030613137/32
     var start = 0.030613137
-    g = g.addFilter(new MinFilter( (d1:DataElement, d2:DataElement)=>d1(idx)<d2(idx)  ),"min").connectNodes("ls1","min")
-    g = g.addFilter(new PrintSink(), "pMin").connectNodes("min", "pMin")
-    g = g.addFilter(new MaxFilter( (d1:DataElement, d2:DataElement)=>d1(idx)<d2(idx)  ),"max").connectNodes("ls1","max")
-    g = g.addFilter(new PrintSink(), "pMax").connectNodes("max", "pMax")
-    //g = g.addFilter(new LewisBinReader("CartAndRad.100.bin"), "ls1")
-    /*
-    g = g.addFilter(new LewisBinReader("CartAndRad.100.bin",5), "source")
-    g = g.addFilter(new ThinningFilter(60), "ls1").connectNodes("source", "ls1")
-//    */
-   // /*
+    g = g.addFilter(new MinFilter( (d1:DataElement, d2:DataElement)=>d1(idx)>d2(idx)  ),"min").connectNodes("ls1","min")
+    //g = g.addFilter(new PrintSink(), "pMin").connectNodes("min", "pMin")
+    g = g.addFilter(new MaxFilter( (d1:DataElement, d2:DataElement)=>d1(idx)>d2(idx)  ),"max").connectNodes("ls1","max")
+    //g = g.addFilter(new PrintSink(), "pMax").connectNodes("max", "pMax")
+//    /*
+    
+    g = g.addFilter(new FilterBy((d: DataElement) => { d(3) == 1}), "f1.3").connectNodes("ls1", "f1.3")
+    //g= g.addFilter(new PrintSink(),"p3").connectNodes("f1.3","p3")
+    
     var x = start + dx
-    g = g.addFilter(new FilterBy((d: DataElement) => { d(idx) < x }), "f1").connectNodes("ls1", "f1")
+    g = g.addFilter(new FilterBy((d: DataElement) => { d(4) < 6443.0 + 253.03125 }), "f1").connectNodes("ls1", "f1")
     x += dx
     g = g.addFilter(new FilterBy((d: DataElement) => { d(idx) >= x && d(idx) < x + dx }), "f2").connectNodes("ls1", "f2")
     x += dx
@@ -97,36 +103,52 @@ object TestNBASeq {
 
     //g = g.addFilter(new LinearFitFilter("x[0][0][0]"), "lf").connectNodes("ls1", "lf")
     
-    //g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]+x[1][0]["+idx+"]"), "a1").connectNodes("f1","a1").connectNodes("f2","a1")
+    //g = g.addFilter(new FunctionFilter("x[0][0]"), "a1").connectNodes("f1","a1").connectNodes("f2","a1")
     
     ///*
-    g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0][0]"), "a1").connectNodes("f1","a1").connectNodes("f2","a1")
-    g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0][0]"), "a2").connectNodes("f3","a2").connectNodes("f4","a2")
-    g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0][0]"), "a3").connectNodes("f5","a3").connectNodes("f6","a3")
-    g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0][0]"), "a4").connectNodes("f7","a4").connectNodes("f8","a4")
-    g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0][0]"), "a5").connectNodes("f9","a5").connectNodes("f10","a5")
-    g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0][0]"), "a6").connectNodes("f11","a6").connectNodes("f12","a6")
-    g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0][0]"), "a7").connectNodes("f13","a7").connectNodes("f14","a7")
-    g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0][0]"), "a8").connectNodes("f15","a8").connectNodes("f16","a8")
-    g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0][0]"), "a9").connectNodes("f17","a9").connectNodes("f18","a9")
-    g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0][0]"), "a10").connectNodes("f19","a10").connectNodes("f20","a10")
-    g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0][0]"), "a11").connectNodes("f21","a11").connectNodes("f22","a11")
-    g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0][0]"), "a12").connectNodes("f23","a12").connectNodes("f24","a12")
-    g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0][0]"), "a13").connectNodes("f25","a13").connectNodes("f26","a13")
-    g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0][0]"), "a14").connectNodes("f27","a14").connectNodes("f28","a14")
-    g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0][0]"), "a15").connectNodes("f29","a15").connectNodes("f30","a15")
-    g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0][0]"), "a16").connectNodes("f31","a16").connectNodes("f32","a16")
+    g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0]["+idx+"]"), "a1").connectNodes("f1","a1").connectNodes("f2","a1")
+    g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0]["+idx+"]"), "a2").connectNodes("f3","a2").connectNodes("f4","a2")
+    g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0]["+idx+"]"), "a3").connectNodes("f5","a3").connectNodes("f6","a3")
+    g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0]["+idx+"]"), "a4").connectNodes("f7","a4").connectNodes("f8","a4")
+    g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0]["+idx+"]"), "a5").connectNodes("f9","a5").connectNodes("f10","a5")
+    g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0]["+idx+"]"), "a6").connectNodes("f11","a6").connectNodes("f12","a6")
+    g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0]["+idx+"]"), "a7").connectNodes("f13","a7").connectNodes("f14","a7")
+    g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0]["+idx+"]"), "a8").connectNodes("f15","a8").connectNodes("f16","a8")
+    g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0]["+idx+"]"), "a9").connectNodes("f17","a9").connectNodes("f18","a9")
+    g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0]["+idx+"]"), "a10").connectNodes("f19","a10").connectNodes("f20","a10")
+    g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0]["+idx+"]"), "a11").connectNodes("f21","a11").connectNodes("f22","a11")
+    g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0]["+idx+"]"), "a12").connectNodes("f23","a12").connectNodes("f24","a12")
+    g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0]["+idx+"]"), "a13").connectNodes("f25","a13").connectNodes("f26","a13")
+    g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0]["+idx+"]"), "a14").connectNodes("f27","a14").connectNodes("f28","a14")
+    g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0]["+idx+"]"), "a15").connectNodes("f29","a15").connectNodes("f30","a15")
+    g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0]["+idx+"]"), "a16").connectNodes("f31","a16").connectNodes("f32","a16")
 
-    g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0][0]"), "b1").connectNodes("a1","b1").connectNodes("a2","b1")
-    g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0][0]"), "b2").connectNodes("a3","b2").connectNodes("a4","b2")
-    g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0][0]"), "b3").connectNodes("a5","b3").connectNodes("a6","b3")
-    g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0][0]"), "b4").connectNodes("a7","b4").connectNodes("a8","b4")
-    g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0][0]"), "b5").connectNodes("a9","b5").connectNodes("a10","b5")
-    g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0][0]"), "b6").connectNodes("a11","b6").connectNodes("a12","b6")
-    g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0][0]"), "b7").connectNodes("a13","b7").connectNodes("a14","b7")
-    g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0][0]"), "b8").connectNodes("a15","b8").connectNodes("a16","b8")
+    g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0]["+idx+"]"), "b1").connectNodes("a1","b1").connectNodes("a2","b1")
+    g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0]["+idx+"]"), "b2").connectNodes("a3","b2").connectNodes("a4","b2")
+    g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0]["+idx+"]"), "b3").connectNodes("a5","b3").connectNodes("a6","b3")
+    g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0]["+idx+"]"), "b4").connectNodes("a7","b4").connectNodes("a8","b4")
+    g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0]["+idx+"]"), "b5").connectNodes("a9","b5").connectNodes("a10","b5")
+    g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0]["+idx+"]"), "b6").connectNodes("a11","b6").connectNodes("a12","b6")
+    g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0]["+idx+"]"), "b7").connectNodes("a13","b7").connectNodes("a14","b7")
+    g = g.addFilter(new FunctionFilter("x[0][0]["+idx+"]*x[1][0]["+idx+"]"), "b8").connectNodes("a15","b8").connectNodes("a16","b8")
     
-    g = g.addFilter(new KMeans(5),"k1").connectNodes("f1","k1")
+    //g = g.addFilter(new PrintSink(), "pf1").connectNodes("f1","pf1")
+    g = g.addFilter(new KMeans(2),"k1").connectNodes("f1","k1").connectNodes("ls1","k1")
+    g = g.addFilter(new KMeans(3),"k2").connectNodes("f2","k2").connectNodes("ls1","k2")
+    g = g.addFilter(new KMeans(4),"k3").connectNodes("f3","k3").connectNodes("ls1","k3")
+    g = g.addFilter(new KMeans(5),"k4").connectNodes("f4","k4").connectNodes("ls1","k4")
+    g = g.addFilter(new KMeans(5),"k5").connectNodes("ls1","k5")
+    
+    
+    g = g.addFilter(new KMeans(6),"km1").connectNodes("ls1","km1").connectNodes("b1","km1")
+    g = g.addFilter(new KMeans(6),"km2").connectNodes("ls1","km2").connectNodes("b1","km2")
+    g = g.addFilter(new KMeans(6),"km3").connectNodes("ls1","km3").connectNodes("b1","km3")
+    g = g.addFilter(new KMeans(6),"km4").connectNodes("ls1","km4").connectNodes("b1","km4")
+    g = g.addFilter(new KMeans(6),"km5").connectNodes("ls1","km5").connectNodes("b1","km5")
+    g = g.addFilter(new KMeans(6),"km6").connectNodes("ls1","km6").connectNodes("b1","km6")
+    g = g.addFilter(new KMeans(6),"km7").connectNodes("ls1","km7").connectNodes("b1","km7")
+    g = g.addFilter(new KMeans(6),"km8").connectNodes("ls1","km8").connectNodes("b1","km8")
+    
     
     /*
     //g = g.addFilter(new LinearFitFilter("x[0][0][0]"), "lf").connectNodes("b1", "lf")
@@ -139,7 +161,7 @@ object TestNBASeq {
     g = g.connectNodes("b8", "lf")
 //    */
     
-    g = g.addFilter(new PrintSink(), "ps1")
+    //g = g.addFilter(new PrintSink(), "ps1")
     var time1 = System.nanoTime()
     println("construction time:" + (time1 - timeInitial))
     timeInitial = System.nanoTime()
