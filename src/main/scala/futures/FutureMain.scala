@@ -34,8 +34,8 @@ object FutureMain {
     graph1 = graph1.addFilter(new FunctionFilter(func1), "fn1")
     graph1 = graph1.addFilter(new PrintSink(), "ps1")
     
-    graph1 = graph1.connectNodes("data0", "fn1")
-    graph1 = graph1.connectNodes("data1", "ps1")
+    graph1 = graph1.connectNodes("ls1", "fn1")
+    graph1 = graph1.connectNodes("fn1", "ps1")
     
     //graph1.printConnections()
     
@@ -63,18 +63,16 @@ object FutureMain {
     
     graph1 = graph1.addFilter(new FunctionFilter("x[0][0][0]*x[1][0][0]+i",Map(("i"->1.0))), "f100" )
     graph1 = graph1.addFilter(new PrintSink(), "ps1")
-    graph1 = graph1.connectNodes("d10", "f100")
-    graph1 = graph1.connectNodes("d10.2", "f100")
-    graph1 = graph1.connectNodes("d100", "ps1")
+    graph1 = graph1.connectNodes("f10", "f100")
+    graph1 = graph1.connectNodes("f10.2", "f100")
+    graph1 = graph1.connectNodes("f100", "ps1")
     graph1.run()
     
     println("Modify to have multiple inputs")
     graph1 = graph1.addFilter(new FunctionFilter("x[0][0][0]+x[1][0][0]+x[2][0][0]"), "f111")
-    graph1 = graph1.connectNodes("d1", "f111").connectNodes("d10", "f111").connectNodes("d100", "f111")
+    graph1 = graph1.connectNodes("f1", "f111").connectNodes("f10", "f111").connectNodes("f100", "f111")
     //graph1 = graph1.disconnectNodes("d100", "ps1").connectNodes("d111", "ps1")
     graph1.run()
-    
-    
     
   }
   
@@ -116,12 +114,12 @@ object FutureMain {
         graph1 = graph1.addFilter(new FunctionFilter("x[0][0][0]+x[1][0][0]"),"l"+j)
         val t1 = j-1
         val t2 = j-2
-        graph1 = graph1.connectNodes("d"+t1,"l"+j)
-        graph1 = graph1.connectNodes("d"+t2,"l"+j)
+        graph1 = graph1.connectNodes("l"+t1,"l"+j)
+        graph1 = graph1.connectNodes("l"+t2,"l"+j)
       }
     }
     graph1 = graph1.addFilter(new PrintSink(), "ps")
-    graph1 = graph1.connectNodes("d"+i,"ps")
+    graph1 = graph1.connectNodes("l"+i,"ps")
     return graph1
   }
   
@@ -152,17 +150,17 @@ object FutureMain {
     graph1 = graph1.addFilter(new ListSource(0,21,2), "ls1")
     //graph1 = graph1.addFilter(new PrintSink(), "ps1").connectNodes("d1","ps1")
     
-    graph1 = graph1.addFilter(new MinFilter( (x:DataElement,y:DataElement) => x(0) > y(0) ),"noImin").connectNodes("d1", "noImin")
+    graph1 = graph1.addFilter(new MinFilter( (x:DataElement,y:DataElement) => x(0) > y(0) ),"noImin").connectNodes("ls1", "noImin")
     //graph1 = graph1.addFilter(new PrintSink(), "ps1").connectNodes("noIminD","ps1")
     
-    graph1 = graph1.addFilter(new MinFilter( (x:DataElement,y:DataElement) => x(0) > y(0), 5 ),"5min").connectNodes("d1", "5min")
+    graph1 = graph1.addFilter(new MinFilter( (x:DataElement,y:DataElement) => x(0) > y(0), 5 ),"5min").connectNodes("ls1", "5min")
     //graph1 = graph1.addFilter(new PrintSink(), "ps1").connectNodes("5minD","ps1")
     
-    graph1 = graph1.addFilter(new MaxFilter( (x:DataElement,y:DataElement) => x(0) > y(0) ),"noImax").connectNodes("d1", "noImax")
-    graph1 = graph1.addFilter(new PrintSink(), "ps1").connectNodes("noImaxD","ps1")
+    graph1 = graph1.addFilter(new MaxFilter( (x:DataElement,y:DataElement) => x(0) > y(0) ),"noImax").connectNodes("ls1", "noImax")
+    graph1 = graph1.addFilter(new PrintSink(), "ps1").connectNodes("noImax","ps1")
     
-    graph1 = graph1.addFilter(new MaxFilter( (x:DataElement,y:DataElement) => x(0) > y(0), 5 ),"5max").connectNodes("d1", "5max")
-    graph1 = graph1.addFilter(new PrintSink(), "ps1").connectNodes("5maxD","ps1")
+    graph1 = graph1.addFilter(new MaxFilter( (x:DataElement,y:DataElement) => x(0) > y(0), 5 ),"5max").connectNodes("ls1", "5max")
+    graph1 = graph1.addFilter(new PrintSink(), "ps1").connectNodes("5max","ps1")
     
     graph1.run()
     
@@ -172,8 +170,8 @@ object FutureMain {
     var graph1 = FutureGraph(2,false)
     graph1 = graph1.addFilter(new ListSource(0,21,2), "ls1")
     //graph1 = graph1.addFilter(new PrintSink(), "ps1").connectNodes("d1","ps1")
-    graph1 = graph1.addFilter(new SortFilter( (x:DataElement,y:DataElement) => x(0) > y(0)), "sf1").connectNodes("d1","sf1")
-    graph1 = graph1.addFilter(new PrintSink(), "ps2").connectNodes("sfd","ps2")
+    graph1 = graph1.addFilter(new SortFilter( (x:DataElement,y:DataElement) => x(0) > y(0)), "sf1").connectNodes("ls1","sf1")
+    graph1 = graph1.addFilter(new PrintSink(), "ps2").connectNodes("sf1","ps2")
    
     graph1.run()
   }
@@ -181,7 +179,7 @@ object FutureMain {
   def fileInputTest(){
     var graph1 = FutureGraph(2,false)
     graph1 = graph1.addFilter(new FileSource("test.txt"), "fs1")
-    graph1 = graph1.addFilter(new PrintSink(), "ps1").connectNodes("d1","ps1")
+    graph1 = graph1.addFilter(new PrintSink(), "ps1").connectNodes("fs1","ps1")
     
     graph1.run()
   }
@@ -190,28 +188,28 @@ object FutureMain {
     var g1 = FutureGraph()
     g1 = g1.addFilter(new ListSource(0,11,1), "s1")
     g1 = g1.addFilter(new ListSource(10,21,1), "s2")
-    g1 = g1.addFilter(new FunctionFilter("x[0][0]+x[1][0]"),"l").connectNodes("sd1","l").connectNodes("sd2","l")
-    g1 = g1.addFilter(new PrintSink(), "ps3").connectNodes("d","ps3")
+    g1 = g1.addFilter(new FunctionFilter("x[0][0]+x[1][0]"),"l").connectNodes("s1","l").connectNodes("s2","l")
+    g1 = g1.addFilter(new PrintSink(), "ps3").connectNodes("l","ps3")
     g1.run()
   }
   
   def simpleTest(){
     var g1 = FutureGraph()
     g1 = g1.addFilter(new ListSource(0,11,1), "s1")
-    g1 = g1.addFilter(new SortFilter( (x:DataElement,y:DataElement) => x(0) > y(0)), "sfg").connectNodes("sd1","sfg")
-    g1 = g1.addFilter(new SortFilter( (x:DataElement,y:DataElement) => x(0) < y(0)), "sfl").connectNodes("sd1","sfl")
-    g1 = g1.addFilter(new FunctionFilter("x[0][0]*x[1][0]"),"times").connectNodes("sfgd","times").connectNodes("sfld","times")
-    g1 = g1.addFilter(new PrintSink(), "ps1").connectNodes("td","ps1")
+    g1 = g1.addFilter(new SortFilter( (x:DataElement,y:DataElement) => x(0) > y(0)), "sfg").connectNodes("s1","sfg")
+    g1 = g1.addFilter(new SortFilter( (x:DataElement,y:DataElement) => x(0) < y(0)), "sfl").connectNodes("s1","sfl")
+    g1 = g1.addFilter(new FunctionFilter("x[0][0]*x[1][0]"),"times").connectNodes("sfg","times").connectNodes("sfl","times")
+    g1 = g1.addFilter(new PrintSink(), "ps1").connectNodes("times","ps1")
     g1.run()
   }
   
   def simpleTestChain(){
     FutureGraph()
     .addFilter(new ListSource(0,11,1), "s1")
-    .addFilter(new SortFilter( (x:DataElement,y:DataElement) => x(0) > y(0)), "sfg").connectNodes("sd1","sfg")
-    .addFilter(new SortFilter( (x:DataElement,y:DataElement) => x(0) < y(0)), "sfl").connectNodes("sd1","sfl")
-    .addFilter(new FunctionFilter("x[0][0]*x[1][0]"),"times").connectNodes("sfgd","times").connectNodes("sfld","times")
-    .addFilter(new PrintSink(), "ps1").connectNodes("td","ps1")
+    .addFilter(new SortFilter( (x:DataElement,y:DataElement) => x(0) > y(0)), "sfg").connectNodes("s1","sfg")
+    .addFilter(new SortFilter( (x:DataElement,y:DataElement) => x(0) < y(0)), "sfl").connectNodes("s1","sfl")
+    .addFilter(new FunctionFilter("x[0][0]*x[1][0]"),"times").connectNodes("sfg","times").connectNodes("sfl","times")
+    .addFilter(new PrintSink(), "ps1").connectNodes("times","ps1")
     .run()
   }
   
@@ -219,17 +217,17 @@ object FutureMain {
   def main(args: Array[String]): Unit = {
     //testHelp()
     simpleListTest()
-    //simpleFuncTest()
+    simpleFuncTest()
     //linearFiltTest()
     //singFuncTest()
-    //fib(6).run()
-    //minmaxTest()
-    //sortTest()
+    fib(6).run()
+    minmaxTest()
+    sortTest()
     //fileInputTest()
-    //funcTest()
+    funcTest()
     
-    //simpleTest()
-    //simpleTestChain
+    simpleTest()
+    simpleTestChain
 		//println("Waiting for an input.")
 		//io.StdIn.readLine
   }

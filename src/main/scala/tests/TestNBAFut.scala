@@ -19,7 +19,7 @@ object TestNBAFut {
     
     println("Heap size:" + Runtime.getRuntime().maxMemory())
 
-    var g = FutureGraph(1,false)
+    var g = FutureGraph(1,true)
     var timeInitial = System.nanoTime()
     g = g.addFilter(new csvFileSource("nba2015historical_projections.csv"), "ls1")
 

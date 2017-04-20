@@ -86,8 +86,8 @@ class FutureGraph(
       if (futs.contains(f)) return futs(f)
       else {
         //println("inMF:" + f + " " + funcToInputs(f).length)
-        funcToInputs(f).foreach(x => mFut(x.key))
-        
+        val inputs:Vector[Future[Vector[DataStore]]] = for(x <- funcToInputs(f)) yield {mFut(x.key)}
+         
 //        var input = for(i <- funcToInputs(f)) yield Await.result(mFut(i.key),Duration.Inf)(i.idx)
 //        filtKeys(f).apply(input)
         
@@ -101,7 +101,26 @@ class FutureGraph(
 //        }
         
 //        val output: Future[Vector[DataStore]] = Future.sequence(fs).map(filtKeys(f).apply(_))
-				val output: Future[Vector[DataStore]] = Future.sequence(funcToInputs(f).map { case DKey(fkey, i) => futs(fkey).map(_(i)) }).map( {if(print)println(f);filtKeys(f)(_) })
+				
+        /*
+        val output: Future[Vector[DataStore]] = Future{ 
+          
+          val tmp = Await.result( Future.sequence(inputs),Duration.Inf)
+          var in:Vector[DataStore] = Vector.empty
+          for(i <- 0 until funcToInputs(f).length){
+            in = in :+ tmp(i)( (funcToInputs(f)(i)).idx)
+          }
+          
+          filtKeys(f)(in)
+        }
+        */
+        
+        val tmp = Future.sequence(  funcToInputs(f).map { case DKey(fkey, i) => futs(fkey).map(_(i)) }  )
+        
+        val output: Future[Vector[DataStore]] = tmp.map( {if(print)println(f);filtKeys(f)(_) })
+				
+				
+				
         futs(f) = output
         //println("end:" + f)
         // run on next???
@@ -132,7 +151,9 @@ class FutureGraph(
 
   def run():FutureRunGraph= {
     println("Run (fut)")
-    return new FutureRunGraph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc, funcToInputs, nextfkey, nextdkey, runOnModify, WeakReference(this),makeFuts(),numThreads)
+    var tmp = makeFuts()
+    
+    return new FutureRunGraph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc, funcToInputs, nextfkey, nextdkey, runOnModify, WeakReference(this),tmp,numThreads)
   }
 
   // don't need topoSort (parallelism deals with dependencies)
