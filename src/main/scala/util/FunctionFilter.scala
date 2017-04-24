@@ -10,6 +10,9 @@ class FunctionFilter(val fsts:String, val m:Map[String,Double] = Map() ) extends
   override def apply(input: Vector[DataStore]): Vector[DataStore] = {
     // need to actually get the ranges
     var r:Range = null
+    println("HERE?")
+    println( input(0) )
+    println( input(0)(0) )
     println( "HERE:"+input(0)(0)(0) )
     if(input.length == 0)  r = Range(0,0)
     else if(input(0).length == 0) r = Range(0,0)

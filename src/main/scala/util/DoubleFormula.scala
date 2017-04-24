@@ -149,7 +149,7 @@ object DoubleFormula extends JavaTokenParsers {
         override def eval(i:Int,x:IOList,vars:Map[String,Double]):Double = vars(name)
         def safeRange(x:IOList):Range = allRange
     }
-    private class XNode(input:Int,offset:Int,index:Int) extends DoubleNode {
+    private case class XNode(input:Int,offset:Int,index:Int) extends DoubleNode {
         override def eval(i:Int,x:IOList,vars:Map[String,Double]):Double = x(input)(i+offset)(index)
         def safeRange(x:IOList):Range = -offset until x(input).length-offset
     }
@@ -161,6 +161,10 @@ object DoubleFormula extends JavaTokenParsers {
         override def eval(i:Int,x:IOList,vars: Map[String, Double]): Double = (ops foldLeft start.eval(i,x,vars)){(res, e) => e._1(res, e._2.eval(i,x,vars))}
         def safeRange(x:IOList):Range = ops.foldLeft(start.safeRange(x))((r,t) => {
             val nr=t._2.safeRange(x)
+            if(nr.isEmpty) {
+              val xn = t._2.asInstanceOf[XNode]
+              println("nr empty from "+xn)
+            }
             (r.head max nr.head) to (r.last min nr.last)
         } )
         override def toString:String = "TreeNode "+start+" "+ops
