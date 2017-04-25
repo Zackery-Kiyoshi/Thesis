@@ -139,11 +139,8 @@ class FutureGraph(
     }
     var tmp = getTopoSort()
     
-    
     var a:List[Future[Vector[DataStore]]] = List.empty 
-    
     for(d <- dKeys) yield{ if(dataToFunc(d).isEmpty ) a = futs(d.key) :: a}
-    
     Await.result( Future.sequence(a), Duration.Inf)
     //Await.result(futs(tmp(tmp.length-1)), Duration.Inf)
     return futs
