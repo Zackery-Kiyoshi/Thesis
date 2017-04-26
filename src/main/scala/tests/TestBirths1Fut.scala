@@ -11,9 +11,9 @@ object TestBirths1Fut {
   def main(args: Array[String]): Unit = {
 
     val standardConfig = config(
-      Key.exec.minWarmupRuns -> 5,
-      Key.exec.maxWarmupRuns -> 10,
-      Key.exec.benchRuns -> 50,
+      Key.exec.minWarmupRuns -> 50,
+      Key.exec.maxWarmupRuns -> 100,
+      Key.exec.benchRuns -> 500,
       Key.verbose -> false
       ) withWarmer (new org.scalameter.Warmer.Default)
     
@@ -169,7 +169,8 @@ object TestBirths1Fut {
     println("construction time:" + (time1 - timeInitial))
     timeInitial = System.nanoTime()
     var time = standardConfig measure {
-      g.run()
+      var tg = g.run()
+      println(tg.getData("f1"))
     }
     time1 = System.nanoTime()
     println("test run time:" + (time1 - timeInitial))

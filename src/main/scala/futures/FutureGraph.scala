@@ -147,7 +147,7 @@ class FutureGraph(
   }
 
   def run():FutureRunGraph= {
-    println("Run (fut)")
+    if(print)println("Run (fut)")
     var tmp = makeFuts()
     
     return new FutureRunGraph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc, funcToInputs, nextfkey, nextdkey, runOnModify, WeakReference(this),tmp,numThreads)

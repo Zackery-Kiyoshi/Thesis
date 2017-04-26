@@ -40,6 +40,8 @@ class SequentialRunGraph (
   }
   
   
+  def getData(f:String):Vector[DataStore]= getData( getFKey(f) )
+  
   def getData(f:FKey):Vector[DataStore]={
     // how to get data out
     var ret:Vector[DataStore] = Vector.empty
