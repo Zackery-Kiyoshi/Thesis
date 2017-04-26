@@ -170,7 +170,8 @@ object TestBirths1Fut {
     timeInitial = System.nanoTime()
     var time = standardConfig measure {
       var tg = g.run()
-      println(tg.getData("f1"))
+      //println(tg.getData("f1"))
+      g.clearFuts()
     }
     time1 = System.nanoTime()
     println("test run time:" + (time1 - timeInitial))

@@ -7,7 +7,7 @@ import futures.FutureGraph
 import util._
 import java.io._
 
-object TestBirthsFut {
+object TestBirthsSeq {
   def main(args: Array[String]): Unit = {
 
     val standardConfig = config(
@@ -19,7 +19,7 @@ object TestBirthsFut {
     
     println("Heap size:" + Runtime.getRuntime().maxMemory())
     
-    var g = FutureGraph(1,false)
+    var g = SequentialGraph(false)
     g.setPrints(true)
     var timeInitial = System.nanoTime()
     g = g.addFilter(new csvFileSource("US_births_1994-2003_CDC_NCHS.csv"), "ls1")

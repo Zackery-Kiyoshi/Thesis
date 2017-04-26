@@ -155,6 +155,9 @@ class FutureGraph(
 
   // don't need topoSort (parallelism deals with dependencies)
 
+  def clearFuts(){
+    futs.clear()
+  }
   
   override def union(g:ParallelGraph):FutureGraph={
     val newfiltKeys: Map[FKey, Filter] = filtKeys ++ g.filtKeys.filter(p => !fKeys.contains(p._1))
