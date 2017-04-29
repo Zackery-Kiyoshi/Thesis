@@ -20,6 +20,7 @@ object LewisCR100Seq {
     
     var g = SequentialGraph(false)
     var timeInitial = System.nanoTime()
+    g = g.addFilter(new LewisBinReader("CartAndRad.100.bin", (x:Int)=>(x*.1).toInt), "ls1")
     
     var idx = 0
     var dx = 0.09375
