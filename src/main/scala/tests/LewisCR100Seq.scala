@@ -2,12 +2,11 @@ package tests
 
 import org.scalameter._
 
-import sequential.SequentialGraph
-import futures.FutureGraph
 import util._
-import java.io._
+import sequential._
 
-object TestLewisBin1Seq {
+
+object LewisCR100Seq {
   def main(args: Array[String]): Unit = {
 
     val standardConfig = config(
@@ -21,15 +20,14 @@ object TestLewisBin1Seq {
     
     var g = SequentialGraph(false)
     var timeInitial = System.nanoTime()
-    g = g.addFilter(new csvFileSource("US_births_1994-2003_CDC_NCHS.csv"), "ls1")
     
     var idx = 0
     var dx = 0.09375
     var start = -1.5 * math.pow(10, -5)
     g = g.addFilter(new MinFilter( (d1:DataElement, d2:DataElement)=>d1(idx)>d2(idx)  ),"min").connectNodes("ls1","min")
-    //g = g.addFilter(new PrintSink(), "pMin").connectNodes("min", "pMin")
+    g = g.addFilter(new PrintSink(), "pMin").connectNodes("min", "pMin")
     g = g.addFilter(new MaxFilter( (d1:DataElement, d2:DataElement)=>d1(idx)>d2(idx)  ),"max").connectNodes("ls1","max")
-    //g = g.addFilter(new PrintSink(), "pMax").connectNodes("max", "pMax")
+    g = g.addFilter(new PrintSink(), "pMax").connectNodes("max", "pMax")
 //    /*
     
     g = g.addFilter(new FilterBy((d: DataElement) => { d(3) == 1}), "f1.3").connectNodes("ls1", "f1.3")
@@ -137,7 +135,6 @@ object TestLewisBin1Seq {
     g = g.addFilter(new KMeans(4),"k3").connectNodes("f3","k3").connectNodes("ls1","k3")
     g = g.addFilter(new KMeans(5),"k4").connectNodes("f4","k4").connectNodes("ls1","k4")
     g = g.addFilter(new KMeans(5),"k5").connectNodes("ls1","k5")
-    
     
     g = g.addFilter(new KMeans(6),"km1").connectNodes("ls1","km1").connectNodes("b1","km1")
     g = g.addFilter(new KMeans(6),"km2").connectNodes("ls1","km2").connectNodes("b1","km2")
