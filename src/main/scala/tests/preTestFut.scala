@@ -3,7 +3,7 @@ package tests
 import org.scalameter._
 
 import sequential.SequentialGraph
-import futures.FutureGraph
+import future._
 import util._
 import java.io._
 

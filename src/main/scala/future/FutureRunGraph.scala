@@ -1,4 +1,4 @@
-package futures
+package future
 
 import scala.ref.WeakReference
 import scala.concurrent.{ Await, Future }

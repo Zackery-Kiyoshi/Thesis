@@ -1,4 +1,4 @@
-package futures
+package future
 
 import util._
 

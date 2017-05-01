@@ -20,15 +20,15 @@ object LewisCR100Seq {
     
     var g = SequentialGraph(false)
     var timeInitial = System.nanoTime()
-    g = g.addFilter(new LewisBinReader("CartAndRad.100.bin", (x:Int)=>(x*.1).toInt), "ls1")
+    g = g.addFilter(new LewisBinReader("CartAndRad.100.bin", (x:Int)=>(x*1).toInt), "ls1")
     
     var idx = 0
     var dx = 0.09375
     var start = -1.5 * math.pow(10, -5)
     g = g.addFilter(new MinFilter( (d1:DataElement, d2:DataElement)=>d1(idx)>d2(idx)  ),"min").connectNodes("ls1","min")
-    g = g.addFilter(new PrintSink(), "pMin").connectNodes("min", "pMin")
+    //g = g.addFilter(new PrintSink(), "pMin").connectNodes("min", "pMin")
     g = g.addFilter(new MaxFilter( (d1:DataElement, d2:DataElement)=>d1(idx)>d2(idx)  ),"max").connectNodes("ls1","max")
-    g = g.addFilter(new PrintSink(), "pMax").connectNodes("max", "pMax")
+    //g = g.addFilter(new PrintSink(), "pMax").connectNodes("max", "pMax")
 //    /*
     
     g = g.addFilter(new FilterBy((d: DataElement) => { d(3) == 1}), "f1.3").connectNodes("ls1", "f1.3")
