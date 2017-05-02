@@ -2,7 +2,7 @@
 import org.scalameter.api._
 import org.scalameter.picklers.Implicits._
 
-import futures.FutureGraph
+import future.FutureGraph
 import util._
 
 trait SmallTestFut extends Bench.OfflineRegressionReport {

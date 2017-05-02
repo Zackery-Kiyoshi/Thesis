@@ -4,7 +4,7 @@ import scala.util.Random
 import org.scalameter.api._
 import org.scalameter.picklers.Implicits._
 
-import futures._
+import future._
 import util._
 import java.io._
 
@@ -127,7 +127,7 @@ class Test1Fut extends Bench.OfflineRegressionReport {
 //    */
     //g=g.connectNodes("ls1","ps1")
     
-    var gRun:futures.FutureRunGraph = null
+    var gRun:FutureRunGraph = null
     measure method "run" in{
       gRun = g.run()
     }
