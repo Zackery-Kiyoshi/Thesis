@@ -167,6 +167,7 @@ object LewisCR100Fut {
     timeInitial = System.nanoTime()
     var time = standardConfig measure {
       g.run()
+      g.clearFuts()
     }
     time1 = System.nanoTime()
     println("test run time:" + (time1 - timeInitial))
