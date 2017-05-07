@@ -103,7 +103,9 @@ class SequentialGraph (
     }
     running = true
     
-    var ret = run(super.getTopoSort())
+    val topo = getTopoSort()
+    assert(fKeys.length == topo.length, "The topological sort lost something!")
+    val ret = run(topo)
     // need to run each loop
     return new SequentialRunGraph(ret.filtKeys, ret.fKeys, ret.dataKeys, ret.dKeys, ret.funcToData, ret.dataToFunc, ret.funcToInputs, ret.nextfkey, ret.nextdkey, false, WeakReference(this),print)
   }
@@ -113,15 +115,9 @@ class SequentialGraph (
       running = runOnModify
       return this
     }
-    var newTodo:List[FKey] = List.empty 
-    var curNode:Filter = null
-    if(todo.isEmpty){
-      return this
-    }else {
-      newTodo = todo.tail
-      //println(todo(0).key)
-      curNode = filtKeys(todo(0))
-    }
+    if(todo.isEmpty) return this
+    val newTodo:List[FKey] = todo.tail 
+    val curNode:Filter = filtKeys(todo.head)
     val tmpDataKeys:collection.mutable.Map[DKey, DataStore] = collection.mutable.Map(dataKeys.toSeq: _*)
     // need to get the correct input data
     val data:Vector[DataStore] = (for(d <- dKeys; if(dataToFunc(d).contains(todo(0)))) yield {
@@ -137,7 +133,7 @@ class SequentialGraph (
     var i=0
     //println(funcToData(todo(0)).length)
     //println("  " + rezData.len gth)
-    for(d<- funcToData(todo(0))){
+    for(d<- funcToData(todo.head)){
       // update dataStores
       //for sinks
       if(i < rezData.length){
@@ -147,7 +143,7 @@ class SequentialGraph (
         i+=1
       }
     }
-    var n = new SequentialGraph(filtKeys,fKeys,Map(tmpDataKeys.toSeq: _*),dKeys,funcToData,dataToFunc,funcToInputs,nextfkey,nextdkey,runOnModify,WeakReference(this),print)
+    val n = new SequentialGraph(filtKeys,fKeys,Map(tmpDataKeys.toSeq: _*),dKeys,funcToData,dataToFunc,funcToInputs,nextfkey,nextdkey,runOnModify,WeakReference(this),print)
     n.run(newTodo)
   }
   

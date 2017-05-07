@@ -4,8 +4,8 @@ import java.io._
 
 class LewisBinReader(val filename:String, val m:Int=>Int = (x:Int)=>x ) extends Filter {
   val t = "LinearFit"
-
-  override def apply(input: Vector[DataStore]): Vector[DataStore] = {
+  
+  val data = {
     var dis = new DataInputStream( new BufferedInputStream( new FileInputStream(new File(filename)) ))
     var n = java.lang.Integer.reverseBytes( dis.readInt() ) 
     n = m(n)
@@ -22,6 +22,10 @@ class LewisBinReader(val filename:String, val m:Int=>Int = (x:Int)=>x ) extends 
     }
     var ds = DataStore()
     ds.set(ret)
-    return Vector(ds)
+    Vector(ds)
+  }
+
+  override def apply(input: Vector[DataStore]): Vector[DataStore] = {
+    data
   }
 }

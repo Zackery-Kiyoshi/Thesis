@@ -258,7 +258,7 @@ abstract class Graph (
   Future(DataStore)
 //  */
 
-  def getTopoSort(): List[FKey]={
+  final def getTopoSort(): List[FKey]={
     var ret:List[FKey] = List.empty
     
     // get roots

@@ -4,8 +4,7 @@ import scala.io.Source
 
 class csvFileSource(val filename:String) extends Filter{
   val t = "csvFileSource"
-  
-  override def apply(input:Vector[DataStore]):Vector[DataStore] = {
+  val data = {
     var ret = Vector[DataStore](new DataStore())
     var tmp = Vector[DataElement]()
     var i = 0
@@ -14,7 +13,11 @@ class csvFileSource(val filename:String) extends Filter{
       i+=1
     }
     ret(0).set(tmp)
-    return ret;
+    ret
+  }
+  
+  override def apply(input:Vector[DataStore]):Vector[DataStore] = {
+    data
   }
   
   def readCSV(s:String):Double={

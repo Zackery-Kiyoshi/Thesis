@@ -17,24 +17,22 @@ class KMeans(val k: Int) extends Filter {
     d -=1
     // create k random points
     val r = scala.util.Random
-    var ctrs: Array[DataElement] = new Array(k)
-    var preCtrs: Array[DataElement] = new Array(k)
+    val ctrs: Array[DataElement] = new Array(k)
     for (i <- 0 until k) {
       ctrs(i) = new DataElement(Vector.tabulate(d)( x => r.nextDouble))
     }
     if(input(0).length == 0) return Vector[DataStore](new DataStore())
     // actual algorithm
-      var keepGoing = true
+    var keepGoing = true
     do {
       //println(">>>>>>>>>START")
-      preCtrs = ctrs.filter(e => true)
+      val preCtrs = ctrs.filter(e => true)
       for (i <- 0 until k) {
         var closest: List[DataElement] = List.empty
-        var t: List[Double] = List.empty
         
         for (a <- input) {
           for( z <- 0 until a.length ){
-            t = List.tabulate(d) { x:  Int => if (x < a(z).length) Math.abs(ctrs(i)(x) - a(z)(x)) else 0.0 }
+            val t = List.tabulate(d) { x:  Int => if (x < a(z).length) Math.abs(ctrs(i)(x) - a(z)(x)) else 0.0 }
             var ret = true
             for(j <- 0 until i){
               for(l <- 0 until d){

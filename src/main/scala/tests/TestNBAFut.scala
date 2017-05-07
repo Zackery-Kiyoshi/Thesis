@@ -19,13 +19,13 @@ object TestNBAFut {
     
     println("Heap size:" + Runtime.getRuntime().maxMemory())
 
-    var g = FutureGraph(1,true)
-    var timeInitial = System.nanoTime()
+    var g = FutureGraph(if(args.length==0) 1 else args(0).toInt, true)
+    val timeInitial = System.nanoTime()
     g = g.addFilter(new csvFileSource("nba2015historical_projections.csv"), "ls1")
 
-    var idx = 6
-    var dx =  0.655715297-0.030613137/32
-    var start = 0.030613137
+    val idx = 6
+    val dx =  0.655715297-0.030613137/32
+    val start = 0.030613137
     g = g.addFilter(new MinFilter( (d1:DataElement, d2:DataElement)=>d1(idx)>d2(idx)  ),"min").connectNodes("ls1","min")
     //g = g.addFilter(new PrintSink(), "pMin").connectNodes("min", "pMin")
     g = g.addFilter(new MaxFilter( (d1:DataElement, d2:DataElement)=>d1(idx)>d2(idx)  ),"max").connectNodes("ls1","max")
@@ -161,16 +161,25 @@ object TestNBAFut {
 //    */
     
     //g = g.addFilter(new PrintSink(), "ps1")
-    var time1 = System.nanoTime()
+    val time1 = System.nanoTime()
     println("construction time:" + (time1 - timeInitial))
-    timeInitial = System.nanoTime()
-    var time = standardConfig measure {
+    val timeInitial2 = System.nanoTime()
+    val time = standardConfig measure {
       var tg = g.run()
+      tg.getData("km1")
+      tg.getData("km2")
+      tg.getData("km3")
+      tg.getData("km4")
+      tg.getData("km5")
+      tg.getData("km6")
+      tg.getData("km7")
+      tg.getData("km8")
+      println(tg.getData("km1")(0)(0)(0))
       //println(tg.getData("f1"))
       g.clearFuts()
     }
-    time1 = System.nanoTime()
-    println("test run time:" + (time1 - timeInitial))
+    val time2 = System.nanoTime()
+    println("test run time:" + (time2 - timeInitial2))
     println("run time:" + time)
   }
 }

@@ -87,45 +87,12 @@ class FutureGraph(
       else {
         //println("inMF:" + f + " " + funcToInputs(f).length)
         val inputs:Vector[Future[Vector[DataStore]]] = for(x <- funcToInputs(f)) yield {mFut(x.key)}
-         
-//        var input = for(i <- funcToInputs(f)) yield Await.result(mFut(i.key),Duration.Inf)(i.idx)
-//        filtKeys(f).apply(input)
-        
-        //println("fs built")
-//        val input = for (d <- funcToInputs(f)) yield {
-//          println(f + "  "+ futs(d.key))
-//          while( futs(d.key) == null) { println("T") }
-          
-          //while(dataKeys(d) == Future{DataStore()}){ println("TEST") }
-//          dataKeys(d)
-//        }
-        
-//        val output: Future[Vector[DataStore]] = Future.sequence(fs).map(filtKeys(f).apply(_))
-				
-        /*
-        val output: Future[Vector[DataStore]] = Future{ 
-          
-          val tmp = Await.result( Future.sequence(inputs),Duration.Inf)
-          var in:Vector[DataStore] = Vector.empty
-          for(i <- 0 until funcToInputs(f).length){
-            in = in :+ tmp(i)( (funcToInputs(f)(i)).idx)
-          }
-          
-          filtKeys(f)(in)
-        }
-        */
-        
+                 
         val tmp = Future.sequence(  funcToInputs(f).map { case DKey(fkey, i) => futs(fkey).map(_(i)) }  )
         
         val output: Future[Vector[DataStore]] = tmp.map( {if(print)println(f);filtKeys(f)(_) })
 				
-				
-				
         futs(f) = output
-        //println("end:" + f)
-        // run on next???
-        
-        
         
         return output
       }
@@ -137,18 +104,18 @@ class FutureGraph(
 			//println("Making future on "+i)
       mFut(fKeys(i))
     }
-    var tmp = getTopoSort()
+    val tmp = getTopoSort()
     
     var a:List[Future[Vector[DataStore]]] = List.empty 
     for(d <- dKeys) yield{ if(dataToFunc(d).isEmpty ) a = futs(d.key) :: a}
-    Await.result( Future.sequence(a), Duration.Inf)
+    //Await.result( Future.sequence(a), Duration.Inf)
     //Await.result(futs(tmp(tmp.length-1)), Duration.Inf)
     return futs
   }
 
   def run():FutureRunGraph= {
     if(print)println("Run (fut)")
-    var tmp = makeFuts()
+    val tmp = makeFuts()
     
     return new FutureRunGraph(filtKeys, fKeys, dataKeys, dKeys, funcToData, dataToFunc, funcToInputs, nextfkey, nextdkey, runOnModify, WeakReference(this),tmp,numThreads)
   }
